@@ -1,5 +1,4 @@
 import 'package:chiabill/data/models/trip_member_response.dart';
-
 import 'user_response.dart';
 
 class TripResponse {
@@ -7,20 +6,24 @@ class TripResponse {
   final String name;
   final String? description;
   final String? currency;
+  final double? totalBudget;
   final UserResponse? createdBy;
   final int? ownerId;
   final List<TripMemberResponse>? members;
-  final String? createdAt; // THÊM DÒNG NÀY
+  final String? createdAt;
+  final int? memberCount; // THÊM DÒNG NÀY
 
   TripResponse({
     required this.id,
     required this.name,
     this.description,
     this.currency,
+    this.totalBudget,
     this.createdBy,
     this.ownerId,
     this.members,
-    this.createdAt, // THÊM VÀO CONSTRUCTOR
+    this.createdAt,
+    this.memberCount, // THÊM VÀO CONSTRUCTOR
   });
 
   factory TripResponse.fromJson(Map<String, dynamic> json) {
@@ -29,12 +32,14 @@ class TripResponse {
       name: json['name'] as String,
       description: json['description'] as String?,
       currency: json['currency'] as String?,
+      totalBudget: json['totalBudget'] != null ? double.parse(json['totalBudget'].toString()) : null,
       createdBy: json['createdBy'] != null ? UserResponse.fromJson(json['createdBy']) : null,
       ownerId: json['ownerId'] as int?,
       members: json['members'] != null
           ? (json['members'] as List).map((i) => TripMemberResponse.fromJson(i)).toList()
           : null,
-      createdAt: json['createdAt'] as String?, // THÊM VÀO HÀM PARSE JSON
+      createdAt: json['createdAt'] as String?,
+      memberCount: json['memberCount'] as int?, // THÊM VÀO PARSE JSON
     );
   }
 }

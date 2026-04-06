@@ -1,3 +1,4 @@
+import 'package:chiabill/utils/toast_util.dart';
 import 'package:chiabill/controllers/home_controller.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
@@ -56,11 +57,11 @@ class AuthController extends GetxController {
         Get.put(FcmController(), permanent: true);
       }
 
-      Get.snackbar("Thành công", "Đăng nhập thành công!");
+      ToastUtil.showSuccess("Thành công", "Đăng nhập thành công!");
       Get.put(HomeController()).fetchTrips();
       Get.offAll(() => HomeScreen());
     } else {
-      Get.snackbar("Lỗi", result.message ?? "Không thể đăng nhập");
+      ToastUtil.showError("Lỗi", result.message ?? "Không thể đăng nhập");
     }
     isLoading.value = false;
   }
@@ -93,16 +94,16 @@ class AuthController extends GetxController {
             Get.put(FcmController(), permanent: true);
           }
 
-          Get.snackbar("Thành công", "Đăng nhập thành công!");
+          ToastUtil.showSuccess("Thành công", "Đăng nhập thành công!");
           Get.put(HomeController()).fetchTrips();
           Get.offAll(() => HomeScreen());
         } else {
-          Get.snackbar("Lỗi", result.message ?? "Xác thực server thất bại");
+          ToastUtil.showError("Lỗi", result.message ?? "Xác thực server thất bại");
         }
       }
     } catch (error) {
       print("Google Auth Error: $error");
-      Get.snackbar("Lỗi", "Không thể đăng nhập Google");
+      ToastUtil.showError("Lỗi", "Không thể đăng nhập Google");
     } finally {
       isLoading.value = false;
     }

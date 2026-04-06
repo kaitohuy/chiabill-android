@@ -1,3 +1,4 @@
+import 'package:chiabill/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../data/repositories/invitation_repository.dart';
@@ -23,10 +24,7 @@ class JoinTripController extends GetxController {
     if (result.success && result.data != null) {
       inviteInfo.value = result.data;
     } else {
-      // Dùng ScaffoldMessenger thay cho Get.snackbar
-      ScaffoldMessenger.of(Get.context!).showSnackBar(
-        SnackBar(content: Text(result.message ?? "Mã không hợp lệ"), backgroundColor: Colors.redAccent),
-      );
+      ToastUtil.showError("Lỗi", result.message ?? "Mã không hợp lệ");
       inviteInfo.value = null;
     }
     isLoading.value = false;
@@ -40,14 +38,10 @@ class JoinTripController extends GetxController {
 
     if (result.success) {
       Get.back(); // Đóng popup
-      ScaffoldMessenger.of(Get.context!).showSnackBar(
-        const SnackBar(content: Text("Chào mừng bạn đến với chuyến đi!"), backgroundColor: Colors.green),
-      );
+      ToastUtil.showSuccess("Chào mừng!", "Bạn đã tham gia chuyến đi thành công");
       Get.find<HomeController>().fetchTrips();
     } else {
-      ScaffoldMessenger.of(Get.context!).showSnackBar(
-        SnackBar(content: Text(result.message ?? "Không thể tham gia"), backgroundColor: Colors.redAccent),
-      );
+      ToastUtil.showError("Thất bại", result.message ?? "Không thể tham gia");
     }
     isLoading.value = false;
   }

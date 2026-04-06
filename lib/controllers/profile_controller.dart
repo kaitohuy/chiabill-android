@@ -1,3 +1,4 @@
+import 'package:chiabill/utils/toast_util.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -93,11 +94,11 @@ class ProfileController extends GetxController {
     if (result.success) {
       user.value = result.data;
       if (!silent) {
-        Get.snackbar("Thành công", "Đã lưu thay đổi", backgroundColor: Colors.green, colorText: Colors.white);
+        ToastUtil.showSuccess("Thành công", "Đã lưu thay đổi");
       }
     } else {
       if (!silent) {
-        Get.snackbar("Lỗi", result.message ?? "Lỗi lưu thông tin", backgroundColor: Colors.redAccent, colorText: Colors.white);
+        ToastUtil.showError("Lỗi", result.message ?? "Lỗi lưu thông tin");
       }
     }
     if (!silent) isLoading.value = false;
@@ -139,9 +140,9 @@ class ProfileController extends GetxController {
       if (type == 'bank-qr') currentQrUrl.value = result.data;
 
       saveProfile(silent: true);
-      Get.snackbar("Thành công", "Đã cập nhật ảnh!", backgroundColor: Colors.green, colorText: Colors.white);
+      ToastUtil.showSuccess("Thành công", "Đã cập nhật ảnh!");
     } else {
-      Get.snackbar("Lỗi", result.message ?? "Không thể tải ảnh");
+      ToastUtil.showError("Lỗi", result.message ?? "Không thể tải ảnh");
     }
     isUploading.value = false;
   }

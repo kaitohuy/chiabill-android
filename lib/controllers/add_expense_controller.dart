@@ -1,3 +1,4 @@
+import 'package:chiabill/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../data/models/create_expense_request.dart';
@@ -9,6 +10,7 @@ import '../data/models/update_expense_request.dart';
 import '../data/repositories/category_repository.dart';
 import '../data/repositories/expense_repository.dart';
 import '../data/models/trip_member_response.dart';
+import '../utils/currency_util.dart';
 import 'trip_detail_controller.dart';
 
 class AddExpenseController extends GetxController {
@@ -44,7 +46,7 @@ class AddExpenseController extends GetxController {
     activeMembers = trip.members?.where((m) => m.status != 'DISABLED').toList() ?? [];
 
     if (expenseToEdit != null) {
-      amountController.text = expenseToEdit!.totalAmount.toInt().toString();
+      amountController.text = CurrencyUtils.formatNumber(expenseToEdit!.totalAmount);
       descController.text = expenseToEdit!.description;
       selectedPayerId.value = expenseToEdit!.payer?.id ?? (trip.createdBy?.id ?? 0);
       selectedCategoryId.value = expenseToEdit!.categoryId;
@@ -79,7 +81,7 @@ class AddExpenseController extends GetxController {
         selectedCategoryId.value = categories.first.id;
       }
     } else {
-      Get.snackbar("Lỗi tải danh mục", result.message ?? "Có lỗi xảy ra", backgroundColor: Colors.redAccent, colorText: Colors.white);
+      ToastUtil.showError("Lỗi tải danh mục", result.message ?? "Có lỗi xảy ra");
     }
   }
 
@@ -92,9 +94,9 @@ class AddExpenseController extends GetxController {
       Get.back(); // Đóng sub-dialog tạo mới
       categories.add(result.data!); // Thêm vào list hiện tại
       selectedCategoryId.value = result.data!.id; // Tự động chọn luôn cái vừa tạo
-      Get.snackbar("Thành công", "Đã thêm danh mục mới", backgroundColor: Colors.green, colorText: Colors.white);
+      ToastUtil.showSuccess("Thành công", "Đã thêm danh mục mới");
     } else {
-      Get.snackbar("Lỗi", result.message ?? "Không thể tạo danh mục", backgroundColor: Colors.redAccent, colorText: Colors.white);
+      ToastUtil.showError("Lỗi", result.message ?? "Không thể tạo danh mục");
     }
   }
 
@@ -118,78 +120,83 @@ class AddExpenseController extends GetxController {
   Future<void> submitExpense() async {
     double? total = double.tryParse(amountController.text.replaceAll(',', ''));
     if (total == null || total <= 0) {
-      Get.snackbar("Lỗi", "Số tiền không hợp lệ", backgroundColor: Colors.redAccent, colorText: Colors.white);
+      ToastUtil.showWarning("Lỗi", "Số tiền không hợp lệ");
       return;
     }
 
     // THÊM CHẶN GIỚI HẠN (Ví dụ: Tối đa 10 tỷ VNĐ)
     if (total > 10000000000) {
-      Get.snackbar("Lỗi", "Chi tiêu gì mà tốn kém thế! Vui lòng nhập số tiền nhỏ hơn 10 tỷ.", backgroundColor: Colors.redAccent, colorText: Colors.white);
+      ToastUtil.showWarning("Lỗi", "Chi tiêu gì mà tốn kém thế! Vui lòng nhập số tiền nhỏ hơn 10 tỷ.");
       return;
     }
 
     // Kiểm tra xem user có chọn ai để chia tiền không
     if (selectedSplitMemberIds.isEmpty) {
-      Get.snackbar("Lỗi", "Vui lòng chọn ít nhất 1 người để chia tiền", backgroundColor: Colors.redAccent, colorText: Colors.white);
+      ToastUtil.showWarning("Lỗi", "Vui lòng chọn ít nhất 1 người để chia tiền");
       return;
     }
 
     isLoading.value = true;
 
-    // 3. TÍNH TOÁN TIỀN CHIA ĐỀU CHO CÁC THÀNH VIÊN ĐƯỢC CHỌN
-    int memberCount = selectedSplitMemberIds.length;
-    double splitAmount = total / memberCount;
-
-    // Đẩy danh sách userId được chọn xuống BE
-    List<SplitRequest> splits = selectedSplitMemberIds.map((id) =>
-        SplitRequest(userId: id, amount: splitAmount)
-    ).toList();
-
-    // Validate danh mục
-    if (selectedCategoryId.value == null) {
-      Get.snackbar("Lỗi", "Vui lòng chọn danh mục chi phí", backgroundColor: Colors.redAccent, colorText: Colors.white);
-      return;
-    }
-
     isLoading.value = true;
+    try {
+      // 3. TÍNH TOÁN TIỀN CHIA ĐỀU CHO CÁC THÀNH VIÊN ĐƯỢC CHỌN
+      int memberCount = selectedSplitMemberIds.length;
+      double splitAmount = total / memberCount;
 
-    bool isSuccess = false;
-    String errorMessage = "";
+      // Đẩy danh sách userId được chọn xuống BE
+      List<SplitRequest> splits = selectedSplitMemberIds.map((id) =>
+          SplitRequest(userId: id, amount: splitAmount)
+      ).toList();
 
-    if (expenseToEdit != null) {
-      final updateRequest = UpdateExpenseRequest(
-        payerId: selectedPayerId.value,
-        totalAmount: total,
-        description: descController.text.trim(),
-        categoryId: selectedCategoryId.value, // TRUYỀN CATEGORY VÀO ĐÂY
-        expenseDate: DateTime.now().toIso8601String().split('.')[0],
-        splits: splits,
-      );
-      final result = await _repository.updateExpense(expenseToEdit!.id, updateRequest);
-      isSuccess = result.success;
-      errorMessage = result.message ?? "Lỗi";
-    } else {
-      final createRequest = CreateExpenseRequest(
-        tripId: trip.id,
-        payerId: selectedPayerId.value,
-        totalAmount: total,
-        description: descController.text.trim(),
-        categoryId: selectedCategoryId.value, // TRUYỀN CATEGORY VÀO ĐÂY
-        splits: splits,
-      );
-      final result = await _repository.createExpense(createRequest);
-      isSuccess = result.success;
-      errorMessage = result.message ?? "Lỗi";
+      // Validate danh mục
+      if (selectedCategoryId.value == null) {
+        ToastUtil.showWarning("Lỗi", "Vui lòng chọn danh mục chi phí");
+        return;
+      }
+
+      bool isSuccess = false;
+      String errorMessage = "";
+
+      if (expenseToEdit != null) {
+        final updateRequest = UpdateExpenseRequest(
+          payerId: selectedPayerId.value,
+          totalAmount: total,
+          description: descController.text.trim(),
+          categoryId: selectedCategoryId.value, // TRUYỀN CATEGORY VÀO ĐÂY
+          expenseDate: DateTime.now().toIso8601String().split('.')[0],
+          splits: splits,
+        );
+        final result = await _repository.updateExpense(expenseToEdit!.id, updateRequest);
+        isSuccess = result.success;
+        errorMessage = result.message ?? "Lỗi";
+      } else {
+        final createRequest = CreateExpenseRequest(
+          tripId: trip.id,
+          payerId: selectedPayerId.value,
+          totalAmount: total,
+          description: descController.text.trim(),
+          categoryId: selectedCategoryId.value, // TRUYỀN CATEGORY VÀO ĐÂY
+          splits: splits,
+        );
+        final result = await _repository.createExpense(createRequest);
+        isSuccess = result.success;
+        errorMessage = result.message ?? "Lỗi";
+      }
+
+      if (isSuccess) {
+        // ĐÓNG NGAY khi thành công
+        Get.back();
+        ToastUtil.showSuccess("Thành công", expenseToEdit != null ? "Đã cập nhật chi phí" : "Đã thêm chi phí");
+        Get.find<TripDetailController>(tag: trip.id.toString()).fetchData();
+      } else {
+        ToastUtil.showError("Lỗi", errorMessage);
+      }
+    } catch (e) {
+      ToastUtil.showError("Lỗi hệ thống", "Đã xảy ra lỗi không xác định");
+    } finally {
+      isLoading.value = false;
     }
-
-    if (isSuccess) {
-      Get.back();
-      Get.snackbar("Thành công", expenseToEdit != null ? "Đã cập nhật chi phí" : "Đã thêm chi phí", backgroundColor: Colors.green, colorText: Colors.white);
-      Get.find<TripDetailController>(tag: trip.id.toString()).fetchData();
-    } else {
-      Get.snackbar("Lỗi", errorMessage, backgroundColor: Colors.redAccent, colorText: Colors.white);
-    }
-    isLoading.value = false;
   }
 
   @override

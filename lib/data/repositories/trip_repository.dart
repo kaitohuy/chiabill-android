@@ -92,15 +92,24 @@ class TripRepository {
     }
   }
 
-  // Sửa chuyến đi
-  Future<ApiResponse<TripResponse>> updateTrip(int tripId, String name, String? description) async {
+  // ==================================================
+  // ĐÃ CẬP NHẬT: Thêm tham số totalBudget vào hàm Sửa chuyến đi
+  // ==================================================
+  Future<ApiResponse<TripResponse>> updateTrip(int tripId, String name, String? description, double? totalBudget) async {
     try {
+      Map<String, dynamic> requestData = {
+        "name": name,
+        "description": description ?? ""
+      };
+
+      // Nếu có sửa ngân sách thì nhét thêm vào requestData
+      if (totalBudget != null) {
+        requestData["totalBudget"] = totalBudget;
+      }
+
       final response = await _apiService.dio.put(
         "/api/trips/$tripId",
-        data: {
-          "name": name,
-          "description": description ?? ""
-        },
+        data: requestData,
       );
       return ApiResponse<TripResponse>.fromJson(response.data, (data) => TripResponse.fromJson(data));
     } catch (e) {
@@ -215,6 +224,20 @@ class TripRepository {
       return ApiResponse.fromJson(response.data, (data) => data);
     } catch (e) {
       return ApiResponse(success: false, message: "Lỗi mở khóa: $e");
+    }
+  }
+
+  // Hàm lấy tổng quan tài chính
+  Future<ApiResponse<Map<String, dynamic>>> getSettlementSummary() async {
+    try {
+      final response = await _apiService.dio.get('/api/settlements/summary');
+      return ApiResponse(
+        success: true,
+        data: response.data['data'],
+        message: response.data['message'],
+      );
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
     }
   }
 }

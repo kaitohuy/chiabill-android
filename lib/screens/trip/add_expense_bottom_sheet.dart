@@ -1,8 +1,11 @@
+import 'package:chiabill/utils/toast_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../controllers/add_expense_controller.dart';
 import '../../data/models/trip_response.dart';
 import '../../data/models/expense_response.dart';
+import '../../utils/currency_util.dart';
 
 class AddExpenseBottomSheet extends StatelessWidget {
   final TripResponse trip;
@@ -26,7 +29,12 @@ class AddExpenseBottomSheet extends StatelessWidget {
       ),
       child: SingleChildScrollView(
         // BÍ QUYẾT LÀ Ở ĐÂY: Nhét bottomInset vào padding của ScrollView
-        padding: EdgeInsets.only(left: 24, right: 24, top: 24, bottom: bottomInset + 24),
+        padding: EdgeInsets.only(
+          left: 24, 
+          right: 24, 
+          top: 24, 
+          bottom: bottomInset + 24 + MediaQuery.of(context).padding.bottom,
+        ),
         child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,10 +46,18 @@ class AddExpenseBottomSheet extends StatelessWidget {
         const SizedBox(height: 20),
 
             TextField(
-              controller: controller.amountController,
-              keyboardType: TextInputType.number,
+              controller: controller.amountController, // Tên controller của bạn
+              keyboardType: TextInputType.number, // Ép mở bàn phím số
+
+              // THÊM ĐOẠN NÀY ĐỂ FORMAT REALTIME:
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly, // Chặn nhập chữ
+                CurrencyInputFormatter(), // Tự động chèn dấu phẩy
+              ],
+
               decoration: InputDecoration(
-                labelText: "Số tiền (VNĐ)",
+                labelText: "Số tiền",
+                suffixText: "đ", // Hiện chữ 'đ' mờ mờ ở cuối ô nhập cho xịn
                 prefixIcon: const Icon(Icons.attach_money, color: Colors.orange),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
@@ -427,7 +443,7 @@ class AddExpenseBottomSheet extends StatelessWidget {
               style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, foregroundColor: Colors.white),
               onPressed: controller.isLoading.value ? null : () {
                 if (nameCtrl.text.trim().isEmpty) {
-                  Get.snackbar("Thiếu thông tin", "Vui lòng nhập tên danh mục", backgroundColor: Colors.redAccent, colorText: Colors.white);
+                  ToastUtil.showWarning("Thiếu thông tin", "Vui lòng nhập tên danh mục");
                   return;
                 }
                 // Gọi API tạo danh mục với tên và emoji đã chọn

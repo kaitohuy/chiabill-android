@@ -1,0 +1,44 @@
+﻿Analyzing chiabill...                                           
+
+warning - The '!' will have no effect because the receiver can't be null - lib\controllers\add_expense_controller.dart:62:108 - unnecessary_non_null_assertion
+warning - The '!' will have no effect because the receiver can't be null - lib\controllers\add_expense_controller.dart:66:69 - unnecessary_non_null_assertion
+warning - The '!' will have no effect because the receiver can't be null - lib\controllers\add_expense_controller.dart:74:61 - unnecessary_non_null_assertion
+warning - The '!' will have no effect because the receiver can't be null - lib\controllers\add_expense_controller.dart:90:68 - unnecessary_non_null_assertion
+warning - The '!' will have no effect because the receiver can't be null - lib\controllers\add_expense_controller.dart:116:71 - unnecessary_non_null_assertion
+   info - Don't invoke 'print' in production code - lib\controllers\auth_controller.dart:105:7 - avoid_print
+warning - Unused import: 'package:flutter/material.dart' - lib\controllers\fcm_controller.dart:3:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\controllers\fcm_controller.dart:65:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\controllers\fcm_controller.dart:89:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\controllers\fcm_controller.dart:91:7 - avoid_print
+warning - Dead code - lib\controllers\profile_controller.dart:54:53 - dead_code
+warning - The left operand can't be null, so the right operand is never executed - lib\controllers\profile_controller.dart:54:56 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\controllers\profile_controller.dart:55:78 - dead_null_aware_expression
+warning - The left operand can't be null, so the right operand is never executed - lib\controllers\profile_controller.dart:67:63 - dead_null_aware_expression
+warning - Unused import: 'package:flutter_dotenv/flutter_dotenv.dart' - lib\data\network\api_service.dart:2:8 - unused_import
+   info - Don't invoke 'print' in production code - lib\main.dart:14:3 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\auth\welcome_screen.dart:32:48 - deprecated_member_use
+warning - The receiver can't be null, so the null-aware operator '?.' is unnecessary - lib\screens\home\home_screen.dart:163:49 - invalid_null_aware_operator
+warning - The '!' will have no effect because the receiver can't be null - lib\screens\home\home_screen.dart:163:78 - unnecessary_non_null_assertion
+warning - The '!' will have no effect because the receiver can't be null - lib\screens\home\home_screen.dart:164:47 - unnecessary_non_null_assertion
+warning - The '!' will have no effect because the receiver can't be null - lib\screens\home\home_screen.dart:183:85 - unnecessary_non_null_assertion
+warning - The '!' will have no effect because the receiver can't be null - lib\screens\home\home_screen.dart:216:101 - unnecessary_non_null_assertion
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\notification\notification_screen.dart:57:62 - deprecated_member_use
+warning - Unused import: 'package:get_storage/get_storage.dart' - lib\screens\profile\profile_screen.dart:3:8 - unused_import
+warning - Unused import: '../auth/welcome_screen.dart' - lib\screens\profile\profile_screen.dart:6:8 - unused_import
+warning - The '!' will have no effect because the receiver can't be null - lib\screens\trip\add_expense_bottom_sheet.dart:241:72 - unnecessary_non_null_assertion
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\trip\tabs\expense_tab.dart:70:79 - deprecated_member_use
+warning - Dead code - lib\screens\trip\tabs\history_tab.dart:97:52 - dead_code
+warning - The left operand can't be null, so the right operand is never executed - lib\screens\trip\tabs\history_tab.dart:97:55 - dead_null_aware_expression
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\trip\tabs\history_tab.dart:116:132 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\trip\tabs\history_tab.dart:119:78 - deprecated_member_use
+warning - The receiver can't be 'null' because of short-circuiting, so the null-aware operator '?.' can't be used - lib\screens\trip\tabs\history_tab.dart:283:70 - invalid_null_aware_operator
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\trip\tabs\member_tabs.dart:32:85 - deprecated_member_use
+warning - The '!' will have no effect because the receiver can't be null - lib\screens\trip\tabs\member_tabs.dart:113:111 - unnecessary_non_null_assertion
+warning - The '!' will have no effect because the receiver can't be null - lib\screens\trip\tabs\member_tabs.dart:121:92 - unnecessary_non_null_assertion
+warning - The '!' will have no effect because the receiver can't be null - lib\screens\trip\tabs\member_tabs.dart:123:91 - unnecessary_non_null_assertion
+warning - The '!' will have no effect because the receiver can't be null - lib\screens\trip\tabs\member_tabs.dart:139:112 - unnecessary_non_null_assertion
+warning - The '!' will have no effect because the receiver can't be null - lib\screens\trip\tabs\member_tabs.dart:144:112 - unnecessary_non_null_assertion
+warning - Dead code - lib\screens\trip\tabs\settlements_tab.dart:107:45 - dead_code
+warning - The left operand can't be null, so the right operand is never executed - lib\screens\trip\tabs\settlements_tab.dart:107:48 - dead_null_aware_expression
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\utils\app_snackbar.dart:82:31 - deprecated_member_use
+

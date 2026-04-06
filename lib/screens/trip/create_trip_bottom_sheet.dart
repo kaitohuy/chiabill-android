@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Thêm dòng này
 import 'package:get/get.dart';
 import '../../controllers/create_trip_controller.dart';
+import '../../utils/currency_util.dart'; // Thêm dòng này
 
 class CreateTripBottomSheet extends StatelessWidget {
   CreateTripBottomSheet({super.key});
@@ -10,8 +12,12 @@ class CreateTripBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      // Chỉ cần padding cố định, không cộng thêm bàn phím nữa
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.only(
+        left: 24, 
+        right: 24, 
+        top: 24, 
+        bottom: 24 + MediaQuery.of(context).padding.bottom,
+      ),
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -24,22 +30,35 @@ class CreateTripBottomSheet extends StatelessWidget {
             const Text("Tạo chuyến đi mới", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.lightGreen)),
             const SizedBox(height: 24),
 
-            // Ô nhập tên chuyến đi
             TextField(
               controller: controller.nameController,
               decoration: InputDecoration(
-                labelText: "Tên chuyến đi (VD: Vũng Tàu 2 ngày 1 đêm)",
+                labelText: "Tên chuyến đi (VD: Vũng Tàu 2N1Đ)",
                 prefixIcon: const Icon(Icons.map, color: Colors.lightGreen),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Colors.lightGreen, width: 2),
-                ),
               ),
             ),
             const SizedBox(height: 16),
 
-            // Ô nhập mô tả
+            // ===================================
+            // THÊM Ô NHẬP NGÂN SÁCH Ở ĐÂY
+            // ===================================
+            TextField(
+              controller: controller.budgetController, // Nhớ khai báo budgetController trong CreateTripController
+              keyboardType: TextInputType.number,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                CurrencyInputFormatter(),
+              ],
+              decoration: InputDecoration(
+                labelText: "Ngân sách dự kiến (Không bắt buộc)",
+                prefixIcon: const Icon(Icons.account_balance_wallet, color: Colors.lightGreen),
+                suffixText: "đ",
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            const SizedBox(height: 16),
+
             TextField(
               controller: controller.descController,
               decoration: InputDecoration(
@@ -51,7 +70,6 @@ class CreateTripBottomSheet extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // Nút Tạo mới
             Obx(() => SizedBox(
               width: double.infinity,
               height: 50,

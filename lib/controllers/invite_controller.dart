@@ -1,3 +1,4 @@
+import 'package:chiabill/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Import thư viện này để dùng Clipboard
 import 'package:get/get.dart';
@@ -40,7 +41,7 @@ class InviteController extends GetxController {
     if (result.success && result.data != null) {
       generatedCode.value = result.data!.inviteCode;
     } else {
-      Get.snackbar("Lỗi", result.message ?? "Không thể tạo mã, có thể mã này đã bị trùng!");
+      ToastUtil.showError("Lỗi", result.message ?? "Không thể tạo mã, có thể mã này đã bị trùng!");
     }
     isLoading.value = false;
   }
@@ -49,14 +50,7 @@ class InviteController extends GetxController {
   void copyToClipboard() {
     if (generatedCode.value.isNotEmpty) {
       Clipboard.setData(ClipboardData(text: generatedCode.value));
-      Get.snackbar(
-        "Thành công",
-        "Đã copy mã: ${generatedCode.value}",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.black87,
-        colorText: Colors.white,
-        margin: const EdgeInsets.all(16),
-      );
+      ToastUtil.showSuccess("Thành công", "Đã copy mã: ${generatedCode.value}");
     }
   }
 

@@ -1,3 +1,4 @@
+import 'package:chiabill/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../data/repositories/ghost_repository.dart';
@@ -29,14 +30,14 @@ class GhostController extends GetxController {
     // Bỏ ép kiểu, chỉ check success
     if (result.success) {
       Get.back(); // Đóng popup
-      Get.snackbar("Thành công", "Đã thêm ${names.length} người vào nhóm", backgroundColor: Colors.green, colorText: Colors.white);
+      ToastUtil.showSuccess("Thành công", "Đã thêm ${names.length} người vào nhóm");
 
       // Load lại TOÀN BỘ dữ liệu Trip Detail (Members, Expenses, Settlements)
       if (Get.isRegistered<TripDetailController>(tag: tripId.toString())) {
         Get.find<TripDetailController>(tag: tripId.toString()).fetchData();
       }
     } else {
-      Get.snackbar("Lỗi", result.message ?? "Không thể thêm", backgroundColor: Colors.redAccent, colorText: Colors.white);
+      ToastUtil.showError("Lỗi", result.message ?? "Không thể thêm");
     }
     isLoading.value = false;
   }

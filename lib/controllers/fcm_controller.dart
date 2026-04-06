@@ -1,3 +1,4 @@
+import 'package:chiabill/utils/toast_util.dart';
 import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -31,16 +32,9 @@ class FcmController extends GetxController {
       // 1. FOREGROUND: App đang mở
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
         if (message.notification != null) {
-          Get.snackbar(
+          ToastUtil.showInfo(
             message.notification!.title ?? "Thông báo mới",
             message.notification!.body ?? "",
-            backgroundColor: Colors.white,
-            colorText: Colors.black,
-            icon: const Icon(Icons.notifications_active, color: Colors.orange),
-            margin: const EdgeInsets.all(16),
-            snackPosition: SnackPosition.TOP,
-            duration: const Duration(seconds: 4),
-            onTap: (_) => _handleNotificationClick(message.data), // Bấm vào snackbar
           );
         }
       });

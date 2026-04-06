@@ -1,9 +1,11 @@
 import 'dart:io';
+import 'package:chiabill/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../data/repositories/payment_repository.dart';
 import '../data/models/settlement_response.dart';
+import '../utils/currency_util.dart';
 import 'trip_detail_controller.dart';
 
 class CreatePaymentController extends GetxController {
@@ -22,7 +24,7 @@ class CreatePaymentController extends GetxController {
   void onInit() {
     super.onInit();
     // Khởi tạo mặc định số tiền = đúng số tiền còn nợ
-    amountController.text = settlement.amount.toInt().toString();
+    amountController.text = CurrencyUtils.formatNumber(settlement.amount);
   }
 
   Future<void> pickImage() async {
@@ -36,29 +38,36 @@ class CreatePaymentController extends GetxController {
   Future<void> submitPayment() async {
     double? amount = double.tryParse(amountController.text.replaceAll(',', ''));
     if (amount == null || amount <= 0) {
-      Get.snackbar("Lỗi", "Số tiền không hợp lệ");
+      ToastUtil.showWarning("Lỗi", "Số tiền không hợp lệ");
       return;
     }
     if (selectedImage.value == null) {
-      Get.snackbar("Lỗi", "Vui lòng đính kèm ảnh minh chứng giao dịch!");
+      ToastUtil.showWarning("Lỗi", "Vui lòng đính kèm ảnh minh chứng giao dịch!");
       return;
     }
 
     isLoading.value = true;
-    final result = await _repo.createPayment(tripId, settlement.toUserId!, amount, selectedImage.value!);
-    isLoading.value = false;
+    try {
+      final result = await _repo.createPayment(tripId, settlement.toUserId!, amount, selectedImage.value!);
 
-    if (result.success) {
-      Get.back(); // Đóng BottomSheet QR Code
-      Get.back(); // Đóng BottomSheet Nhập tiền
-      Get.snackbar("Thành công", "Đã gửi yêu cầu thanh toán. Đang chờ xác nhận!", backgroundColor: Colors.green, colorText: Colors.white);
+      if (result.success) {
+        // ĐÓNG NGAY khi thành công
+        Get.back(); // Đóng BottomSheet QR Code
+        Get.back(); // Đóng BottomSheet Nhập tiền
 
-      // Load lại Tab Thanh toán
-      if (Get.isRegistered<TripDetailController>(tag: tripId.toString())) {
-        Get.find<TripDetailController>(tag: tripId.toString()).fetchData();
+        ToastUtil.showSuccess("Thành công", "Đã gửi yêu cầu thanh toán. Đang chờ xác nhận!");
+
+        // Load lại Tab Thanh toán
+        if (Get.isRegistered<TripDetailController>(tag: tripId.toString())) {
+          Get.find<TripDetailController>(tag: tripId.toString()).fetchData();
+        }
+      } else {
+        ToastUtil.showError("Lỗi", result.message ?? "Không thể gửi minh chứng");
       }
-    } else {
-      Get.snackbar("Lỗi", result.message ?? "Không thể gửi minh chứng", backgroundColor: Colors.redAccent, colorText: Colors.white);
+    } catch (e) {
+      ToastUtil.showError("Lỗi hệ thống", "Đã xảy ra lỗi không xác định");
+    } finally {
+      isLoading.value = false;
     }
   }
 }

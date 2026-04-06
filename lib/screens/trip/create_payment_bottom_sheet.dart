@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../controllers/create_payment_controller.dart';
 import '../../data/models/settlement_response.dart';
+import '../../utils/currency_util.dart';
 
 class CreatePaymentBottomSheet extends StatelessWidget {
   final int tripId;
@@ -19,7 +21,12 @@ class CreatePaymentBottomSheet extends StatelessWidget {
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.85, // Chiếm 85% màn hình
-      padding: EdgeInsets.only(left: 20, right: 20, top: 24, bottom: 24 + bottomInset),
+      padding: EdgeInsets.only(
+        left: 20, 
+        right: 20, 
+        top: 24, 
+        bottom: 24 + bottomInset + MediaQuery.of(context).padding.bottom,
+      ),
       decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,15 +59,22 @@ class CreatePaymentBottomSheet extends StatelessWidget {
           const Text("Số tiền thanh toán đợt này", style: TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           TextField(
-            controller: controller.amountController,
-            keyboardType: TextInputType.number,
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.green),
+            controller: controller.amountController, // Tên controller của bạn
+            keyboardType: TextInputType.number, // Ép mở bàn phím số
+
+            // THÊM ĐOẠN NÀY ĐỂ FORMAT REALTIME:
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly, // Chặn nhập chữ
+              CurrencyInputFormatter(), // Tự động chèn dấu phẩy
+            ],
+
             decoration: InputDecoration(
               prefixIcon: const Icon(Icons.payments, color: Colors.green),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               suffixText: "VNĐ",
             ),
           ),
+
           const SizedBox(height: 24),
 
           // UPLOAD ẢNH

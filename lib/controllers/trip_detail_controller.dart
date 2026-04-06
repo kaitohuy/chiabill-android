@@ -1,3 +1,4 @@
+import 'package:chiabill/utils/toast_util.dart';
 import 'package:chiabill/controllers/profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -200,7 +201,7 @@ class TripDetailController extends GetxController {
       activeInviteCode.value = result.data!.inviteCode;
     } else {
       // FE chỉ cần hiển thị đúng cái message BE trả về
-      Get.snackbar("Lỗi", result.message ?? "Không thể tạo mã mời", backgroundColor: Colors.redAccent, colorText: Colors.white);
+      ToastUtil.showError("Lỗi", result.message ?? "Không thể tạo mã mời");
     }
     isLoading.value = false;
   }
@@ -208,7 +209,7 @@ class TripDetailController extends GetxController {
   void copyToClipboard() {
     if (activeInviteCode.value.isNotEmpty) {
       Clipboard.setData(ClipboardData(text: activeInviteCode.value));
-      Get.snackbar("Thành công", "Đã copy mã: ${activeInviteCode.value}", backgroundColor: Colors.black87, colorText: Colors.white, snackPosition: SnackPosition.BOTTOM);
+      ToastUtil.showSuccess("Thành công", "Đã copy mã: ${activeInviteCode.value}");
     }
   }
 
@@ -226,10 +227,10 @@ class TripDetailController extends GetxController {
     isLoading.value = true;
     final result = await _expenseRepo.deleteExpense(expenseId);
     if (result.success) {
-      Get.snackbar("Thành công", "Đã xóa khoản chi");
+      ToastUtil.showSuccess("Thành công", "Đã xóa khoản chi");
       fetchData();
     } else {
-      Get.snackbar("Lỗi", result.message ?? "Không thể xóa");
+      ToastUtil.showError("Lỗi", result.message ?? "Không thể xóa");
       isLoading.value = false;
     }
   }
@@ -244,17 +245,13 @@ class TripDetailController extends GetxController {
 
       // Đợi hiệu ứng chuyển màn hình xong (300ms) rồi mới báo thành công
       Future.delayed(const Duration(milliseconds: 300), () {
-        ScaffoldMessenger.of(Get.context!).showSnackBar(
-          const SnackBar(content: Text("Đã xóa chuyến đi"), backgroundColor: Colors.green),
-        );
+        ToastUtil.showSuccess("Thông báo", "Đã xóa chuyến đi");
         if (Get.isRegistered<HomeController>()) {
           Get.find<HomeController>().fetchTrips();
         }
       });
     } else {
-      ScaffoldMessenger.of(Get.context!).showSnackBar(
-        SnackBar(content: Text(result.message ?? "Không thể xóa"), backgroundColor: Colors.redAccent),
-      );
+      ToastUtil.showError("Lỗi", result.message ?? "Không thể xóa");
       isLoading.value = false;
     }
   }
@@ -277,10 +274,10 @@ class TripDetailController extends GetxController {
 
     if (result.success) {
       Get.back(); // Đóng dialog
-      Get.snackbar("Thành công", result.message ?? "Đã thêm thành viên", backgroundColor: Colors.green, colorText: Colors.white);
+      ToastUtil.showSuccess("Thành công", result.message ?? "Đã thêm thành viên");
       fetchData(); // Load lại data chuyến đi
     } else {
-      Get.snackbar("Thất bại", result.message ?? "Không thể thêm", backgroundColor: Colors.redAccent, colorText: Colors.white);
+      ToastUtil.showError("Thất bại", result.message ?? "Không thể thêm");
     }
   }
 
@@ -288,10 +285,10 @@ class TripDetailController extends GetxController {
     isLoading.value = true;
     final result = await _paymentRepo.approvePayment(paymentId);
     if (result.success) {
-      Get.snackbar("Thành công", "Đã xác nhận nhận tiền!", backgroundColor: Colors.green, colorText: Colors.white);
+      ToastUtil.showSuccess("Thành công", "Đã xác nhận nhận tiền!");
       fetchData(); // Load lại data để nợ được trừ đi
     } else {
-      Get.snackbar("Lỗi", result.message ?? "Không thể duyệt", backgroundColor: Colors.redAccent, colorText: Colors.white);
+      ToastUtil.showError("Lỗi", result.message ?? "Không thể duyệt");
       isLoading.value = false;
     }
   }
@@ -300,10 +297,10 @@ class TripDetailController extends GetxController {
     isLoading.value = true;
     final result = await _paymentRepo.rejectPayment(paymentId);
     if (result.success) {
-      Get.snackbar("Thành công", "Đã từ chối khoản thanh toán", backgroundColor: Colors.orange, colorText: Colors.white);
+      ToastUtil.showSuccess("Thành công", "Đã từ chối khoản thanh toán");
       fetchData(); // Load lại data
     } else {
-      Get.snackbar("Lỗi", result.message ?? "Không thể từ chối", backgroundColor: Colors.redAccent, colorText: Colors.white);
+      ToastUtil.showError("Lỗi", result.message ?? "Không thể từ chối");
       isLoading.value = false;
     }
   }
@@ -331,23 +328,11 @@ class TripDetailController extends GetxController {
     if (result.success) {
       // 2. RỜI NHÓM THÀNH CÔNG THÌ MỚI VĂNG RA MÀN HÌNH CHÍNH
       Get.back();
-      Get.snackbar("Thành công", "Bạn đã rời khỏi nhóm", backgroundColor: Colors.green, colorText: Colors.white);
+      ToastUtil.showSuccess("Thành công", "Bạn đã rời khỏi nhóm");
       if (Get.isRegistered<HomeController>()) Get.find<HomeController>().fetchTrips();
     } else {
       // 3. BÁO LỖI (CHẮC CHẮN DIALOG CŨ ĐÃ ĐÓNG RỒI NÊN KHÔNG SỢ ĐÈ NHAU)
-      Get.defaultDialog(
-        title: "Không thể rời nhóm",
-        titleStyle: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-        content: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(result.message ?? "Lỗi máy chủ.", textAlign: TextAlign.center),
-        ),
-        confirm: ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-          onPressed: () => Get.back(),
-          child: const Text("ĐÃ HIỂU", style: TextStyle(color: Colors.white)),
-        ),
-      );
+      ToastUtil.showError("Không thể rời nhóm", result.message ?? "Lỗi máy chủ.");
     }
   }
 
@@ -362,10 +347,10 @@ class TripDetailController extends GetxController {
     isLoading.value = false;
 
     if (result.success) {
-      Get.snackbar("Thành công", "Đã xóa thành viên", backgroundColor: Colors.green, colorText: Colors.white);
+      ToastUtil.showSuccess("Thành công", "Đã xóa thành viên");
       fetchData();
     } else {
-      Get.snackbar("Lỗi", result.message ?? "Không thể xóa", backgroundColor: Colors.redAccent, colorText: Colors.white);
+      ToastUtil.showError("Lỗi", result.message ?? "Không thể xóa");
     }
   }
 
@@ -373,10 +358,10 @@ class TripDetailController extends GetxController {
     isLoading.value = true;
     final result = await _tripRepo.transferOwner(tripId, newOwnerId);
     if (result.success) {
-      Get.snackbar("Thành công", "Đã chuyển quyền Chủ phòng", backgroundColor: Colors.green, colorText: Colors.white);
+      ToastUtil.showSuccess("Thành công", "Đã chuyển quyền Chủ phòng");
       fetchData(); // Load lại data
     } else {
-      Get.snackbar("Lỗi", result.message ?? "Không thể chuyển quyền", backgroundColor: Colors.redAccent, colorText: Colors.white);
+      ToastUtil.showError("Lỗi", result.message ?? "Không thể chuyển quyền");
       isLoading.value = false;
     }
   }
@@ -387,7 +372,7 @@ class TripDetailController extends GetxController {
     if (result.success) {
       fetchData();
     } else {
-      Get.snackbar("Lỗi", result.message ?? "Không thể vô hiệu hóa", backgroundColor: Colors.redAccent, colorText: Colors.white);
+      ToastUtil.showError("Lỗi", result.message ?? "Không thể vô hiệu hóa");
       isLoading.value = false;
     }
   }
@@ -396,10 +381,10 @@ class TripDetailController extends GetxController {
     isLoading.value = true;
     final result = await _tripRepo.activateMember(tripId, memberId);
     if (result.success) {
-      Get.snackbar("Thành công", "Đã mở khóa thành viên", backgroundColor: Colors.green, colorText: Colors.white);
+      ToastUtil.showSuccess("Thành công", "Đã mở khóa thành viên");
       fetchData();
     } else {
-      Get.snackbar("Lỗi", result.message ?? "Không thể mở khóa", backgroundColor: Colors.redAccent, colorText: Colors.white);
+      ToastUtil.showError("Lỗi", result.message ?? "Không thể mở khóa");
       isLoading.value = false;
     }
   }

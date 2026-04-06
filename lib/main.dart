@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -16,6 +17,22 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Cấu hình thanh điều hướng và thanh trạng thái
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      systemNavigationBarColor: Colors.transparent, // Nền thanh 3 nút trong suốt
+      systemNavigationBarDividerColor: Colors.transparent,
+      systemNavigationBarIconBrightness: Brightness.dark, // Màu của 3 nút (đen/xám)
+      systemNavigationBarContrastEnforced: false, // Tắt ép buộc độ tương phản (để trong suốt hoàn toàn)
+      statusBarColor: Colors.transparent, // Thanh trạng thái pin/sóng cũng trong suốt luôn
+      statusBarIconBrightness: Brightness.dark,
+      systemStatusBarContrastEnforced: false,
+    ),
+  );
+
+  // Đảm bảo app vẽ tràn màn hình (Edge-to-Edge)
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   await dotenv.load(fileName: ".env");
   await Firebase.initializeApp();

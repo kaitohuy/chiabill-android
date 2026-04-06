@@ -17,18 +17,29 @@ class HomeController extends GetxController {
   var isTripLastPage = false.obs;
   var isLoadingMoreTrips = false.obs;
   var searchKeyword = "".obs;
-
+  var totalOwe = 0.0.obs;
+  var totalReceive = 0.0.obs;
 
   @override
   void onInit() {
     super.onInit();
     Get.put(FcmController(), permanent: true); // permanent: true để nó sống xuyên suốt app
     fetchTrips(); // Gọi API ngay khi mở màn hình
+    fetchSummary();
   }
 
   // ==============================
   // HÀM TẢI DỮ LIỆU
   // ==============================
+  // Hàm mới để lấy Dashboard tài chính
+  Future<void> fetchSummary() async {
+    final result = await _repository.getSettlementSummary();
+    if (result.success && result.data != null) {
+      totalOwe.value = (result.data!['totalOwed'] ?? 0).toDouble();
+      totalReceive.value = (result.data!['totalReceivable'] ?? 0).toDouble();
+    }
+  }
+
   Future<void> fetchTrips({bool isRefresh = true}) async {
     if (isRefresh) {
       currentTripPage.value = 0;
