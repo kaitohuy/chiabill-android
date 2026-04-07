@@ -1,3 +1,4 @@
+import 'package:chiabill/utils/loading_util.dart';
 import 'package:chiabill/utils/toast_util.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -74,34 +75,40 @@ class ProfileController extends GetxController {
   }
 
   Future<void> saveProfile({bool silent = false}) async {
-    if (!silent) isLoading.value = true;
-
-    // Gói toàn bộ dữ liệu vào UpdateProfileRequest
-    final request = UpdateProfileRequest(
-      name: nameController.text.trim(),
-      phone: phoneController.text.trim(), // Truyền Phone vào Request
-      bankId: bankIdController.text.trim().toUpperCase(),
-      accountNo: accountNoController.text.trim(),
-      avatarUrl: currentAvatarUrl.value ?? "",
-      bankQrUrl: currentQrUrl.value ?? "",
-      allowAutoAdd: allowAutoAdd.value,
-      allowAutoApprovePayment: allowAutoApprovePayment.value,
-      paymentPriority: paymentPriority.value,
-    );
-
-    final result = await _repository.updateProfile(request);
-
-    if (result.success) {
-      user.value = result.data;
+    try {
       if (!silent) {
-        ToastUtil.showSuccess("Thành công", "Đã lưu thay đổi");
+        isLoading.value = true;
+        LoadingUtil.show();
       }
-    } else {
+
+      final request = UpdateProfileRequest(
+        name: nameController.text.trim(),
+        phone: phoneController.text.trim(),
+        bankId: bankIdController.text.trim().toUpperCase(),
+        accountNo: accountNoController.text.trim(),
+        avatarUrl: currentAvatarUrl.value ?? "",
+        bankQrUrl: currentQrUrl.value ?? "",
+        allowAutoAdd: allowAutoAdd.value,
+        allowAutoApprovePayment: allowAutoApprovePayment.value,
+        paymentPriority: paymentPriority.value,
+      );
+
+      final result = await _repository.updateProfile(request);
+
+      if (result.success) {
+        user.value = result.data;
+        if (!silent) ToastUtil.showSuccess("Thành công", "Đã lưu thay đổi");
+      } else {
+        if (!silent) ToastUtil.showError("Lỗi", result.message ?? "Lỗi lưu thông tin");
+      }
+    } catch (e) {
+      if (!silent) ToastUtil.showError("Lỗi", "Đã xảy ra lỗi khi lưu thông tin");
+    } finally {
       if (!silent) {
-        ToastUtil.showError("Lỗi", result.message ?? "Lỗi lưu thông tin");
+        isLoading.value = false;
+        LoadingUtil.hide();
       }
     }
-    if (!silent) isLoading.value = false;
   }
 
   void toggleAutoApprovePayment(bool value) {
@@ -129,22 +136,29 @@ class ProfileController extends GetxController {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 50, maxWidth: 1080);
     if (image == null) return;
 
-    File file = File(image.path);
-    isUploading.value = true;
+    try {
+      File file = File(image.path);
+      isUploading.value = true;
+      LoadingUtil.show();
 
-    String endpoint = type == 'avatar' ? "/api/users/avatar" : "/api/users/bank-qr";
-    final result = await _repository.uploadImage(endpoint, file);
+      String endpoint = type == 'avatar' ? "/api/users/avatar" : "/api/users/bank-qr";
+      final result = await _repository.uploadImage(endpoint, file);
 
-    if (result.success && result.data != null) {
-      if (type == 'avatar') currentAvatarUrl.value = result.data;
-      if (type == 'bank-qr') currentQrUrl.value = result.data;
+      if (result.success && result.data != null) {
+        if (type == 'avatar') currentAvatarUrl.value = result.data;
+        if (type == 'bank-qr') currentQrUrl.value = result.data;
 
-      saveProfile(silent: true);
-      ToastUtil.showSuccess("Thành công", "Đã cập nhật ảnh!");
-    } else {
-      ToastUtil.showError("Lỗi", result.message ?? "Không thể tải ảnh");
+        saveProfile(silent: true);
+        ToastUtil.showSuccess("Thành công", "Đã cập nhật ảnh!");
+      } else {
+        ToastUtil.showError("Lỗi", result.message ?? "Không thể tải ảnh");
+      }
+    } catch (e) {
+      ToastUtil.showError("Lỗi", "Đã xảy ra lỗi khi tải ảnh");
+    } finally {
+      isUploading.value = false;
+      LoadingUtil.hide();
     }
-    isUploading.value = false;
   }
 
   @override

@@ -97,6 +97,24 @@ class _TripDetailScreenState extends State<TripDetailScreen> with SingleTickerPr
               );
             }
           }),
+          
+          // NÚT XUẤT FILE (BÊN CẠNH MÃ MỜI)
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.file_download_outlined),
+            tooltip: "Xuất báo cáo",
+            onSelected: (value) => controller.exportTrip(value),
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'excel',
+                child: Row(children: [Icon(Icons.table_chart, color: Colors.green, size: 20), SizedBox(width: 12), Text("Xuất Excel (.xlsx)")]),
+              ),
+              const PopupMenuItem(
+                value: 'pdf',
+                child: Row(children: [Icon(Icons.picture_as_pdf, color: Colors.red, size: 20), SizedBox(width: 12), Text("Xuất PDF (.pdf)")]),
+              ),
+            ],
+          ),
+          const SizedBox(width: 4),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(50),
@@ -183,7 +201,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> with SingleTickerPr
   void _showAddMemberOptions(BuildContext context, TripDetailController controller) {
     Get.bottomSheet(
       Container(
-        padding: const EdgeInsets.symmetric(vertical: 20),
+        padding: EdgeInsets.only(top: 20, left: 0, right: 0, bottom: 20 + MediaQuery.of(context).padding.bottom),
         decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
         child: Column(
           mainAxisSize: MainAxisSize.min,

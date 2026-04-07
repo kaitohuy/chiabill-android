@@ -16,6 +16,10 @@ import '../data/repositories/payment_repository.dart';
 import '../data/repositories/trip_repository.dart';
 import '../data/repositories/expense_repository.dart';
 import '../data/repositories/settlement_repository.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+import 'package:chiabill/utils/loading_util.dart';
+import 'package:share_plus/share_plus.dart';
 import 'home_controller.dart';
 
 class TripDetailController extends GetxController {
@@ -386,6 +390,36 @@ class TripDetailController extends GetxController {
     } else {
       ToastUtil.showError("Lỗi", result.message ?? "Không thể mở khóa");
       isLoading.value = false;
+    }
+  }
+
+  // ==========================================
+  // XUẤT BÁO CÁO EXCEL / PDF
+  // ==========================================
+  Future<void> exportTrip(String format) async {
+    try {
+      LoadingUtil.show();
+      final result = await _tripRepo.exportTripBytes(tripId, format);
+      LoadingUtil.hide();
+
+      if (result.success && result.data != null) {
+        // 1. Tìm đường dẫn lưu file tạm
+        final tempDir = await getTemporaryDirectory();
+        final fileName = "Báo_cáo_${trip.value?.name ?? 'ChuyenDi'}_$tripId.${format == 'excel' ? 'xlsx' : 'pdf'}";
+        final filePath = "${tempDir.path}/$fileName";
+
+        // 2. Ghi file ra bộ nhớ
+        final file = File(filePath);
+        await file.writeAsBytes(result.data!);
+
+        // 3. Chia sẻ file qua Share Sheet
+        await Share.shareXFiles([XFile(filePath)], text: 'Báo cáo chi tiêu chuyến đi: ${trip.value?.name}');
+      } else {
+        ToastUtil.showError("Lỗi xuất file", result.message ?? "Không thể tải báo cáo");
+      }
+    } catch (e) {
+      LoadingUtil.hide();
+      ToastUtil.showError("Lỗi hệ thống", "Đã xảy ra lỗi khi xử lý tệp: $e");
     }
   }
 }

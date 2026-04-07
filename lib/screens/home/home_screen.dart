@@ -185,7 +185,7 @@ class HomeScreen extends StatelessWidget {
                           onLongPress: () {
                             Get.bottomSheet(
                               Container(
-                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                padding: EdgeInsets.only(top: 16, left: 0, right: 0, bottom: 16 + MediaQuery.of(context).padding.bottom),
                                 decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,

@@ -1,3 +1,4 @@
+import 'package:chiabill/utils/loading_util.dart';
 import 'package:chiabill/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -87,8 +88,10 @@ class AddExpenseController extends GetxController {
 
   Future<void> createNewCategory(String name, String emojiIcon) async {
     isLoading.value = true;
+    LoadingUtil.show();
     final result = await _categoryRepo.createCustomCategory(trip.id!, name, emojiIcon);
     isLoading.value = false;
+    LoadingUtil.hide();
 
     if (result.success && result.data != null) {
       Get.back(); // Đóng sub-dialog tạo mới
@@ -137,8 +140,7 @@ class AddExpenseController extends GetxController {
     }
 
     isLoading.value = true;
-
-    isLoading.value = true;
+    LoadingUtil.show();
     try {
       // 3. TÍNH TOÁN TIỀN CHIA ĐỀU CHO CÁC THÀNH VIÊN ĐƯỢC CHỌN
       int memberCount = selectedSplitMemberIds.length;
@@ -196,6 +198,7 @@ class AddExpenseController extends GetxController {
       ToastUtil.showError("Lỗi hệ thống", "Đã xảy ra lỗi không xác định");
     } finally {
       isLoading.value = false;
+      LoadingUtil.hide();
     }
   }
 

@@ -1,3 +1,4 @@
+import 'package:chiabill/utils/loading_util.dart';
 import 'package:chiabill/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -22,6 +23,7 @@ class CreateTripController extends GetxController {
     }
 
     isLoading.value = true;
+    LoadingUtil.show();
     try {
       // ==========================================
       // XỬ LÝ SỐ TIỀN: BỎ DẤU PHẨY TRƯỚC KHI ÉP KIỂU
@@ -42,7 +44,7 @@ class CreateTripController extends GetxController {
 
       if (result.success && result.data != null) {
         // ĐÓNG FORM NGAY LẬP TỨC để người dùng thấy app phản hồi nhanh
-        Get.back(); 
+        Get.back();
 
         nameController.clear();
         descController.clear();
@@ -59,6 +61,7 @@ class CreateTripController extends GetxController {
       ToastUtil.showError("Lỗi hệ thống", "Đã xảy ra lỗi ngoài ý muốn");
     } finally {
       isLoading.value = false;
+      LoadingUtil.hide();
     }
   }
 

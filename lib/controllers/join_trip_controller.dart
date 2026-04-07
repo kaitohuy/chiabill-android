@@ -1,3 +1,4 @@
+import 'package:chiabill/utils/loading_util.dart';
 import 'package:chiabill/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -30,20 +31,27 @@ class JoinTripController extends GetxController {
     isLoading.value = false;
   }
 
-  // Trong hàm confirmJoin()
+  // 2. Hàm xác nhận tham gia
   Future<void> confirmJoin() async {
     String code = codeController.text.trim();
-    isLoading.value = true;
-    final result = await _repository.joinByInvite(code);
+    try {
+      isLoading.value = true;
+      LoadingUtil.show();
+      final result = await _repository.joinByInvite(code);
 
-    if (result.success) {
-      Get.back(); // Đóng popup
-      ToastUtil.showSuccess("Chào mừng!", "Bạn đã tham gia chuyến đi thành công");
-      Get.find<HomeController>().fetchTrips();
-    } else {
-      ToastUtil.showError("Thất bại", result.message ?? "Không thể tham gia");
+      if (result.success) {
+        Get.back(); // Đóng popup
+        ToastUtil.showSuccess("Chào mừng!", "Bạn đã tham gia chuyến đi thành công");
+        Get.find<HomeController>().fetchTrips();
+      } else {
+        ToastUtil.showError("Thất bại", result.message ?? "Không thể tham gia");
+      }
+    } catch (e) {
+      ToastUtil.showError("Lỗi hệ thống", "Đã xảy ra lỗi khi tham gia chuyến đi");
+    } finally {
+      isLoading.value = false;
+      LoadingUtil.hide();
     }
-    isLoading.value = false;
   }
 
   @override

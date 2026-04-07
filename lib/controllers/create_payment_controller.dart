@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:chiabill/utils/loading_util.dart';
 import 'package:chiabill/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -47,6 +48,7 @@ class CreatePaymentController extends GetxController {
     }
 
     isLoading.value = true;
+    LoadingUtil.show();
     try {
       final result = await _repo.createPayment(tripId, settlement.toUserId!, amount, selectedImage.value!);
 
@@ -68,6 +70,7 @@ class CreatePaymentController extends GetxController {
       ToastUtil.showError("Lỗi hệ thống", "Đã xảy ra lỗi không xác định");
     } finally {
       isLoading.value = false;
+      LoadingUtil.hide();
     }
   }
 }

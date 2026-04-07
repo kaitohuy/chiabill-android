@@ -240,4 +240,17 @@ class TripRepository {
       return ApiResponse(success: false, message: e.toString());
     }
   }
+
+  // 6. Xuất báo cáo Excel/PDF
+  Future<ApiResponse<List<int>>> exportTripBytes(int tripId, String format) async {
+    try {
+      final response = await _apiService.dio.get(
+        "/api/trips/$tripId/export/$format",
+        options: Options(responseType: ResponseType.bytes),
+      );
+      return ApiResponse(success: true, data: response.data);
+    } catch (e) {
+      return ApiResponse(success: false, message: "Lỗi tải tệp báo cáo: $e");
+    }
+  }
 }
