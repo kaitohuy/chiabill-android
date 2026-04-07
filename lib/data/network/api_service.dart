@@ -8,8 +8,8 @@ class ApiService {
 
   ApiService() {
     // SỬA LỖI NULL Ở ĐÂY: Thêm ?? "URL_MẶC_ĐỊNH"
-    //_dio.options.baseUrl = dotenv.env['BASE_URL'] ?? "https://chiabill-server.onrender.com";
-    _dio.options.baseUrl = "http://10.151.115.234:8080";
+    _dio.options.baseUrl = dotenv.env['BASE_URL'] ?? "https://chiabill-server.onrender.com";
+    //_dio.options.baseUrl = "http://10.151.115.234:8080";
     _dio.options.connectTimeout = const Duration(seconds: 10);
 
     // Interceptor: Tự động gắn Token vào Header nếu có
