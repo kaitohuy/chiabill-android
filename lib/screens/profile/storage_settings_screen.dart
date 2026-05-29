@@ -196,22 +196,26 @@ class _StorageSettingsScreenState extends State<StorageSettingsScreen> {
                               : "Đang tắt tự động dọn dẹp",
                       style: const TextStyle(fontSize: 12),
                     ),
-                    trailing: DropdownButton<String>(
-                      value: _currentSchedule,
-                      underline: const SizedBox(),
-                      icon: const Icon(Icons.arrow_drop_down),
-                      items: const [
-                        DropdownMenuItem(value: 'daily', child: Text("Hàng ngày")),
-                        DropdownMenuItem(value: 'weekly', child: Text("Hàng tuần")),
-                        DropdownMenuItem(value: 'off', child: Text("Tắt")),
-                      ],
-                      onChanged: (val) {
-                        if (val != null) {
-                          StorageUtil.setCleanSchedule(val);
-                          setState(() => _currentSchedule = val);
-                          ToastUtil.showSuccess("Cập nhật thành công", "Đã lưu thiết lập tự động dọn dẹp.");
-                        }
-                      },
+                    trailing: SizedBox(
+                      width: 110,
+                      child: DropdownButton<String>(
+                        value: _currentSchedule,
+                        underline: const SizedBox(),
+                        icon: const Icon(Icons.arrow_drop_down),
+                        isDense: true,
+                        alignment: Alignment.centerRight,
+                        items: const [
+                          DropdownMenuItem(value: 'daily', child: Text("Hàng ngày")),
+                          DropdownMenuItem(value: 'weekly', child: Text("Hàng tuần")),
+                          DropdownMenuItem(value: 'off', child: Text("Tắt")),
+                        ],
+                        onChanged: (val) {
+                          if (val != null) {
+                            StorageUtil.setCleanSchedule(val);
+                            setState(() => _currentSchedule = val);
+                          }
+                        },
+                      ),
                     ),
                   ),
                   const Divider(height: 1),
@@ -225,24 +229,28 @@ class _StorageSettingsScreenState extends State<StorageSettingsScreen> {
                           : "Không giới hạn dung lượng",
                       style: const TextStyle(fontSize: 12),
                     ),
-                    trailing: DropdownButton<int>(
-                      value: _currentMaxSize,
-                      underline: const SizedBox(),
-                      icon: const Icon(Icons.arrow_drop_down),
-                      items: const [
-                        DropdownMenuItem(value: 20, child: Text("20 MB")),
-                        DropdownMenuItem(value: 50, child: Text("50 MB")),
-                        DropdownMenuItem(value: 100, child: Text("100 MB")),
-                        DropdownMenuItem(value: 0, child: Text("Không giới hạn")),
-                      ],
-                      onChanged: (val) {
-                        if (val != null) {
-                          StorageUtil.setMaxCacheSize(val);
-                          setState(() => _currentMaxSize = val);
-                          ToastUtil.showSuccess("Cập nhật thành công", "Đã cấu hình lại giới hạn dung lượng tối đa.");
-                          _loadCacheSize(); // Reload size to check against limit
-                        }
-                      },
+                    trailing: SizedBox(
+                      width: 110,
+                      child: DropdownButton<int>(
+                        value: _currentMaxSize,
+                        underline: const SizedBox(),
+                        icon: const Icon(Icons.arrow_drop_down),
+                        isDense: true,
+                        alignment: Alignment.centerRight,
+                        items: const [
+                          DropdownMenuItem(value: 20, child: Text("20 MB")),
+                          DropdownMenuItem(value: 50, child: Text("50 MB")),
+                          DropdownMenuItem(value: 100, child: Text("100 MB")),
+                          DropdownMenuItem(value: 0, child: Text("Không giới hạn")),
+                        ],
+                        onChanged: (val) {
+                          if (val != null) {
+                            StorageUtil.setMaxCacheSize(val);
+                            setState(() => _currentMaxSize = val);
+                            _loadCacheSize(); // Reload size to check against limit
+                          }
+                        },
+                      ),
                     ),
                   ),
                 ],

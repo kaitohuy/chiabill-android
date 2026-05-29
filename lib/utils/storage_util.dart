@@ -83,10 +83,12 @@ class StorageUtil {
       // 1. Check schedule
       final schedule = getCleanSchedule();
       if (schedule != 'off' && lastClean != null) {
+        final isNewDay = lastClean.year != now.year || lastClean.month != now.month || lastClean.day != now.day;
         final diffDays = now.difference(lastClean).inDays;
-        if (schedule == 'daily' && diffDays >= 1) {
+        
+        if (schedule == 'daily' && isNewDay) {
           shouldClean = true;
-          print('[StorageUtil] Auto-clean triggered by Daily schedule.');
+          print('[StorageUtil] Auto-clean triggered by Daily schedule (calendar day changed).');
         } else if (schedule == 'weekly' && diffDays >= 7) {
           shouldClean = true;
           print('[StorageUtil] Auto-clean triggered by Weekly schedule.');
