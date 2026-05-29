@@ -1,60 +1,128 @@
-import 'package:chiabill/utils/toast_util.dart';
-import 'package:chiabill/screens/profile/profile_screen.dart';
-import 'package:chiabill/screens/trip/create_trip_bottom_sheet.dart';
-import 'package:chiabill/screens/trip/trip_detail_screen.dart';
+import 'package:chiabill/theme/app_colors.dart';
+import 'package:chiabill/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../controllers/home_controller.dart';
-import '../../controllers/join_trip_controller.dart';
 import '../../controllers/notification_controller.dart';
 import '../../controllers/profile_controller.dart';
+import '../../utils/toast_util.dart';
+import '../../utils/trip_category_util.dart';
 import '../../data/repositories/trip_repository.dart';
-import '../notification/notification_screen.dart';
 import '../trip/edit_trip_dialog.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
+import '../../controllers/join_trip_controller.dart';
 
-// THÊM IMPORT TIỆN ÍCH TIỀN TỆ
-import '../../utils/currency_util.dart';
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
-class HomeScreen extends StatelessWidget {
-  HomeScreen({super.key});
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
 
-  final HomeController controller = Get.put(HomeController());
-  final NotificationController notifController = Get.put(NotificationController(), permanent: true);
-  final ProfileController profileController = Get.put(ProfileController());
+class _HomeScreenState extends State<HomeScreen> {
+  final HomeController controller = Get.find<HomeController>();
+  final NotificationController notifController = Get.find<NotificationController>();
+  final ProfileController profileController = Get.find<ProfileController>();
+
+  bool isSearching = false;
+  final TextEditingController searchController = TextEditingController();
+
+  late ScrollController _monthScrollController;
+  late ScrollController _yearScrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _monthScrollController = ScrollController();
+    _yearScrollController = ScrollController();
+    
+    // Cuộn sau khi build xong nếu đang ở mode đó
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToCurrent(jump: true);
+    });
+  }
+
+  void _scrollToCurrent({bool jump = false}) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      double screenWidth = Get.width;
+      double itemWidth = 100.0;
+      
+      if (controller.filterMode.value == 'Tháng' && _monthScrollController.hasClients) {
+        int monthIndex = controller.selectedMonth.value - 1;
+        if (monthIndex < 0) monthIndex = 0;
+        double offset = (monthIndex * itemWidth) - (screenWidth / 2) + (itemWidth / 2);
+        if (offset < 0) offset = 0;
+        if (offset > _monthScrollController.position.maxScrollExtent) {
+          offset = _monthScrollController.position.maxScrollExtent;
+        }
+        if (jump) {
+          _monthScrollController.jumpTo(offset);
+        } else {
+          _monthScrollController.animateTo(offset, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+        }
+      } else if (controller.filterMode.value == 'Năm' && _yearScrollController.hasClients) {
+        int yearIndex = controller.selectedYear.value - 1950;
+        if (yearIndex < 0) yearIndex = 0;
+        double offset = (yearIndex * itemWidth) - (screenWidth / 2) + (itemWidth / 2);
+        if (offset < 0) offset = 0;
+        if (offset > _yearScrollController.position.maxScrollExtent) {
+          offset = _yearScrollController.position.maxScrollExtent;
+        }
+        if (jump) {
+          _yearScrollController.jumpTo(offset);
+        } else {
+          _yearScrollController.animateTo(offset, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _monthScrollController.dispose();
+    _yearScrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBody: true, // Cho phép nền của body tràn xuống dưới thanh điều hướng hệ thống
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.lightGreen[800],
-        elevation: 0,
         title: Obx(() {
-          String fullName = profileController.user.value?.name ?? "bạn";
-          if (fullName.trim().isEmpty) fullName = "bạn";
-
-          List<String> nameParts = fullName.trim().split(" ");
-          String shortName = nameParts.isNotEmpty ? nameParts.last : "bạn";
-
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("Chào $shortName 👋", style: TextStyle(fontSize: 14, color: Colors.grey.shade600, fontWeight: FontWeight.normal)),
-              const Text("Chuyến đi của bạn", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            ],
-          );
-        }),
+                String fullName = profileController.user.value?.name ?? "bạn";
+                if (fullName.trim().isEmpty) fullName = "bạn";
+                List<String> nameParts = fullName.trim().split(" ");
+                String shortName = nameParts.isNotEmpty ? nameParts.last : "bạn";
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Chào $shortName 👋", style: TextStyle(fontSize: 16, color: AppColors.primaryDark, fontWeight: FontWeight.normal)),
+                    Text("Chuyến đi của bạn", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.primaryDarker)),
+                  ],
+                );
+              }),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
         actions: [
+          IconButton(
+            onPressed: () => Get.toNamed(Routes.CALCULATOR),
+            icon: Image.asset(
+              'assets/images/calculator.png',
+              width: 28,
+              height: 28,
+              errorBuilder: (context, error, stackTrace) => Icon(Icons.calculate_outlined, size: 28, color: AppColors.primary),
+            ),
+          ),
           IconButton(
             onPressed: () => _showJoinTripDialog(context),
             icon: Image.asset(
               'assets/images/join_trip.gif',
-              width: 28,
-              height: 28,
-              errorBuilder: (context, error, stackTrace) => const Icon(Icons.group_add, size: 26, color: Colors.lightGreen),
+              width: 30,
+              height: 30,
+              errorBuilder: (context, error, stackTrace) => Icon(Icons.group_add, size: 26, color: AppColors.primary),
             ),
           ),
           IconButton(
@@ -62,208 +130,58 @@ class HomeScreen extends StatelessWidget {
               isLabelVisible: notifController.unreadCount.value > 0,
               label: Text(notifController.unreadCount.value.toString()),
               backgroundColor: Colors.redAccent,
-              child: const Icon(Icons.notifications_none, size: 26),
+              child: Image.asset(
+                'assets/images/bell.png',
+                width: 26,
+                height: 26,
+                errorBuilder: (context, error, stackTrace) => Icon(Icons.notifications_none, size: 26, color: AppColors.primaryDark),
+              ),
             )),
-            onPressed: () => Get.to(() => NotificationScreen()),
-          ),
-          IconButton(
-              icon: const Icon(Icons.account_circle, size: 28),
-              onPressed: () => Get.to(() => ProfileScreen())
+            onPressed: () => Get.toNamed(Routes.NOTIFICATION),
           ),
           const SizedBox(width: 8),
         ],
       ),
       body: Column(
         children: [
-          // ==========================================
-          // 1. DASHBOARD TÀI CHÍNH TỔNG QUAN
-          // ==========================================
-          Container(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(bottomLeft: Radius.circular(24), bottomRight: Radius.circular(24)),
-              boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
-            ),
-            child: Row(
-              children: [
-                Expanded(child: Obx(() => _buildFinancialCard("Bạn đang nợ", controller.totalOwe.value, Colors.redAccent, Icons.arrow_outward))),
-                const SizedBox(width: 12),
-                Expanded(child: Obx(() => _buildFinancialCard("Người ta nợ", controller.totalReceive.value, Colors.green, Icons.call_received))),
-              ],
-            ),
-          ),
 
-          // ==========================================
-          // 2. THANH TÌM KIẾM
-          // ==========================================
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              onChanged: (value) => controller.onSearchTrips(value),
-              decoration: InputDecoration(
-                hintText: "Tìm theo tên chuyến đi...",
-                prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                filled: true, fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.grey.shade200)),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.grey.shade200)),
-              ),
-            ),
-          ),
-
-          // ==========================================
-          // 3. DANH SÁCH CHUYẾN ĐI
-          // ==========================================
+          _buildSearchAndFilter(),
+          Obx(() {
+            if (controller.filterMode.value == 'Tháng') {
+               return _buildMonthHeader();
+            } else if (controller.filterMode.value == 'Năm') {
+               return _buildYearHeader();
+            }
+            return const SizedBox.shrink(); // 'Tất cả' doesn't show any pill list
+          }),
           Expanded(
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () => Get.bottomSheet(CreateTripBottomSheet(), isScrollControlled: true),
+            child: RefreshIndicator(
+              onRefresh: () => controller.fetchTrips(isRefresh: true),
+              color: AppColors.primary,
               child: Obx(() {
                 if (controller.isLoading.value && controller.trips.isEmpty) {
-                  return const Center(child: CircularProgressIndicator(color: Colors.lightGreen));
+                  return Center(child: CircularProgressIndicator(color: AppColors.primary));
                 }
 
                 if (controller.trips.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Image.asset(
-                          'assets/images/empty_trip.gif',
-                          width: 150,
-                          errorBuilder: (context, error, stackTrace) => Icon(Icons.flight_takeoff, size: 80, color: Colors.lightGreen.withValues(alpha: 0.5)),
-                        ),
-                        const SizedBox(height: 16),
-                        const Text("Chưa có chuyến đi nào.\nChạm vào bất cứ đâu để tạo mới!", textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
-                      ],
-                    ),
-                  );
+                  return _buildEmptyState();
                 }
 
-                return RefreshIndicator(
-                  color: Colors.lightGreen,
-                  onRefresh: () async {
-                    await controller.fetchTrips(isRefresh: true);
-                    await controller.fetchSummary();
+                return NotificationListener<ScrollNotification>(
+                  onNotification: (ScrollNotification scrollInfo) {
+                    if (!controller.isLoadingMoreTrips.value && scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200) {
+                      controller.fetchTrips(isRefresh: false);
+                    }
+                    return false;
                   },
                   child: ListView.builder(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     itemCount: controller.trips.length + (controller.isTripLastPage.value ? 0 : 1),
                     itemBuilder: (context, index) {
                       if (index == controller.trips.length) {
-                        return const Padding(padding: EdgeInsets.symmetric(vertical: 16.0), child: Center(child: CircularProgressIndicator(color: Colors.lightGreen)));
+                        return const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator(strokeWidth: 2)));
                       }
-
-                      final trip = controller.trips[index];
-
-                      List<String> avatars = [];
-                      if (trip.members != null) {
-                        avatars = trip.members!
-                            .where((m) => m.user?.avatarUrl != null && m.user!.avatarUrl!.isNotEmpty)
-                            .map((m) => m.user!.avatarUrl!)
-                            .toList();
-                      }
-                      int totalMembers = trip.memberCount ?? trip.members?.length ?? 1;
-
-                      String dateStr = trip.createdAt ?? "";
-                      if (dateStr.length >= 10) {
-                        final parts = dateStr.substring(0, 10).split('-');
-                        if (parts.length == 3) {
-                          dateStr = "${parts[2]}/${parts[1]}/${parts[0]}";
-                        }
-                      }
-
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: Colors.grey.shade200)),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(20),
-                          onTap: () => Get.to(() => TripDetailScreen(tripId: trip.id!)),
-                          onLongPress: () {
-                            Get.bottomSheet(
-                              Container(
-                                padding: EdgeInsets.only(top: 16, left: 0, right: 0, bottom: 16 + MediaQuery.of(context).padding.bottom),
-                                decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(trip.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                                    const Divider(),
-                                    ListTile(
-                                      leading: const Icon(Icons.edit, color: Colors.blue),
-                                      title: const Text("Sửa thông tin"),
-                                      onTap: () {
-                                        Get.back();
-                                        Get.dialog(EditTripDialog(trip: trip, isFromHome: true));
-                                      },
-                                    ),
-                                    ListTile(
-                                      leading: const Icon(Icons.delete, color: Colors.red),
-                                      title: const Text("Xóa chuyến đi", style: TextStyle(color: Colors.red)),
-                                      onTap: () {
-                                        Get.back();
-                                        Get.defaultDialog(
-                                          title: "Xóa chuyến đi?",
-                                          middleText: "Chuyến đi này sẽ bị xóa vĩnh viễn.",
-                                          textConfirm: "XÓA",
-                                          textCancel: "HỦY",
-                                          confirmTextColor: Colors.white,
-                                          buttonColor: Colors.red,
-                                          onConfirm: () async {
-                                            Get.back();
-                                            final result = await TripRepository().deleteTrip(trip.id!);
-                                            if (result.success) {
-                                              ToastUtil.showSuccess("Thành công", "Đã xóa chuyến đi");
-                                              controller.fetchTrips(isRefresh: true);
-                                              controller.fetchSummary();
-                                            }
-                                          },
-                                        );
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Container(
-                                    width: 52, height: 52,
-                                    decoration: BoxDecoration(color: Colors.lightGreen.shade50, borderRadius: BorderRadius.circular(16)),
-                                    child: Icon(Icons.flight_land, color: Colors.lightGreen.shade700, size: 28)
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(trip.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16), maxLines: 1, overflow: TextOverflow.ellipsis),
-                                      const SizedBox(height: 4),
-                                      Text(trip.description ?? "Không có mô tả", maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.grey.shade500, fontSize: 13)),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    _buildAvatarStack(avatars, totalMembers),
-                                    const SizedBox(height: 6),
-                                    Text(dateStr, style: TextStyle(fontSize: 11, color: Colors.grey.shade400, fontWeight: FontWeight.w600)),
-                                  ],
-                                )
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
+                      return _buildTripCard(context, controller.trips[index]);
                     },
                   ),
                 );
@@ -272,89 +190,425 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Get.bottomSheet(CreateTripBottomSheet(), isScrollControlled: true),
-        backgroundColor: Colors.lightGreen,
-        foregroundColor: Colors.white,
-        elevation: 4,
-        icon: const Icon(Icons.add),
-        label: const Text("Tạo chuyến đi", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+    );
+  }
+
+  Widget _buildSearchAndFilter() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              height: 44,
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(22),
+              ),
+              child: TextField(
+                controller: searchController,
+                decoration: InputDecoration(
+                  hintText: "Tìm chuyến đi...",
+                  hintStyle: TextStyle(color: Colors.grey[500], fontSize: 14),
+                  prefixIcon: Icon(Icons.search, color: Colors.grey[600], size: 20),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                onChanged: (val) {
+                   if (val.isNotEmpty && controller.filterMode.value != 'Tất cả') {
+                      controller.filterMode.value = 'Tất cả';
+                      controller.fetchTrips(isRefresh: true);
+                   } else {
+                      controller.onSearchTrips(val);
+                   }
+                },
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Container(
+            height: 44,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(22),
+            ),
+            child: Obx(() => DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: controller.filterMode.value,
+                borderRadius: BorderRadius.circular(16),
+                dropdownColor: Colors.white,
+                icon: Icon(Icons.keyboard_arrow_down, color: AppColors.primary, size: 20),
+                style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13),
+                items: ['Tất cả', 'Tháng', 'Năm'].map((String mode) {
+                  return DropdownMenuItem<String>(
+                    value: mode,
+                    child: Text(mode),
+                  );
+                }).toList(),
+                onChanged: (String? newMode) {
+                  if (newMode != null) {
+                    controller.onFilterModeChanged(newMode);
+                    _scrollToCurrent(jump: true);
+                  }
+                },
+              ),
+            )),
+          )
+        ],
       ),
     );
   }
 
-  Widget _buildFinancialCard(String title, double amount, Color color, IconData icon) {
+  Widget _buildYearHeader() {
+    int currentYear = DateTime.now().year;
+    int maxYear = currentYear + 10;
+    int itemCount = maxYear - 1950 + 1;
+
     return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(16), border: Border.all(color: color.withValues(alpha: 0.3))),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 16, color: color),
-              const SizedBox(width: 4),
-              Text(title, style: TextStyle(fontSize: 12, color: Colors.grey.shade700, fontWeight: FontWeight.bold)),
-            ],
-          ),
-          const SizedBox(height: 8),
-
-          // SỬ DỤNG CURRENCY UTILS TẠI ĐÂY
-          Text(
-              "${CurrencyUtils.formatNumber(amount)} đ",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: color),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis
-          ),
-        ],
+      height: 45,
+      margin: const EdgeInsets.only(bottom: 10),
+      child: ListView.builder(
+        controller: _yearScrollController,
+        scrollDirection: Axis.horizontal,
+        itemExtent: 100.0,
+        itemCount: itemCount,
+        itemBuilder: (context, index) {
+          int year = 1950 + index;
+          return Obx(() {
+            bool isSelected = controller.selectedYear.value == year;
+            return GestureDetector(
+              onTap: () {
+                controller.onDateChanged(controller.selectedMonth.value, year);
+                _scrollToCurrent();
+              },
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  color: isSelected ? AppColors.primary : Colors.grey[100],
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: Center(
+                  child: Text(
+                    "Năm $year",
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : Colors.black87,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      fontSize: 13
+                    ),
+                  ),
+                ),
+              ));
+          });
+        },
       ),
     );
   }
 
-  Widget _buildAvatarStack(List<String> avatars, int totalMembers) {
-    int maxDisplay = 3;
-    int displayCount = avatars.length > maxDisplay ? maxDisplay : avatars.length;
-    int remaining = totalMembers - displayCount;
+  Widget _buildMonthHeader() {
+    return Container(
+      height: 45,
+      margin: const EdgeInsets.only(bottom: 10),
+      child: ListView.builder(
+        controller: _monthScrollController,
+        scrollDirection: Axis.horizontal,
+        itemExtent: 100.0,
+        itemCount: 13, // 12 tháng + 1 icon lịch
+        itemBuilder: (context, index) {
+          if (index == 12) {
+            // Nút Lịch đổi sang dạng pill capsule
+            return GestureDetector(
+              onTap: () => _showYearPicker(context),
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryBackgroundLight,
+                  borderRadius: BorderRadius.circular(25),
+                  border: Border.all(color: AppColors.primaryLighter),
+                ),
+                child: Center(
+                  child: FittedBox(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.calendar_month_outlined, color: AppColors.primaryDark, size: 18),
+                        const SizedBox(width: 4),
+                        Text("Đổi năm", style: TextStyle(color: AppColors.primaryDark, fontSize: 13, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }
+          int month = index + 1; // 1-12
+          return Obx(() {
+            bool isSelected = controller.selectedMonth.value == month;
+            return GestureDetector(
+              onTap: () {
+                controller.onDateChanged(month, controller.selectedYear.value);
+                _scrollToCurrent();
+              },
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  color: isSelected ? AppColors.primary : Colors.grey[100],
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: Center(
+                  child: Text(
+                    "Tháng $month",
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : AppColors.primaryDark,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      fontSize: 13
+                    ),
+                  ),
+                ),
+              ));
+          });
+        },
+      ),
+    );
+  }
 
-    if (displayCount == 0) {
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.people, size: 14, color: Colors.grey.shade400),
-          const SizedBox(width: 4),
-          Text("$totalMembers người", style: TextStyle(fontSize: 12, color: Colors.grey.shade500, fontWeight: FontWeight.w500)),
-        ],
-      );
-    }
+  Widget _buildEmptyState() {
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [
+        SizedBox(height: Get.height * 0.3),
+        Icon(Icons.map_outlined, size: 80, color: Colors.grey[300]),
+        const SizedBox(height: 16),
+        const Center(child: Text("Chưa có chuyến đi nào trong tháng này", style: TextStyle(color: Colors.grey))),
+      ],
+    );
+  }
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(displayCount + (remaining > 0 ? 1 : 0), (index) {
-        if (remaining > 0 && index == displayCount) {
-          return Align(
-            widthFactor: 0.7,
-            child: CircleAvatar(
-              radius: 13,
-              backgroundColor: Colors.grey.shade200,
-              child: Text("+$remaining", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey.shade700)),
-            ),
-          );
-        }
-        return Align(
-          widthFactor: 0.7,
-          child: CircleAvatar(
-            radius: 14,
-            backgroundColor: Colors.white,
-            child: CircleAvatar(
-              radius: 12,
-              backgroundImage: NetworkImage(avatars[index]),
-              onBackgroundImageError: (_, __) => const Icon(Icons.person, size: 12),
-            ),
+  void _showYearPicker(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Chọn năm"),
+          content: SizedBox(
+            width: 300,
+            height: 300,
+            child: Obx(() => YearPicker(
+              firstDate: DateTime(1900),
+              lastDate: DateTime(2100),
+              selectedDate: DateTime(controller.selectedYear.value),
+              onChanged: (DateTime dateTime) {
+                controller.onDateChanged(controller.selectedMonth.value, dateTime.year);
+                Navigator.pop(context);
+              },
+            )),
           ),
         );
-      }),
+      },
     );
   }
+
+  Widget _buildTripCard(BuildContext context, dynamic trip) {
+    String dateStr = trip.createdAt ?? "";
+    if (dateStr.length >= 10) {
+      final parts = dateStr.substring(0, 10).split('-');
+      if (parts.length == 3) {
+        dateStr = "${parts[2]}/${parts[1]}/${parts[0]}";
+      }
+    }
+
+    Color categoryColor = TripCategoryUtil.getColor(trip.categoryIcon);
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: Colors.grey.shade200)),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: () {
+          if (trip.id == -1) {
+            ToastUtil.showWarning("Đang chờ đồng bộ", "Chuyến đi này chưa được đồng bộ lên máy chủ");
+            return;
+          }
+          Get.toNamed(Routes.TRIP_DETAIL, arguments: trip.id);
+        },
+        onLongPress: () => trip.id == -1 ? null : _showTripOptions(context, trip),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                  width: 52, height: 52,
+                  decoration: BoxDecoration(color: categoryColor.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(16)),
+                  child: Icon(TripCategoryUtil.getIconData(trip.categoryIcon), color: categoryColor, size: 28)
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        if (trip.id == -1) ...[
+                          const Icon(Icons.schedule, color: Colors.orange, size: 16),
+                          const SizedBox(width: 4),
+                        ],
+                        Expanded(child: Text(trip.name, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(trip.description ?? "Không có mô tả", maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.grey.shade500, fontSize: 13)),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                   _buildMemberAvatars(trip),
+                   const SizedBox(height: 8),
+                   Text(dateStr, style: TextStyle(fontSize: 11, color: Colors.grey.shade400)),
+                ],
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMemberAvatars(dynamic trip) {
+    if (trip.members == null || (trip.members as List).isEmpty) {
+      return Text("${trip.memberCount ?? 0} TV", style: TextStyle(fontSize: 12, color: Colors.grey.shade600, fontWeight: FontWeight.bold));
+    }
+
+    final members = trip.members as List;
+    final int displayCount = members.length > 3 ? 3 : members.length;
+    final int extraCount = (trip.memberCount ?? members.length) - displayCount;
+
+    return SizedBox(
+      height: 28,
+      width: (displayCount * 14.0) + (extraCount > 0 ? 24.0 : 0) + 14.0, // Fixed width to align right properly
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.centerRight,
+        children: [
+          for (int i = 0; i < displayCount; i++)
+            Positioned(
+              right: i * 14.0 + (extraCount > 0 ? 20.0 : 0),
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                ),
+                child: CircleAvatar(
+                  radius: 12,
+                  backgroundImage: members[displayCount - 1 - i].avatarUrl != null 
+                      ? NetworkImage(members[displayCount - 1 - i].avatarUrl!) 
+                      : null,
+                  backgroundColor: Colors.grey.shade300,
+                  child: members[displayCount - 1 - i].avatarUrl == null 
+                      ? Text(members[displayCount - 1 - i].name?.substring(0, 1).toUpperCase() ?? "?", style: const TextStyle(fontSize: 10, color: Colors.black))
+                      : null,
+                ),
+              ),
+            ),
+          if (extraCount > 0)
+            Positioned(
+              right: 0,
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                  color: AppColors.primaryBackgroundLight,
+                ),
+                child: CircleAvatar(
+                  radius: 12,
+                  backgroundColor: AppColors.primaryBackgroundLight,
+                  child: Text("+$extraCount", style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.primaryDark)),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _showTripOptions(BuildContext context, dynamic trip) {
+    Get.bottomSheet(
+      Container(
+        padding: EdgeInsets.only(top: 16, left: 0, right: 0, bottom: 16 + MediaQuery.of(context).padding.bottom),
+        decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(trip.name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Divider(),
+            ListTile(
+              leading: Icon(Icons.edit, color: Colors.blue),
+              title: const Text("Sửa thông tin"),
+              onTap: () {
+                Get.back();
+                Get.dialog(EditTripDialog(trip: trip, isFromHome: true));
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.delete, color: Colors.red),
+              title: const Text("Xóa chuyến đi", style: TextStyle(color: Colors.red)),
+              onTap: () {
+                Get.back();
+                _confirmDeleteTrip(trip);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _confirmDeleteTrip(dynamic trip) {
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text("Xóa chuyến đi?", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20), textAlign: TextAlign.center),
+        content: const Text("Chuyến đi này sẽ bị xóa. Bạn vẫn có thể phục hồi lại trong Thùng rác.", textAlign: TextAlign.center, style: TextStyle(fontSize: 15)),
+        actionsPadding: const EdgeInsets.only(bottom: 16, right: 16, left: 16),
+        actionsAlignment: MainAxisAlignment.spaceEvenly,
+        actions: [
+          OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.red, 
+              side: BorderSide(color: Colors.red),
+              minimumSize: const Size(100, 44),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24))
+            ),
+            onPressed: () => Get.back(),
+            child: const Text("HỦY", style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red, 
+              foregroundColor: Colors.white,
+              minimumSize: const Size(100, 44),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24))
+            ),
+            onPressed: () async {
+              Get.back();
+              final result = await TripRepository().deleteTrip(trip.id!);
+              if (result.success) {
+                ToastUtil.showSuccess("Thành công", "Đã xóa chuyến đi");
+                controller.fetchTrips(isRefresh: true);
+              } else {
+                ToastUtil.showError("Lỗi", result.message ?? "Không thể xóa chuyến đi");
+              }
+            },
+            child: const Text("XÓA", style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
 
   void _showJoinTripDialog(BuildContext context) {
     final JoinTripController joinController = Get.put(JoinTripController());
@@ -373,7 +627,7 @@ class HomeScreen extends StatelessWidget {
                 Image.asset(
                   'assets/images/join_trip.gif',
                   height: 100,
-                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.group_add, size: 60, color: Colors.lightGreen),
+                  errorBuilder: (context, error, stackTrace) => Icon(Icons.group_add, size: 60, color: AppColors.primary),
                 ),
                 const SizedBox(height: 16),
                 const Text("Tham gia nhóm", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
@@ -386,7 +640,7 @@ class HomeScreen extends StatelessWidget {
                   decoration: InputDecoration(
                     labelText: "Mã mời (VD: abcd-1234)",
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    prefixIcon: const Icon(Icons.keyboard),
+                    prefixIcon: Icon(Icons.keyboard),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -395,10 +649,10 @@ class HomeScreen extends StatelessWidget {
                   style: OutlinedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 48),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      side: const BorderSide(color: Colors.lightGreen),
-                      foregroundColor: Colors.lightGreen
+                      side: BorderSide(color: AppColors.primary),
+                      foregroundColor: AppColors.primary
                   ),
-                  icon: const Icon(Icons.qr_code_scanner),
+                  icon: Icon(Icons.qr_code_scanner),
                   label: const Text("Quét mã QR"),
                   onPressed: () {
                     Get.to(() => Scaffold(
@@ -429,7 +683,7 @@ class HomeScreen extends StatelessWidget {
               children: [
                 const Center(child: Text("🎉 Tìm thấy chuyến đi!", style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 16))),
                 const Divider(height: 24),
-                Text("Tên chuyến: ${info.tripName}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                Text("Tên chuyến: ${info.tripName}", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                 const SizedBox(height: 8),
                 Text("Người tạo: ${info.createdByName}", style: TextStyle(color: Colors.grey[700])),
                 Text("Thành viên hiện tại: ${info.memberCount} người", style: TextStyle(color: Colors.grey[700])),
@@ -448,7 +702,7 @@ class HomeScreen extends StatelessWidget {
           Obx(() {
             if (joinController.inviteInfo.value == null) {
               return ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.lightGreen, foregroundColor: Colors.white),
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
                 onPressed: joinController.isLoading.value ? null : () => joinController.checkInviteCode(),
                 child: joinController.isLoading.value
                     ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
@@ -470,4 +724,6 @@ class HomeScreen extends StatelessWidget {
       Get.delete<JoinTripController>();
     });
   }
+
+  // Hàm _getIconData đã được chuyển vào TripCategoryUtil
 }

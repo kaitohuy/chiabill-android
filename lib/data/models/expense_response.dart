@@ -13,6 +13,11 @@ class ExpenseResponse {
   final int? categoryId;
   final String? categoryName;
   final String? categoryIcon;
+  final String? currency;
+  final double? exchangeRate;
+  final bool isFromFund;
+  final String? clientUuid;
+  final String? splitType;
 
   ExpenseResponse({
     required this.id,
@@ -24,6 +29,11 @@ class ExpenseResponse {
     this.categoryId,
     this.categoryName,
     this.categoryIcon,
+    this.currency,
+    this.exchangeRate,
+    this.isFromFund = false,
+    this.clientUuid,
+    this.splitType,
   });
 
   factory ExpenseResponse.fromJson(Map<String, dynamic> json) {
@@ -40,6 +50,11 @@ class ExpenseResponse {
       categoryId: json['categoryId'] as int?,
       categoryName: json['categoryName'] as String?,
       categoryIcon: json['categoryIcon'] as String?,
+      currency: json['currency'] as String?,
+      exchangeRate: json['exchangeRate'] != null ? (json['exchangeRate'] as num).toDouble() : null,
+      isFromFund: json['isFromFund'] as bool? ?? false,
+      clientUuid: json['clientUuid'] as String?,
+      splitType: json['splitType'] as String?,
     );
   }
 }

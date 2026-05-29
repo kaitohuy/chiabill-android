@@ -1,10 +1,9 @@
 import 'package:chiabill/utils/toast_util.dart';
 import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../data/network/api_service.dart';
-import '../screens/trip/trip_detail_screen.dart';
+import '../routes/app_pages.dart';
 
 class FcmController extends GetxController {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
@@ -62,7 +61,6 @@ class FcmController extends GetxController {
   // HÀM ĐIỀU HƯỚNG CHUNG (Cần bỏ comment dòng Get.to)
   // ==========================================
   void _handleNotificationClick(Map<String, dynamic> data) {
-    print("Dữ liệu đính kèm: $data");
     final String? type = data['type'];
     final String? referenceId = data['referenceId'];
 
@@ -71,7 +69,7 @@ class FcmController extends GetxController {
 
       if (type == "EXPENSE_CREATED" || type == "PAYMENT_REQUESTED" || type == "PAYMENT_APPROVED") {
         // Thực hiện điều hướng
-        Get.to(() => TripDetailScreen(tripId: tripId));
+        Get.toNamed(Routes.TRIP_DETAIL, arguments: tripId);
       }
       // Thêm các nhánh khác tùy ý bạn sau này...
     }

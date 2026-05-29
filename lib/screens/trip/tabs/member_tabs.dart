@@ -1,7 +1,10 @@
+import 'package:chiabill/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:cached_network_image/cached_network_image.dart' as org_cached;
 import '../../../controllers/trip_detail_controller.dart';
 import '../widgets/kick_member_dialog.dart';
+import '../../../utils/ui_util.dart';
 
 class MembersTab extends StatelessWidget {
   final TripDetailController controller;
@@ -21,7 +24,7 @@ class MembersTab extends StatelessWidget {
             // 🌟 BỌC GESTURE DETECTOR ĐỂ BẮT CLICK KHOẢNG TRỐNG
             child: GestureDetector(
               behavior: HitTestBehavior.translucent,
-              onTap: onAddMemberTap,
+              onTap: () => UIUtil.smartTap(context, onAddMemberTap),
               child: Builder(
                   builder: (context) {
                     // Xử lý Empty State
@@ -30,7 +33,7 @@ class MembersTab extends StatelessWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.people_outline, size: 80, color: Colors.blue.withOpacity(0.5)),
+                            Icon(Icons.people_outline, size: 80, color: Colors.blue.withValues(alpha:0.5)),
                             const SizedBox(height: 16),
                             const Text("Chưa có thành viên nào.\nChạm vào bất cứ đâu để thêm!", textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
                           ],
@@ -40,7 +43,7 @@ class MembersTab extends StatelessWidget {
 
                     // Danh sách thành viên
                     return RefreshIndicator(
-                        color: Colors.lightGreen,
+                        color: AppColors.primary,
                         onRefresh: () async => controller.fetchData(),
                         child: ListView.builder(
                           physics: const AlwaysScrollableScrollPhysics(),
@@ -64,10 +67,10 @@ class MembersTab extends StatelessWidget {
                                     alignment: Alignment.topRight,
                                     children: [
                                       CircleAvatar(
-                                        backgroundColor: member.isGhost ? Colors.grey[200] : Colors.lightGreen[100],
-                                        backgroundImage: (member.avatarUrl != null && member.avatarUrl!.isNotEmpty) ? NetworkImage(member.avatarUrl!) : null,
+                                        backgroundColor: member.isGhost ? Colors.grey[200] : AppColors.primaryBackground,
+                                        backgroundImage: (member.avatarUrl != null && member.avatarUrl!.isNotEmpty) ? org_cached.CachedNetworkImageProvider(member.avatarUrl!, maxWidth: 150, maxHeight: 150) : null,
                                         child: (member.avatarUrl == null || member.avatarUrl!.isEmpty)
-                                            ? (member.isGhost ? const Icon(Icons.visibility_off, color: Colors.grey, size: 20) : Text(memberInitial, style: const TextStyle(color: Colors.lightGreen, fontWeight: FontWeight.bold)))
+                                            ? (member.isGhost ? Icon(Icons.visibility_off, color: Colors.grey, size: 10) : Text(memberInitial, style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)))
                                             : null,
                                       ),
                                       if (isMemberOwner) const Text("👑", style: TextStyle(fontSize: 16)),
@@ -76,14 +79,14 @@ class MembersTab extends StatelessWidget {
                                   title: Row(
                                       children: [
                                         Expanded(
-                                            child: Text(member.name ?? "Ẩn danh", style: const TextStyle(fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis)
+                                            child: Text(member.name ?? "Ẩn danh", style: TextStyle(fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis)
                                         ),
                                         if (isDisabled)
                                           const Text(" (Tạm ngưng)", style: TextStyle(fontSize: 10, color: Colors.red, fontWeight: FontWeight.bold))
                                       ]
                                   ),
                                   subtitle: Text(member.isGhost ? "Người dùng ảo (Ghost)" : "Thành viên app"),
-                                  trailing: const Icon(Icons.settings, color: Colors.grey, size: 20),
+                                  trailing: Icon(Icons.settings, color: Colors.grey, size: 22),
 
                                   // 🌟 MENU ADMIN QUẢN LÝ THÀNH VIÊN KHI BẤM VÀO
                                   onTap: () {
@@ -94,11 +97,11 @@ class MembersTab extends StatelessWidget {
                                           child: Column(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              Text(member.name ?? "Thành viên", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                                              Text(member.name ?? "Thành viên", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
                                               const SizedBox(height: 16),
 
                                               ListTile(
-                                                  leading: const Icon(Icons.email, color: Colors.blue),
+                                                  leading: Icon(Icons.email, color: Colors.blue),
                                                   title: const Text("Email / Tài khoản"),
                                                   subtitle: Text(member.email ?? "Không có thông tin")
                                               ),
@@ -109,9 +112,9 @@ class MembersTab extends StatelessWidget {
                                                 const SizedBox(height: 8),
 
                                                 ListTile(
-                                                    leading: const Icon(Icons.swap_horiz, color: Colors.blue),
+                                                    leading: Icon(Icons.swap_horiz, color: Colors.blue),
                                                     title: const Text("Chuyển quyền Chủ phòng"),
-                                                    onTap: () { Get.back(); controller.transferOwner(member.id!); }
+                                                    onTap: () { Get.back(); controller.transferOwner(member.id); }
                                                 ),
                                                 ListTile(
                                                     leading: Icon(isDisabled ? Icons.play_arrow : Icons.pause, color: Colors.orange),
@@ -119,22 +122,21 @@ class MembersTab extends StatelessWidget {
                                                     onTap: () {
                                                       Get.back();
                                                       if (isDisabled) {
-                                                        controller.activateMember(member.id!);
+                                                        controller.activateMember(member.id);
                                                       } else {
-                                                        controller.disableMember(member.id!);
+                                                        controller.disableMember(member.id);
                                                       }
                                                     }
                                                 ),
                                                 ListTile(
-                                                    leading: const Icon(Icons.person_remove, color: Colors.red),
+                                                    leading: Icon(Icons.person_remove, color: Colors.red),
                                                     title: const Text("Đuổi khỏi nhóm", style: TextStyle(color: Colors.red)),
                                                     onTap: () {
-                                                      Get.back();
-                                                      Get.back();
+                                                      Get.back(); // Đóng bottom sheet
                                                       Get.dialog(
                                                           KickMemberDialog(
                                                               userName: member.name ?? "Thành viên",
-                                                              onConfirm: (forgive) => controller.kickMember(member.id!, forgive)
+                                                              onConfirm: (forgive) => controller.kickMember(member.id, forgive)
                                                           )
                                                       );
                                                     }
@@ -165,20 +167,45 @@ class MembersTab extends StatelessWidget {
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.red,
-                      side: const BorderSide(color: Colors.red),
+                      side: BorderSide(color: Colors.red),
                       padding: const EdgeInsets.symmetric(vertical: 14)
                   ),
-                  icon: const Icon(Icons.exit_to_app),
+                  icon: Icon(Icons.exit_to_app),
                   label: const Text("Rời nhóm", style: TextStyle(fontWeight: FontWeight.bold)),
                   onPressed: () {
-                    Get.defaultDialog(
-                      title: "Rời nhóm",
-                      middleText: "Bạn chắc chắn muốn rời khỏi nhóm này?",
-                      textConfirm: "XÁC NHẬN",
-                      textCancel: "HỦY",
-                      confirmTextColor: Colors.white,
-                      buttonColor: Colors.orange,
-                      onConfirm: () => controller.leaveTrip(),
+                    Get.dialog(
+                      AlertDialog(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        title: const Text("Rời nhóm?", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20), textAlign: TextAlign.center),
+                        content: const Text("Bạn chắc chắn muốn rời khỏi nhóm này? \n(Dữ liệu chi tiêu của bạn trong nhóm vẫn sẽ được giữ lại cho các thành viên khác)", textAlign: TextAlign.center, style: TextStyle(fontSize: 15)),
+                        actionsPadding: const EdgeInsets.only(bottom: 16, right: 16, left: 16),
+                        actionsAlignment: MainAxisAlignment.spaceEvenly,
+                        actions: [
+                          OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.orange, 
+                              side: BorderSide(color: Colors.orange),
+                              minimumSize: const Size(100, 44),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24))
+                            ),
+                            onPressed: () => Get.back(),
+                            child: const Text("HỦY", style: TextStyle(fontWeight: FontWeight.bold)),
+                          ),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.orange, 
+                              foregroundColor: Colors.white,
+                              minimumSize: const Size(100, 44),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24))
+                            ),
+                            onPressed: () {
+                              Get.back();
+                              controller.leaveTrip();
+                            },
+                            child: const Text("XÁC NHẬN", style: TextStyle(fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ),
                     );
                   },
                 ),

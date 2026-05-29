@@ -1,210 +1,142 @@
 import 'package:chiabill/utils/toast_util.dart';
 import 'package:chiabill/controllers/profile_controller.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import '../data/models/category_stat_response.dart';
-import '../data/models/expense_category_respone.dart';
-import '../data/models/payment_response.dart';
-import '../data/models/trip_response.dart';
-import '../data/models/expense_response.dart';
-import '../data/models/settlement_response.dart';
-import '../data/repositories/category_repository.dart';
-import '../data/repositories/invitation_repository.dart';
-import '../data/repositories/payment_repository.dart';
-import '../data/repositories/trip_repository.dart';
-import '../data/repositories/expense_repository.dart';
-import '../data/repositories/settlement_repository.dart';
-import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 import 'package:chiabill/utils/loading_util.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+import '../data/models/trip_response.dart';
+import '../services/trip_service.dart';
 import 'home_controller.dart';
+import 'trip_expense_controller.dart';
+import 'trip_settlement_controller.dart';
+import 'trip_history_controller.dart';
+import '../services/offline_sync_service.dart';
 
 class TripDetailController extends GetxController {
   final int tripId;
   TripDetailController(this.tripId);
 
-  final TripRepository _tripRepo = TripRepository();
-  final ExpenseRepository _expenseRepo = ExpenseRepository();
-  final SettlementRepository _settlementRepo = SettlementRepository();
-  final InvitationRepository _invitationRepo = InvitationRepository();
-  final PaymentRepository _paymentRepo = PaymentRepository();
-  final CategoryRepository _categoryRepo = CategoryRepository();
+  final TripService _tripService = TripService();
 
   var isLoading = true.obs;
   var trip = Rxn<TripResponse>();
-  var expenses = <ExpenseResponse>[].obs;
-  var settlements = <SettlementResponse>[].obs;
-  var payments = <PaymentResponse>[].obs;
-
-  // BIẾN THỐNG KÊ MỚI
-  var categoryStats = <CategoryStatResponse>[].obs;
 
   var currentTab = 0.obs;
   var isAddingMember = false.obs;
   var activeInviteCode = "".obs;
-
-  // PHÂN TRANG & FILTER (Giữ nguyên các biến của bạn...)
-  var currentExpensePage = 0.obs;
-  var isExpenseLastPage = false.obs;
-  var isLoadingMoreExpenses = false.obs;
-  var currentPaymentPage = 0.obs;
-  var isPaymentLastPage = false.obs;
-  var isLoadingMorePayments = false.obs;
-  var searchKeyword = "".obs;
-  var filterCategoryId = RxnInt();
-  var filterPayerId = RxnInt();
-  var categories = <ExpenseCategoryResponse>[].obs;
-  var filterPaymentStatus = RxnString();
-  var filterPaymentFromUserId = RxnInt();
-  var filterPaymentToUserId = RxnInt();
+  var isSharingInvite = false.obs;
 
   @override
   void onInit() {
     super.onInit();
+    // Khởi tạo các controller con dùng chung tripId
+    Get.put(TripExpenseController(tripId), tag: tripId.toString());
+    Get.put(TripSettlementController(tripId), tag: tripId.toString());
+    Get.put(TripHistoryController(tripId), tag: tripId.toString());
+
+    if (Get.isRegistered<OfflineSyncService>()) {
+      ever(Get.find<OfflineSyncService>().syncTrigger, (_) {
+        if (!isClosed) fetchData(isSilent: true);
+      });
+    }
+
     fetchData();
   }
 
-  // CẬP NHẬT FETCH DATA: Thêm fetchStats vào danh sách đợi
-  Future<void> fetchData() async {
+  Future<void> transferOwner(int newOwnerId) async {
     isLoading.value = true;
-    await Future.wait([
-      fetchTripDetail(),
-      fetchCategories(),
-      fetchExpenses(isRefresh: true),
-      fetchSettlements(),
-      fetchActiveInvite(),
-      fetchPayments(isRefresh: true),
-      fetchStats(), // <--- THÊM DÒNG NÀY
-    ]);
+    final res = await _tripService.transferOwner(tripId, newOwnerId);
+    if (res.success) {
+      await fetchTripDetail();
+    }
     isLoading.value = false;
   }
 
-  // ==========================================
-  // HÀM LẤY DỮ LIỆU THỐNG KÊ BIỂU ĐỒ
-  // ==========================================
-  Future<void> fetchStats() async {
-    final result = await _expenseRepo.getTripStats(tripId);
-    if (result.success && result.data != null) {
-      categoryStats.value = result.data!;
+  Future<void> activateMember(int memberId) async {
+    isLoading.value = true;
+    final res = await _tripService.activateMember(tripId, memberId);
+    if (res.success) {
+      await fetchTripDetail();
     }
+    isLoading.value = false;
   }
 
-  Future<void> fetchCategories() async {
-    final result = await _categoryRepo.getCategories(tripId);
-    if (result.success && result.data != null) {
-      categories.value = result.data!;
+  Future<void> disableMember(int memberId) async {
+    isLoading.value = true;
+    final res = await _tripService.disableMember(tripId, memberId);
+    if (res.success) {
+      await fetchTripDetail();
     }
+    isLoading.value = false;
   }
 
-  // ĐÃ CẬP NHẬT: Nhét các biến Filter vào hàm gọi Repo
-  Future<void> fetchExpenses({bool isRefresh = true}) async {
-    if (isRefresh) {
-      currentExpensePage.value = 0;
-      isExpenseLastPage.value = false;
-      isLoadingMoreExpenses.value = false;
-      // Nếu là refresh do filter, ta clear danh sách cũ ngay để UI hiện Loading tròn
-      if (expenses.isNotEmpty) expenses.clear();
-    } else {
-      if (isExpenseLastPage.value || isLoadingMoreExpenses.value) return;
-      isLoadingMoreExpenses.value = true;
+  Future<void> kickMember(int memberId, bool forgive) async {
+    isLoading.value = true;
+    final res = await _tripService.kickMember(tripId, memberId, forgive);
+    if (res.success) {
+      await fetchTripDetail();
     }
-
-    final result = await _expenseRepo.searchExpenses(
-      tripId: tripId,
-      page: currentExpensePage.value,
-      size: 20,
-      keyword: searchKeyword.value.trim().isNotEmpty ? searchKeyword.value.trim() : null,
-      categoryId: filterCategoryId.value,
-      payerId: filterPayerId.value,
-    );
-
-    if (result.success && result.data != null) {
-      if (isRefresh) {
-        expenses.value = result.data!.content;
-      } else {
-        expenses.addAll(result.data!.content);
-      }
-      currentExpensePage.value++;
-      isExpenseLastPage.value = result.data!.last;
-    }
-
-    if (!isRefresh) isLoadingMoreExpenses.value = false;
+    isLoading.value = false;
   }
 
-  // HÀM MỚI: Dùng để gọi khi user bấm "Áp dụng" trên UI Lọc
-  void applyExpenseFilter({String? keyword, int? catId, int? payerId}) {
-    if (keyword != null) searchKeyword.value = keyword;
-    filterCategoryId.value = catId;
-    filterPayerId.value = payerId;
-    fetchExpenses(isRefresh: true); // Load lại trang 1 với filter mới
+
+
+  @override
+  void onClose() {
+    Get.delete<TripExpenseController>(tag: tripId.toString());
+    Get.delete<TripSettlementController>(tag: tripId.toString());
+    Get.delete<TripHistoryController>(tag: tripId.toString());
+    super.onClose();
   }
 
-  // ==========================================
-  // LOGIC TẢI LỊCH SỬ GIAO DỊCH (CÓ PHÂN TRANG)
-  // ==========================================
-  Future<void> fetchPayments({bool isRefresh = true}) async {
-    if (isRefresh) {
-      currentPaymentPage.value = 0;
-      isPaymentLastPage.value = false;
-      isLoadingMorePayments.value = false;
-      if (payments.isNotEmpty) payments.clear(); // Clear để UI hiện loading tròn
-    } else {
-      if (isPaymentLastPage.value || isLoadingMorePayments.value) return;
-      isLoadingMorePayments.value = true;
+  Future<void> fetchData({bool isSilent = false}) async {
+    if (!isSilent) isLoading.value = true;
+    
+    await Future.wait([
+      fetchTripDetail(),
+      fetchActiveInvite(),
+    ]);
+
+    // Các Controller con tự load data theo onInit() của chúng, nhưng nếu gọi fetchData() thủ công thì có thể trigger reload
+    if (Get.isRegistered<TripExpenseController>(tag: tripId.toString())) {
+      Get.find<TripExpenseController>(tag: tripId.toString()).fetchExpenses(isSilent: true);
+      Get.find<TripExpenseController>(tag: tripId.toString()).fetchStats();
+    }
+    if (Get.isRegistered<TripSettlementController>(tag: tripId.toString())) {
+      Get.find<TripSettlementController>(tag: tripId.toString()).fetchSettlements();
+    }
+    if (Get.isRegistered<TripHistoryController>(tag: tripId.toString())) {
+      Get.find<TripHistoryController>(tag: tripId.toString()).fetchTripHistory(isSilent: true);
+      Get.find<TripHistoryController>(tag: tripId.toString()).fetchPayments(isSilent: true);
     }
 
-    final result = await _paymentRepo.getTripPaymentsPaginated(
-      tripId: tripId,
-      page: currentPaymentPage.value,
-      size: 20,
-      status: filterPaymentStatus.value,
-      fromUserId: filterPaymentFromUserId.value,
-      toUserId: filterPaymentToUserId.value,
-    );
-
-    if (result.success && result.data != null) {
-      if (isRefresh) {
-        payments.value = result.data!.content;
-      } else {
-        payments.addAll(result.data!.content);
-      }
-      currentPaymentPage.value++;
-      isPaymentLastPage.value = result.data!.last;
-    }
-
-    if (!isRefresh) isLoadingMorePayments.value = false;
+    if (!isSilent) isLoading.value = false;
   }
 
-  // HÀM MỚI ĐỂ ÁP DỤNG LỌC THANH TOÁN
-  void applyPaymentFilter({String? status, int? fromId, int? toId}) {
-    filterPaymentStatus.value = status;
-    filterPaymentFromUserId.value = fromId;
-    filterPaymentToUserId.value = toId;
-    fetchPayments(isRefresh: true);
+  Future<void> fetchTripDetail() async {
+    final result = await _tripService.getTripDetail(tripId);
+    if (result.success) trip.value = result.data;
   }
-  // Lấy mã đang hoạt động
+
   Future<void> fetchActiveInvite() async {
-    final result = await _invitationRepo.getActiveInvite(tripId);
+    final result = await _tripService.getActiveInvite(tripId);
     if (result.success && result.data != null) {
       activeInviteCode.value = result.data!.inviteCode;
     }
   }
 
-  // Tạo mã mới
   Future<void> generateInviteCode(String customCode) async {
     isLoading.value = true;
-    final result = await _invitationRepo.createInvite(
-        tripId,
-        customCode: customCode.isNotEmpty ? customCode : null
-    );
+    final result = await _tripService.generateInviteCode(tripId, customCode);
 
     if (result.success && result.data != null) {
       activeInviteCode.value = result.data!.inviteCode;
     } else {
-      // FE chỉ cần hiển thị đúng cái message BE trả về
       ToastUtil.showError("Lỗi", result.message ?? "Không thể tạo mã mời");
     }
     isLoading.value = false;
@@ -212,42 +144,36 @@ class TripDetailController extends GetxController {
 
   void copyToClipboard() {
     if (activeInviteCode.value.isNotEmpty) {
-      Clipboard.setData(ClipboardData(text: activeInviteCode.value));
-      ToastUtil.showSuccess("Thành công", "Đã copy mã: ${activeInviteCode.value}");
+      final String baseUrl = dotenv.env['BASE_URL'] ?? "https://chiabill-server.onrender.com";
+      final inviteUrl = "$baseUrl/join/${activeInviteCode.value}";
+      Clipboard.setData(ClipboardData(text: inviteUrl));
+      ToastUtil.showSuccess("Thành công", "Đã copy link mời tham gia");
     }
   }
 
-  Future<void> fetchTripDetail() async {
-    final result = await _tripRepo.getTripDetail(tripId);
-    if (result.success) trip.value = result.data;
-  }
+  Future<void> shareInviteLink() async {
+    if (isSharingInvite.value || activeInviteCode.value.isEmpty) return;
+    
+    isSharingInvite.value = true;
+    final String codeToShare = activeInviteCode.value;
+    final String baseUrl = dotenv.env['BASE_URL'] ?? "https://chiabill-server.onrender.com";
+    final String shareText = 'Mời bạn tham gia nhóm trên ChiaBill:\n$baseUrl/join/$codeToShare';
 
-  Future<void> fetchSettlements() async {
-    final result = await _settlementRepo.getSettlements(tripId);
-    if (result.success && result.data != null) settlements.value = result.data!;
-  }
-
-  Future<void> deleteExpense(int expenseId) async {
-    isLoading.value = true;
-    final result = await _expenseRepo.deleteExpense(expenseId);
-    if (result.success) {
-      ToastUtil.showSuccess("Thành công", "Đã xóa khoản chi");
-      fetchData();
-    } else {
-      ToastUtil.showError("Lỗi", result.message ?? "Không thể xóa");
-      isLoading.value = false;
+    try {
+      await SharePlus.instance.share(ShareParams(text: shareText));
+    } finally {
+      Future.delayed(const Duration(seconds: 1), () {
+        isSharingInvite.value = false;
+      });
     }
   }
 
-  // Thêm hàm này vào class TripDetailController
   Future<void> deleteTrip() async {
     isLoading.value = true;
-    final result = await _tripRepo.deleteTrip(tripId);
+    final result = await _tripService.deleteTrip(tripId);
     if (result.success) {
-      Get.back(); // Đóng dialog xác nhận
-      Get.back(); // Văng ra khỏi màn TripDetail, về lại Home
-
-      // Đợi hiệu ứng chuyển màn hình xong (300ms) rồi mới báo thành công
+      Get.back();
+      Get.back();
       Future.delayed(const Duration(milliseconds: 300), () {
         ToastUtil.showSuccess("Thông báo", "Đã xóa chuyến đi");
         if (Get.isRegistered<HomeController>()) {
@@ -261,51 +187,16 @@ class TripDetailController extends GetxController {
   }
 
   Future<void> addDirectMember(String input) async {
-    if (input.trim().isEmpty) return;
-
-    // Tự động phân loại Email hay SĐT
-    String email = "";
-    String phone = "";
-    if (input.contains("@")) {
-      email = input.trim();
-    } else {
-      phone = input.trim();
-    }
-
     isAddingMember.value = true;
-    final result = await _tripRepo.addDirectMember(tripId, email, phone);
+    final result = await _tripService.addDirectMember(tripId, input);
     isAddingMember.value = false;
 
     if (result.success) {
-      Get.back(); // Đóng dialog
-      ToastUtil.showSuccess("Thành công", result.message ?? "Đã thêm thành viên");
-      fetchData(); // Load lại data chuyến đi
+      Get.back();
+      ToastUtil.showSuccess("Thành công", "Đã thêm thành viên. Nhớ cập nhật khoản chi cũ nếu muốn họ gánh chung nhé!");
+      fetchData(isSilent: true);
     } else {
       ToastUtil.showError("Thất bại", result.message ?? "Không thể thêm");
-    }
-  }
-
-  Future<void> approvePayment(int paymentId) async {
-    isLoading.value = true;
-    final result = await _paymentRepo.approvePayment(paymentId);
-    if (result.success) {
-      ToastUtil.showSuccess("Thành công", "Đã xác nhận nhận tiền!");
-      fetchData(); // Load lại data để nợ được trừ đi
-    } else {
-      ToastUtil.showError("Lỗi", result.message ?? "Không thể duyệt");
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> rejectPayment(int paymentId) async {
-    isLoading.value = true;
-    final result = await _paymentRepo.rejectPayment(paymentId);
-    if (result.success) {
-      ToastUtil.showSuccess("Thành công", "Đã từ chối khoản thanh toán");
-      fetchData(); // Load lại data
-    } else {
-      ToastUtil.showError("Lỗi", result.message ?? "Không thể từ chối");
-      isLoading.value = false;
     }
   }
 
@@ -316,104 +207,77 @@ class TripDetailController extends GetxController {
     return GetStorage().read('userId');
   }
 
-  // Check xem có phải chủ phòng không
   bool get isOwner => trip.value?.ownerId != null && trip.value?.ownerId == currentUserId;
 
   Future<void> leaveTrip() async {
-    // 1. ĐÓNG DIALOG XÁC NHẬN NGAY LẬP TỨC TRƯỚC KHI GỌI MẠNG
-    if (Get.isDialogOpen == true) {
-      Get.back();
-    }
-
+    if (Get.isDialogOpen == true) Get.back();
     isLoading.value = true;
-    final result = await _tripRepo.leaveTrip(tripId);
+    final result = await _tripService.leaveTrip(tripId);
     isLoading.value = false;
-
     if (result.success) {
-      // 2. RỜI NHÓM THÀNH CÔNG THÌ MỚI VĂNG RA MÀN HÌNH CHÍNH
       Get.back();
       ToastUtil.showSuccess("Thành công", "Bạn đã rời khỏi nhóm");
       if (Get.isRegistered<HomeController>()) Get.find<HomeController>().fetchTrips();
     } else {
-      // 3. BÁO LỖI (CHẮC CHẮN DIALOG CŨ ĐÃ ĐÓNG RỒI NÊN KHÔNG SỢ ĐÈ NHAU)
       ToastUtil.showError("Không thể rời nhóm", result.message ?? "Lỗi máy chủ.");
     }
   }
 
-  Future<void> kickMember(int memberId, bool forgiveDebt) async {
-    // 1. ĐÓNG DIALOG CHỌN XÓA NỢ HAY GIỮ NỢ NGAY LẬP TỨC
-    if (Get.isDialogOpen == true) {
-      Get.back();
-    }
 
-    isLoading.value = true;
-    final result = await _tripRepo.kickMember(tripId, memberId, forgiveDebt);
-    isLoading.value = false;
 
-    if (result.success) {
-      ToastUtil.showSuccess("Thành công", "Đã xóa thành viên");
-      fetchData();
-    } else {
-      ToastUtil.showError("Lỗi", result.message ?? "Không thể xóa");
-    }
-  }
 
-  Future<void> transferOwner(int newOwnerId) async {
-    isLoading.value = true;
-    final result = await _tripRepo.transferOwner(tripId, newOwnerId);
-    if (result.success) {
-      ToastUtil.showSuccess("Thành công", "Đã chuyển quyền Chủ phòng");
-      fetchData(); // Load lại data
-    } else {
-      ToastUtil.showError("Lỗi", result.message ?? "Không thể chuyển quyền");
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> disableMember(int memberId) async {
-    isLoading.value = true;
-    final result = await _tripRepo.disableMember(tripId, memberId);
-    if (result.success) {
-      fetchData();
-    } else {
-      ToastUtil.showError("Lỗi", result.message ?? "Không thể vô hiệu hóa");
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> activateMember(int memberId) async {
-    isLoading.value = true;
-    final result = await _tripRepo.activateMember(tripId, memberId);
-    if (result.success) {
-      ToastUtil.showSuccess("Thành công", "Đã mở khóa thành viên");
-      fetchData();
-    } else {
-      ToastUtil.showError("Lỗi", result.message ?? "Không thể mở khóa");
-      isLoading.value = false;
-    }
-  }
-
-  // ==========================================
-  // XUẤT BÁO CÁO EXCEL / PDF
-  // ==========================================
-  Future<void> exportTrip(String format) async {
+  Future<void> exportTrip(
+    String format, {
+    bool includeDetails = false,
+    bool includeSettlement = false,
+  }) async {
     try {
       LoadingUtil.show();
-      final result = await _tripRepo.exportTripBytes(tripId, format);
+      final result = await _tripService.exportTripBytes(
+        tripId,
+        format,
+        includeDetails: includeDetails,
+        includeSettlement: includeSettlement,
+      );
       LoadingUtil.hide();
 
       if (result.success && result.data != null) {
-        // 1. Tìm đường dẫn lưu file tạm
+        final List<int> bytes = List<int>.from(result.data!);
+
+        // Sử dụng thư mục tạm an toàn để tránh crash Scoped Storage trên Android 11+
         final tempDir = await getTemporaryDirectory();
-        final fileName = "Báo_cáo_${trip.value?.name ?? 'ChuyenDi'}_$tripId.${format == 'excel' ? 'xlsx' : 'pdf'}";
+        final ext = format == 'excel' ? 'xlsx' : 'pdf';
+        final safeName = (trip.value?.name ?? 'ChuyenDi')
+            .replaceAll(RegExp(r'[^\w\s]'), '')
+            .replaceAll(' ', '_');
+        final fileName = "BaoCao_${safeName}_$tripId.$ext";
         final filePath = "${tempDir.path}/$fileName";
 
-        // 2. Ghi file ra bộ nhớ
         final file = File(filePath);
-        await file.writeAsBytes(result.data!);
+        await file.writeAsBytes(bytes, flush: true);
 
-        // 3. Chia sẻ file qua Share Sheet
-        await Share.shareXFiles([XFile(filePath)], text: 'Báo cáo chi tiêu chuyến đi: ${trip.value?.name}');
+        final savedSize = await file.length();
+        print('[Export] Saved $filePath — $savedSize bytes');
+
+        if (savedSize < 100) {
+          ToastUtil.showError("Lỗi xuất file", "File tải về bị lỗi ($savedSize bytes)");
+          return;
+        }
+
+        // Hiển thị thông báo mở hộp thoại chia sẻ
+        ToastUtil.showSuccess("Đã xuất báo cáo", "📁 Đang chuẩn bị chia sẻ tệp...");
+
+        // Mở share sheet để user có thể chia sẻ hoặc mở ngay
+        final mimeType = format == 'excel'
+            ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            : 'application/pdf';
+
+        await SharePlus.instance.share(
+          ShareParams(
+            text: 'Bao cao chi tieu chuyen di: ${trip.value?.name}',
+            files: [XFile(filePath, mimeType: mimeType)],
+          ),
+        );
       } else {
         ToastUtil.showError("Lỗi xuất file", result.message ?? "Không thể tải báo cáo");
       }

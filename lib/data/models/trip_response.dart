@@ -11,7 +11,10 @@ class TripResponse {
   final int? ownerId;
   final List<TripMemberResponse>? members;
   final String? createdAt;
-  final int? memberCount; // THÊM DÒNG NÀY
+  final String? startDate;
+  final int? memberCount;
+  final String? categoryName;
+  final String? categoryIcon;
 
   TripResponse({
     required this.id,
@@ -23,7 +26,10 @@ class TripResponse {
     this.ownerId,
     this.members,
     this.createdAt,
-    this.memberCount, // THÊM VÀO CONSTRUCTOR
+    this.startDate,
+    this.memberCount,
+    this.categoryName,
+    this.categoryIcon,
   });
 
   factory TripResponse.fromJson(Map<String, dynamic> json) {
@@ -39,7 +45,10 @@ class TripResponse {
           ? (json['members'] as List).map((i) => TripMemberResponse.fromJson(i)).toList()
           : null,
       createdAt: json['createdAt'] as String?,
-      memberCount: json['memberCount'] as int?, // THÊM VÀO PARSE JSON
+      startDate: json['startDate'] as String?,
+      memberCount: json['memberCount'] as int?,
+      categoryName: json['categoryName'] as String?,
+      categoryIcon: json['categoryIcon'] as String?,
     );
   }
 }

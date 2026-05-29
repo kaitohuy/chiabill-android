@@ -8,28 +8,22 @@ import '../network/api_service.dart';
 class PaymentRepository {
   final ApiService _apiService = ApiService();
 
-  Future<ApiResponse<PaymentResponse>> createPayment(int tripId, int toUserId, double amount, File proofFile) async {
+  Future<ApiResponse<PaymentResponse>> createPayment(int tripId, int toUserId, double amount, File? proofFile) async {
     try {
-      String fileName = proofFile.path.split('/').last;
-      FormData formData = FormData.fromMap({
+      Map<String, dynamic> mapData = {
         "toUserId": toUserId,
         "amount": amount,
-        "proof": await MultipartFile.fromFile(proofFile.path, filename: fileName),
-      });
+      };
+      if (proofFile != null) {
+        String fileName = proofFile.path.split('/').last;
+        mapData["proof"] = await MultipartFile.fromFile(proofFile.path, filename: fileName);
+      }
+      FormData formData = FormData.fromMap(mapData);
 
       final response = await _apiService.dio.post("/api/trips/$tripId/payments", data: formData);
       return ApiResponse<PaymentResponse>.fromJson(response.data, (data) => PaymentResponse.fromJson(data));
-    } on DioException catch (e) {
-      if (e.response != null && e.response?.data != null) {
-        try {
-          return ApiResponse.fromJson(e.response!.data, (data) => PaymentResponse.fromJson(data));
-        } catch (_) {
-          return ApiResponse(success: false, message: "Lỗi máy chủ: ${e.response?.statusCode}");
-        }
-      }
-      return ApiResponse(success: false, message: "Lỗi kết nối mạng");
     } catch (e) {
-      return ApiResponse(success: false, message: "Đã xảy ra lỗi: $e");
+      return ApiResponse.withError(e, defaultMessage: "Lỗi tạo giao dịch");
     }
   }
 
@@ -42,7 +36,7 @@ class PaymentRepository {
             (data) => (data as List).map((e) => PaymentResponse.fromJson(e)).toList(),
       );
     } catch (e) {
-      return ApiResponse(success: false, message: "Lỗi tải giao dịch: $e");
+      return ApiResponse.withError(e, defaultMessage: "Lỗi tải giao dịch");
     }
   }
 
@@ -51,13 +45,8 @@ class PaymentRepository {
     try {
       final response = await _apiService.dio.put("/api/payments/$paymentId/approve");
       return ApiResponse.fromJson(response.data, (data) => data as String);
-    } on DioException catch (e) {
-      if (e.response != null && e.response?.data != null) {
-        return ApiResponse.fromJson(e.response!.data, (data) => data as String);
-      }
-      return ApiResponse(success: false, message: "Lỗi kết nối");
     } catch (e) {
-      return ApiResponse(success: false, message: "Lỗi: $e");
+      return ApiResponse.withError(e, defaultMessage: "Lỗi duyệt giao dịch");
     }
   }
 
@@ -66,13 +55,8 @@ class PaymentRepository {
     try {
       final response = await _apiService.dio.put("/api/payments/$paymentId/reject");
       return ApiResponse.fromJson(response.data, (data) => data as String);
-    } on DioException catch (e) {
-      if (e.response != null && e.response?.data != null) {
-        return ApiResponse.fromJson(e.response!.data, (data) => data as String);
-      }
-      return ApiResponse(success: false, message: "Lỗi kết nối");
     } catch (e) {
-      return ApiResponse(success: false, message: "Lỗi: $e");
+      return ApiResponse.withError(e, defaultMessage: "Lỗi từ chối giao dịch");
     }
   }
 
@@ -83,6 +67,8 @@ class PaymentRepository {
     String? status,
     int? fromUserId, // THÊM NÀY
     int? toUserId,   // THÊM NÀY
+    String? startDate,
+    String? endDate,
   }) async {
     try {
       Map<String, dynamic> queryParams = {
@@ -93,6 +79,8 @@ class PaymentRepository {
       if (status != null && status.isNotEmpty) queryParams['status'] = status;
       if (fromUserId != null) queryParams['fromUserId'] = fromUserId;
       if (toUserId != null) queryParams['toUserId'] = toUserId;
+      if (startDate != null) queryParams['startDate'] = startDate;
+      if (endDate != null) queryParams['endDate'] = endDate;
 
       final response = await _apiService.dio.get(
         "/api/trip/$tripId/search", // Nhớ check lại route này nếu BE bạn đổi thành /api/payments/trip/...
@@ -107,7 +95,34 @@ class PaymentRepository {
         ),
       );
     } catch (e) {
-      return ApiResponse(success: false, message: "Lỗi tải lịch sử giao dịch: $e");
+      return ApiResponse.withError(e, defaultMessage: "Lỗi tải lịch sử giao dịch");
+    }
+  }
+
+  Future<ApiResponse<PaymentResponse>> createBatchPayOnBehalf({
+    required int tripId,
+    required int toUserId,
+    required double totalAmount,
+    required List<int> onBehalfOfUserIds,
+    required List<double> onBehalfOfAmounts,
+    File? proofFile,
+  }) async {
+    try {
+      Map<String, dynamic> mapData = {
+        "toUserId": toUserId,
+        "totalAmount": totalAmount,
+        "onBehalfOfUserIds": onBehalfOfUserIds.join(','),
+        "onBehalfOfAmounts": onBehalfOfAmounts.join(','),
+      };
+      if (proofFile != null) {
+        String fileName = proofFile.path.split('/').last;
+        mapData["proof"] = await MultipartFile.fromFile(proofFile.path, filename: fileName);
+      }
+      FormData formData = FormData.fromMap(mapData);
+      final response = await _apiService.dio.post("/api/trips/$tripId/payments/batch-behalf", data: formData);
+      return ApiResponse<PaymentResponse>.fromJson(response.data, (data) => PaymentResponse.fromJson(data));
+    } catch (e) {
+      return ApiResponse.withError(e, defaultMessage: "Lỗi thanh toán hộ");
     }
   }
 }

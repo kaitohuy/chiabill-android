@@ -1,3 +1,4 @@
+import 'package:chiabill/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
@@ -20,26 +21,22 @@ class WelcomeScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // ==========================================
-                // 1. LOGO APP (Hiệu ứng xuất hiện + Lơ lửng)
+                // 1. LOGO APP (Hiệu ứng xuất hiện)
                 // ==========================================
                 Image.asset(
-                  'assets/images/logo.png',
-                  width: 120,
-                  height: 120,
+                  'assets/images/home.gif',
+                  width: 180,
+                  height: 180,
+                  fit: BoxFit.contain,
                   errorBuilder: (context, error, stackTrace) => Container(
-                    width: 120, height: 120,
                     decoration: BoxDecoration(
-                      color: Colors.lightGreen.withValues(alpha: 0.1),
+                      color: AppColors.primary,
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.account_balance_wallet_rounded, size: 60, color: Colors.lightGreen),
                   ),
                 )
-                // Lớp Animate 1: Hiệu ứng bay lơ lửng (Lặp vô hạn)
-                    .animate(onPlay: (controller) => controller.repeat(reverse: true))
-                    .moveY(begin: -5, end: 5, duration: const Duration(seconds: 2), curve: Curves.easeInOut)
-
-                // Lớp Animate 2: Hiệu ứng xuất hiện lúc mới mở app (Chạy 1 lần)
+                // Lớp Animate: Hiệu ứng xuất hiện lúc mới mở app (Chạy 1 lần)
                     .animate()
                     .fadeIn(duration: const Duration(milliseconds: 800), curve: Curves.easeOut)
                     .slideY(begin: 0.2, end: 0, duration: const Duration(milliseconds: 800), curve: Curves.easeOut),
@@ -49,12 +46,12 @@ class WelcomeScreen extends StatelessWidget {
                 // ==========================================
                 // 2. TÊN APP (Xuất hiện trễ hơn Logo một chút)
                 // ==========================================
-                const Text(
+                Text(
                   "Chill Travel",
                   style: TextStyle(
                     fontSize: 42,
                     fontWeight: FontWeight.w900,
-                    color: Colors.lightGreen,
+                    color: AppColors.primary,
                     letterSpacing: 1.2,
                   ),
                 )
@@ -96,7 +93,7 @@ class WelcomeScreen extends StatelessWidget {
                         height: 56,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.lightGreen,
+                            backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
                             elevation: 0,
                             shape: RoundedRectangleBorder(
@@ -105,7 +102,7 @@ class WelcomeScreen extends StatelessWidget {
                           ),
                           onPressed: isLoading ? null : () => authController.loginAnonymous(),
                           child: isLoading
-                              ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
+                              ? const Text("ĐANG XỬ LÝ...", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white70))
                               : const Text(
                               "DÙNG ẨN DANH NGAY",
                               style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)

@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:chiabill/utils/loading_util.dart';
 import 'package:chiabill/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -20,12 +19,24 @@ class CreatePaymentController extends GetxController {
 
   var selectedImage = Rxn<File>();
   var isLoading = false.obs;
+  var overpayWarning = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
     // Khởi tạo mặc định số tiền = đúng số tiền còn nợ
     amountController.text = CurrencyUtils.formatNumber(settlement.amount);
+    
+    // Cảnh báo nhập thừa tiền
+    amountController.addListener(() {
+      double? val = double.tryParse(amountController.text.replaceAll(',', ''));
+      if (val != null && val > settlement.amount) {
+        double excess = val - settlement.amount;
+        overpayWarning.value = '⚠️ Bạn đang chuyển thừa ${CurrencyUtils.formatNumber(excess)}đ! Kiểm tra lại hoặc bo cho chủ nợ hihi 😄';
+      } else {
+        overpayWarning.value = '';
+      }
+    });
   }
 
   Future<void> pickImage() async {
@@ -42,35 +53,41 @@ class CreatePaymentController extends GetxController {
       ToastUtil.showWarning("Lỗi", "Số tiền không hợp lệ");
       return;
     }
-    if (selectedImage.value == null) {
-      ToastUtil.showWarning("Lỗi", "Vui lòng đính kèm ảnh minh chứng giao dịch!");
-      return;
-    }
 
     isLoading.value = true;
-    LoadingUtil.show();
     try {
-      final result = await _repo.createPayment(tripId, settlement.toUserId!, amount, selectedImage.value!);
+      final result = await _repo.createPayment(tripId, settlement.toUserId!, amount, selectedImage.value);
 
       if (result.success) {
-        // ĐÓNG NGAY khi thành công
-        Get.back(); // Đóng BottomSheet QR Code
-        Get.back(); // Đóng BottomSheet Nhập tiền
+        // Đóng ngay lập tức (Xóa QR + Xóa form)
+        Get.back(); 
+        Get.back(); 
 
         ToastUtil.showSuccess("Thành công", "Đã gửi yêu cầu thanh toán. Đang chờ xác nhận!");
 
+        // Xóa thông tin cũ
+        amountController.clear();
+        selectedImage.value = null;
+
         // Load lại Tab Thanh toán
         if (Get.isRegistered<TripDetailController>(tag: tripId.toString())) {
-          Get.find<TripDetailController>(tag: tripId.toString()).fetchData();
+          Get.find<TripDetailController>(tag: tripId.toString()).fetchData(isSilent: true);
         }
       } else {
         ToastUtil.showError("Lỗi", result.message ?? "Không thể gửi minh chứng");
       }
     } catch (e) {
-      ToastUtil.showError("Lỗi hệ thống", "Đã xảy ra lỗi không xác định");
+      ToastUtil.showError("Lỗi hệ thống", e.toString());
     } finally {
       isLoading.value = false;
-      LoadingUtil.hide();
     }
+  }
+
+  @override
+  void onClose() {
+    Future.delayed(const Duration(milliseconds: 500), () {
+      amountController.dispose();
+    });
+    super.onClose();
   }
 }

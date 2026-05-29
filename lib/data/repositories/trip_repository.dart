@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import '../models/api_response.dart';
 import '../models/page_response.dart';
 import '../models/trip_response.dart';
+import '../models/trip_history_response.dart';
 import '../network/api_service.dart';
 
 class TripRepository {
@@ -12,19 +13,20 @@ class TripRepository {
   // Thêm hàm lấy chuyến đi có phân trang và search
   Future<ApiResponse<PageResponse<TripResponse>>> getMyTripsPaginated({
     String? keyword,
+    int? month,
+    int? year,
     int page = 0,
-    int size = 10, // Chuyến đi cái Card to nên load 10 cái 1 lần là vừa
+    int size = 10,
   }) async {
     try {
-      Map<String, dynamic> queryParams = {
+      final queryParams = {
         'page': page,
         'size': size,
-        'sort': 'createdAt,desc', // Mới nhất xếp lên đầu
+        'sort': 'createdAt,desc',
+        if (keyword != null && keyword.isNotEmpty) 'keyword': keyword,
+        if (month != null) 'month': month,
+        if (year != null) 'year': year,
       };
-
-      if (keyword != null && keyword.trim().isNotEmpty) {
-        queryParams['keyword'] = keyword.trim();
-      }
 
       final response = await _apiService.dio.get("/api/trips/search", queryParameters: queryParams);
 
@@ -36,7 +38,7 @@ class TripRepository {
         ),
       );
     } catch (e) {
-      return ApiResponse(success: false, message: "Lỗi tải danh sách chuyến đi: $e");
+      return ApiResponse.withError(e, defaultMessage: "Lỗi tải danh sách chuyến đi");
     }
   }
 
@@ -48,7 +50,7 @@ class TripRepository {
             (data) => (data as List).map((item) => TripResponse.fromJson(item)).toList(),
       );
     } catch (e) {
-      return ApiResponse(success: false, message: "Lỗi tải dữ liệu: $e");
+      return ApiResponse.withError(e, defaultMessage: "Lỗi tải dữ liệu");
     }
   }
 
@@ -63,7 +65,7 @@ class TripRepository {
             (data) => TripResponse.fromJson(data),
       );
     } catch (e) {
-      return ApiResponse(success: false, message: "Lỗi tạo chuyến đi: $e");
+      return ApiResponse.withError(e, defaultMessage: "Lỗi tạo chuyến đi");
     }
   }
 
@@ -75,7 +77,7 @@ class TripRepository {
             (data) => TripResponse.fromJson(data),
       );
     } catch (e) {
-      return ApiResponse(success: false, message: "Lỗi tải chi tiết: $e");
+      return ApiResponse.withError(e, defaultMessage: "Lỗi tải chi tiết");
     }
   }
 
@@ -88,18 +90,19 @@ class TripRepository {
             (data) => TripResponse.fromJson(data),
       );
     } catch (e) {
-      return ApiResponse(success: false, message: "Lỗi tham gia: $e");
+      return ApiResponse.withError(e, defaultMessage: "Lỗi tham gia");
     }
   }
 
   // ==================================================
   // ĐÃ CẬP NHẬT: Thêm tham số totalBudget vào hàm Sửa chuyến đi
   // ==================================================
-  Future<ApiResponse<TripResponse>> updateTrip(int tripId, String name, String? description, double? totalBudget) async {
+  Future<ApiResponse<TripResponse>> updateTrip(int tripId, String name, String? description, double? totalBudget, String? startDate) async {
     try {
       Map<String, dynamic> requestData = {
         "name": name,
-        "description": description ?? ""
+        "description": description ?? "",
+        "startDate": startDate
       };
 
       // Nếu có sửa ngân sách thì nhét thêm vào requestData
@@ -113,7 +116,7 @@ class TripRepository {
       );
       return ApiResponse<TripResponse>.fromJson(response.data, (data) => TripResponse.fromJson(data));
     } catch (e) {
-      return ApiResponse(success: false, message: "Lỗi cập nhật chuyến đi: $e");
+      return ApiResponse.withError(e, defaultMessage: "Lỗi cập nhật chuyến đi");
     }
   }
 
@@ -121,9 +124,39 @@ class TripRepository {
   Future<ApiResponse<void>> deleteTrip(int tripId) async {
     try {
       await _apiService.dio.delete("/api/trips/$tripId");
-      return ApiResponse(success: true);
+      return ApiResponse(success: true, message: "Đã chuyển vào thùng rác");
     } catch (e) {
-      return ApiResponse(success: false, message: "Lỗi xóa chuyến đi: $e");
+      return ApiResponse.withError(e, defaultMessage: "Lỗi xóa chuyến đi");
+    }
+  }
+
+  Future<ApiResponse<List<TripResponse>>> getTrashTrips() async {
+    try {
+      final response = await _apiService.dio.get("/api/trips/trash");
+      return ApiResponse<List<TripResponse>>.fromJson(
+        response.data,
+        (data) => (data as List).map((i) => TripResponse.fromJson(i)).toList(),
+      );
+    } catch (e) {
+      return ApiResponse.withError(e, defaultMessage: "Lỗi tải thùng rác");
+    }
+  }
+
+  Future<ApiResponse<void>> restoreTrip(int tripId) async {
+    try {
+      await _apiService.dio.put("/api/trips/$tripId/restore");
+      return ApiResponse(success: true, message: "Phục hồi thành công");
+    } catch (e) {
+      return ApiResponse.withError(e, defaultMessage: "Lỗi phục hồi chuyến đi");
+    }
+  }
+
+  Future<ApiResponse<void>> forceDeleteTrip(int tripId) async {
+    try {
+      await _apiService.dio.delete("/api/trips/$tripId/force");
+      return ApiResponse(success: true, message: "Đã xóa vĩnh viễn");
+    } catch (e) {
+      return ApiResponse.withError(e, defaultMessage: "Lỗi xóa vĩnh viễn");
     }
   }
 
@@ -136,22 +169,20 @@ class TripRepository {
       final response = await _apiService.dio.post("/api/trips/$tripId/members/add", data: data);
       return ApiResponse.fromJson(response.data, (data) => data);
 
-    } on DioException catch (e) {
-      // 1. NẾU LÀ LỖI TỪ BACKEND (Có status code 400, 401, 500...)
-      if (e.response != null && e.response?.data != null) {
-        try {
-          // Bóc tách JSON lỗi từ BE trả về (chứa câu tiếng Việt của bạn)
-          return ApiResponse.fromJson(e.response!.data, (data) => data);
-        } catch (_) {
-          return ApiResponse(success: false, message: "Lỗi máy chủ: ${e.response?.statusCode}");
-        }
-      }
-      // 2. NẾU LÀ LỖI MẠNG (Không có kết nối, timeout...)
-      return ApiResponse(success: false, message: "Vui lòng kiểm tra lại kết nối mạng.");
-
     } catch (e) {
-      // 3. CÁC LỖI KHÁC CỦA FLUTTER
-      return ApiResponse(success: false, message: "Đã xảy ra lỗi: $e");
+      return ApiResponse.withError(e, defaultMessage: "Lỗi thêm thành viên");
+    }
+  }
+
+  Future<ApiResponse<dynamic>> importMembers(int tripId, List<int> userIds) async {
+    try {
+      final response = await _apiService.dio.post(
+        "/api/trips/$tripId/members/import", 
+        data: {"userIds": userIds}
+      );
+      return ApiResponse.fromJson(response.data, (data) => data);
+    } catch (e) {
+      return ApiResponse.withError(e, defaultMessage: "Lỗi nhập thành viên");
     }
   }
 
@@ -160,14 +191,8 @@ class TripRepository {
     try {
       final response = await _apiService.dio.post("/api/trips/$tripId/leave");
       return ApiResponse.fromJson(response.data, (data) => data);
-    } on DioException catch (e) {
-      // KIỂM TRA XEM BE CÓ TRẢ VỀ JSON CHUẨN KHÔNG
-      if (e.response?.data != null && e.response?.data is Map<String, dynamic>) {
-        return ApiResponse.fromJson(e.response!.data, (data) => data);
-      }
-      return ApiResponse(success: false, message: "Lỗi máy chủ (Code: ${e.response?.statusCode})");
     } catch (e) {
-      return ApiResponse(success: false, message: "Đã xảy ra lỗi hệ thống");
+      return ApiResponse.withError(e, defaultMessage: "Lỗi rời nhóm");
     }
   }
 
@@ -177,13 +202,8 @@ class TripRepository {
     try {
       final response = await _apiService.dio.put("/api/trips/$tripId/transfer-owner", data: {"newOwnerId": newOwnerId});
       return ApiResponse.fromJson(response.data, (data) => data);
-    } on DioException catch (e) {
-      if (e.response?.data != null && e.response?.data is Map<String, dynamic>) {
-        return ApiResponse.fromJson(e.response!.data, (data) => data);
-      }
-      return ApiResponse(success: false, message: "Lỗi máy chủ");
     } catch (e) {
-      return ApiResponse(success: false, message: "Lỗi hệ thống");
+      return ApiResponse.withError(e, defaultMessage: "Lỗi chuyển quyền");
     }
   }
 
@@ -192,13 +212,8 @@ class TripRepository {
     try {
       final response = await _apiService.dio.put("/api/trips/$tripId/members/$memberId/disable");
       return ApiResponse.fromJson(response.data, (data) => data);
-    } on DioException catch (e) {
-      if (e.response?.data != null && e.response?.data is Map<String, dynamic>) {
-        return ApiResponse.fromJson(e.response!.data, (data) => data);
-      }
-      return ApiResponse(success: false, message: "Lỗi máy chủ");
     } catch (e) {
-      return ApiResponse(success: false, message: "Lỗi hệ thống");
+      return ApiResponse.withError(e, defaultMessage: "Lỗi tạm ngưng");
     }
   }
 
@@ -207,13 +222,8 @@ class TripRepository {
     try {
       final response = await _apiService.dio.delete("/api/trips/$tripId/members/$memberId?forgiveDebt=$forgiveDebt");
       return ApiResponse.fromJson(response.data, (data) => data);
-    } on DioException catch (e) {
-      if (e.response?.data != null && e.response?.data is Map<String, dynamic>) {
-        return ApiResponse.fromJson(e.response!.data, (data) => data);
-      }
-      return ApiResponse(success: false, message: "Lỗi máy chủ");
     } catch (e) {
-      return ApiResponse(success: false, message: "Lỗi hệ thống");
+      return ApiResponse.withError(e, defaultMessage: "Lỗi đuổi thành viên");
     }
   }
 
@@ -223,7 +233,7 @@ class TripRepository {
       final response = await _apiService.dio.put("/api/trips/$tripId/members/$memberId/active");
       return ApiResponse.fromJson(response.data, (data) => data);
     } catch (e) {
-      return ApiResponse(success: false, message: "Lỗi mở khóa: $e");
+      return ApiResponse.withError(e, defaultMessage: "Lỗi mở khóa");
     }
   }
 
@@ -237,20 +247,68 @@ class TripRepository {
         message: response.data['message'],
       );
     } catch (e) {
-      return ApiResponse(success: false, message: e.toString());
+      return ApiResponse.withError(e, defaultMessage: "Lỗi tải tổng quan tài chính");
     }
   }
 
-  // 6. Xuất báo cáo Excel/PDF
-  Future<ApiResponse<List<int>>> exportTripBytes(int tripId, String format) async {
+  // 6. Xuất báo cáo Excel/PDF — hỗ trợ query options
+  Future<ApiResponse<List<int>>> exportTripBytes(
+    int tripId,
+    String format, {
+    bool includeDetails = false,
+    bool includeSettlement = false,
+  }) async {
     try {
       final response = await _apiService.dio.get(
         "/api/trips/$tripId/export/$format",
+        queryParameters: {
+          if (includeDetails) 'includeDetails': true,
+          if (includeSettlement) 'includeSettlement': true,
+        },
         options: Options(responseType: ResponseType.bytes),
       );
       return ApiResponse(success: true, data: response.data);
     } catch (e) {
-      return ApiResponse(success: false, message: "Lỗi tải tệp báo cáo: $e");
+      return ApiResponse.withError(e, defaultMessage: "Lỗi tải tệp báo cáo");
+    }
+  }
+
+  // 7. Lấy lịch sử hoạt động (Sửa/Xóa chi phí)
+  Future<ApiResponse<PageResponse<TripHistoryResponse>>> getTripHistory({
+    required int tripId,
+    int page = 0,
+    int size = 20,
+    List<String>? actions,
+    String? startDate,
+    String? endDate,
+  }) async {
+    try {
+      final Map<String, dynamic> queryParams = {
+        'page': page,
+        'size': size,
+      };
+
+      if (actions != null && actions.isNotEmpty) {
+        queryParams['actions'] = actions;
+      }
+      if (startDate != null) {
+        queryParams['startDate'] = startDate;
+      }
+      if (endDate != null) {
+        queryParams['endDate'] = endDate;
+      }
+
+      final response = await _apiService.dio.get(
+        "/api/trips/$tripId/history",
+        queryParameters: queryParams,
+      );
+      
+      return ApiResponse<PageResponse<TripHistoryResponse>>.fromJson(
+        response.data,
+        (data) => PageResponse.fromJson(data as Map<String, dynamic>, (json) => TripHistoryResponse.fromJson(json as Map<String, dynamic>)),
+      );
+    } catch (e) {
+      return ApiResponse.withError(e, defaultMessage: "Lỗi tải lịch sử hoạt động");
     }
   }
 }

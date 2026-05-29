@@ -49,10 +49,32 @@ class NotificationRepository {
           message: "Thành công"
       );
     } catch (e) {
+      return ApiResponse.withError(e, defaultMessage: "Lỗi");
+    }
+  }
+
+  Future<ApiResponse<void>> markAllAsRead() async {
+    try {
+      await _apiService.dio.put("/api/notifications/mark-all-read");
+      return ApiResponse(success: true);
+    } catch (e) {
+      return ApiResponse.withError(e, defaultMessage: "Lỗi đánh dấu đã đọc");
+    }
+  }
+
+  Future<ApiResponse<void>> remindDebt(int debtorId, int tripId, double amount) async {
+    try {
+      await _apiService.dio.post('/api/notifications/remind-debt', data: {
+        'debtorId': debtorId,
+        'tripId': tripId,
+        'amount': amount,
+      });
       return ApiResponse<void>(
-          success: false,
-          message: e.toString()
+          success: true,
+          message: "Đã gửi thông báo nhắc nợ"
       );
+    } catch (e) {
+      return ApiResponse.withError(e, defaultMessage: "Lỗi gửi thông báo");
     }
   }
 }

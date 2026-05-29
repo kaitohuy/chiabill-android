@@ -1,8 +1,9 @@
+import 'package:chiabill/theme/app_colors.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Thêm dòng này
 import 'package:get/get.dart';
 import '../../controllers/create_trip_controller.dart';
-import '../../utils/currency_util.dart'; // Thêm dòng này
+
+import '../../utils/trip_category_util.dart';
 
 class CreateTripBottomSheet extends StatelessWidget {
   CreateTripBottomSheet({super.key});
@@ -27,46 +28,80 @@ class CreateTripBottomSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text("Tạo chuyến đi mới", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.lightGreen)),
+            Text("Tạo chuyến đi mới", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.primary)),
             const SizedBox(height: 24),
 
             TextField(
               controller: controller.nameController,
+              maxLength: 100,
               decoration: InputDecoration(
                 labelText: "Tên chuyến đi (VD: Vũng Tàu 2N1Đ)",
-                prefixIcon: const Icon(Icons.map, color: Colors.lightGreen),
+                prefixIcon: Icon(Icons.map, color: AppColors.primary),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // ===================================
-            // THÊM Ô NHẬP NGÂN SÁCH Ở ĐÂY
-            // ===================================
-            TextField(
-              controller: controller.budgetController, // Nhớ khai báo budgetController trong CreateTripController
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                CurrencyInputFormatter(),
-              ],
-              decoration: InputDecoration(
-                labelText: "Ngân sách dự kiến (Không bắt buộc)",
-                prefixIcon: const Icon(Icons.account_balance_wallet, color: Colors.lightGreen),
-                suffixText: "đ",
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                counterText: "", // Ẩn bộ đếm chữ xấu xí nếu không cần
               ),
             ),
             const SizedBox(height: 16),
 
             TextField(
               controller: controller.descController,
+              maxLength: 200,
               decoration: InputDecoration(
                 labelText: "Mô tả (Không bắt buộc)",
-                prefixIcon: const Icon(Icons.description, color: Colors.lightGreen),
+                prefixIcon: Icon(Icons.description, color: AppColors.primary),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                counterText: "", // Ẩn bộ đếm
               ),
               maxLines: 2,
+            ),
+            const SizedBox(height: 24),
+
+            const Text("Chủ đề chuyến đi", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 90,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: TripCategoryUtil.categories.length,
+                separatorBuilder: (context, index) => const SizedBox(width: 12),
+                itemBuilder: (context, index) {
+                  final cat = TripCategoryUtil.categories[index];
+                  return Obx(() {
+                    final isSelected = controller.selectedCategoryName.value == cat["name"];
+                    return GestureDetector(
+                      onTap: () {
+                        controller.selectedCategoryName.value = cat["name"];
+                        controller.selectedCategoryIcon.value = cat["iconName"];
+                      },
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: isSelected ? cat["color"] : (cat["color"] as Color).withValues(alpha: 0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              cat["icon"] as IconData,
+                              color: isSelected ? Colors.white : cat["color"],
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            cat["name"] as String,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isSelected ? AppColors.primary : Colors.grey[600],
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  });
+                },
+              ),
             ),
             const SizedBox(height: 24),
 
@@ -75,7 +110,7 @@ class CreateTripBottomSheet extends StatelessWidget {
               height: 50,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.lightGreen,
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),

@@ -38,16 +38,33 @@ class JoinTripController extends GetxController {
       isLoading.value = true;
       LoadingUtil.show();
       final result = await _repository.joinByInvite(code);
+      LoadingUtil.hide();
 
-      if (result.success) {
-        Get.back(); // Đóng popup
+      if (result.success && result.data != null) {
+        // Nếu đang mở dưới dạng Dialog (ở Home) thì đóng popup
+        if (Get.isDialogOpen ?? false) {
+          Get.back();
+          Get.toNamed('/trip-detail', arguments: result.data!.id);
+        } else {
+          // Nếu đang mở dưới dạng full screen (từ Deep Link) thì thay màn hình
+          Get.offNamed('/trip-detail', arguments: result.data!.id);
+        }
+
         ToastUtil.showSuccess("Chào mừng!", "Bạn đã tham gia chuyến đi thành công");
-        Get.find<HomeController>().fetchTrips();
+
+        // Xóa thông tin cũ
+        codeController.clear();
+        inviteInfo.value = null;
+
+        // Làm mới danh sách hiển thị ở trang chủ ngầm phòng trường hợp quay lại
+        if (Get.isRegistered<HomeController>()) {
+           Get.find<HomeController>().fetchTrips(isRefresh: true);
+        }
       } else {
         ToastUtil.showError("Thất bại", result.message ?? "Không thể tham gia");
       }
     } catch (e) {
-      ToastUtil.showError("Lỗi hệ thống", "Đã xảy ra lỗi khi tham gia chuyến đi");
+      ToastUtil.showError("Lỗi hệ thống", e.toString());
     } finally {
       isLoading.value = false;
       LoadingUtil.hide();

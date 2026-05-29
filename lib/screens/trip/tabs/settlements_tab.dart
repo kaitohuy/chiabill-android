@@ -2,21 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/create_payment_controller.dart';
 import '../../../controllers/trip_detail_controller.dart';
+import '../../../controllers/trip_settlement_controller.dart';
 import '../../../utils/currency_util.dart';
+import '../../../theme/app_colors.dart';
 import '../create_payment_bottom_sheet.dart';
+import '../pay_on_behalf_screen.dart';
+import '../balance_detail_bottom_sheet.dart';
 
 class SettlementsTab extends StatelessWidget {
-  final TripDetailController controller;
-  const SettlementsTab({super.key, required this.controller});
+  final TripDetailController mainController;
+  const SettlementsTab({super.key, required this.mainController});
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.find<TripSettlementController>(tag: mainController.tripId.toString());
     return Obx(() {
       if (controller.isLoading.value) return const Center(child: CircularProgressIndicator());
 
       if (controller.settlements.isEmpty) {
         return RefreshIndicator(
-          onRefresh: () async => controller.fetchData(),
+          onRefresh: () async => mainController.fetchData(),
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: const [
@@ -36,75 +41,205 @@ class SettlementsTab extends StatelessWidget {
         );
       }
 
-      return RefreshIndicator(
-        color: Colors.orange,
-        onRefresh: () async => controller.fetchData(),
-        child: ListView.builder(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
-          itemCount: controller.settlements.length,
-          itemBuilder: (context, index) {
-            final settle = controller.settlements[index];
-            String fromInitial = (settle.fromUserName != null && settle.fromUserName!.trim().isNotEmpty) ? settle.fromUserName!.trim()[0].toUpperCase() : "?";
-            String toInitial = (settle.toUserName != null && settle.toUserName!.trim().isNotEmpty) ? settle.toUserName!.trim()[0].toUpperCase() : "?";
-
-            return Card(
-              margin: const EdgeInsets.only(bottom: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: () => _showPaymentQR(context, controller, settle),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
+      return Column(
+        children: [
+          // KHU VỰC TÌM KIẾM
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: TextField(
+              onChanged: (val) => controller.searchQuery.value = val,
+              decoration: InputDecoration(
+                hintText: "Tìm theo tên thành viên...",
+                prefixIcon: const Icon(Icons.search, size: 20),
+                contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide(color: Colors.grey.shade300)),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide(color: Colors.grey.shade200)),
+                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide(color: AppColors.primary)),
+                filled: true,
+                fillColor: Colors.grey.shade50,
+              ),
+            ),
+          ),
+          // KHU VỰC LỌC VÀ SẮP XẾP
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    FilterChip(
+                      label: const Text("Tất cả", style: TextStyle(fontSize: 11)),
+                      selected: !controller.filterOnlyMe.value,
+                      onSelected: (val) => controller.filterOnlyMe.value = false,
+                      selectedColor: AppColors.primary.withValues(alpha: 0.15),
+                      checkmarkColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    ),
+                    const SizedBox(width: 8),
+                    FilterChip(
+                      label: const Text("Chỉ mình tôi", style: TextStyle(fontSize: 11)),
+                      selected: controller.filterOnlyMe.value,
+                      onSelected: (val) => controller.filterOnlyMe.value = true,
+                      selectedColor: AppColors.primary.withValues(alpha: 0.15),
+                      checkmarkColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    ),
+                  ],
+                ),
+                PopupMenuButton<String>(
+                  icon: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Expanded(
-                          child: Column(
-                              children: [
-                                CircleAvatar(backgroundColor: Colors.red[100], child: Text(fromInitial, style: const TextStyle(color: Colors.red))),
-                                const SizedBox(height: 8),
-                                Text(settle.fromUserName ?? "Ẩn danh", style: const TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis)
-                              ]
-                          )
-                      ),
-                      Expanded(
-                          flex: 2,
-                          child: Column(
-                              children: [
-                                Text("${CurrencyUtils.formatNumber(settle.amount)} đ", style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Colors.orange)),
-                                const Icon(Icons.arrow_forward, color: Colors.grey),
-                                const Text("Bấm để trả tiền", style: TextStyle(fontSize: 11, color: Colors.blue, decoration: TextDecoration.underline))
-                              ]
-                          )
-                      ),
-                      Expanded(
-                          child: Column(
-                              children: [
-                                CircleAvatar(backgroundColor: Colors.green[100], child: Text(toInitial, style: const TextStyle(color: Colors.green))),
-                                const SizedBox(height: 8),
-                                Text(settle.toUserName ?? "Ẩn danh", style: const TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis)
-                              ]
-                          )
+                      Icon(Icons.sort, size: 16, color: AppColors.primary),
+                      const SizedBox(width: 4),
+                      Text(
+                        controller.sortOrder.value == "highest" ? "Nợ nhiều nhất" : "Nợ thấp nhất",
+                        style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 11),
                       ),
                     ],
                   ),
+                  onSelected: (val) => controller.sortOrder.value = val,
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(value: "highest", child: Text("Nợ nhiều nhất")),
+                    const PopupMenuItem(value: "lowest", child: Text("Nợ thấp nhất")),
+                  ],
                 ),
-              ),
-            );
-          },
-        ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(width: 4, height: 16, decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(2))),
+                    const SizedBox(width: 8),
+                    const Text("QUYẾT TOÁN", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  ],
+                ),
+                GestureDetector(
+                  onTap: () {
+                    Get.to(() => PayOnBehalfScreen(
+                      tripId: mainController.tripId, 
+                      settlements: controller.settlements
+                    ));
+                  },
+                  child: Row(
+                    children: [
+                      Icon(Icons.people_outline, size: 16, color: AppColors.primary),
+                      const SizedBox(width: 4),
+                      Text("Thanh toán hộ", style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: RefreshIndicator(
+              color: Colors.orange,
+              onRefresh: () async => mainController.fetchData(),
+              child: controller.filteredSettlements.isEmpty
+                  ? ListView(
+                      children: const [
+                        SizedBox(height: 80),
+                        Center(
+                          child: Column(
+                            children: [
+                              Icon(Icons.search_off, size: 60, color: Colors.grey),
+                              SizedBox(height: 12),
+                              Text("Không tìm thấy kết quả phù hợp", style: TextStyle(color: Colors.grey)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    )
+                  : ListView.builder(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.all(16),
+                      itemCount: controller.filteredSettlements.length,
+                      itemBuilder: (context, index) {
+                        final settle = controller.filteredSettlements[index];
+                        String fromInitial = (settle.fromUserName != null && settle.fromUserName!.trim().isNotEmpty) ? settle.fromUserName!.trim()[0].toUpperCase() : "?";
+                        String toInitial = (settle.toUserName != null && settle.toUserName!.trim().isNotEmpty) ? settle.toUserName!.trim()[0].toUpperCase() : "?";
+
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () {
+                              Get.bottomSheet(
+                                BalanceDetailBottomSheet(
+                                  tripId: mainController.tripId,
+                                  settlement: settle,
+                                  onPayPressed: () => _showPaymentQR(context, controller, mainController, settle),
+                                ),
+                                isScrollControlled: true,
+                              );
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                      child: Column(
+                                          children: [
+                                            CircleAvatar(backgroundColor: Colors.red[100], child: Text(fromInitial, style: const TextStyle(color: Colors.red))),
+                                            const SizedBox(height: 8),
+                                            Text(settle.fromUserName ?? "Ẩn danh", style: const TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis)
+                                          ]
+                                      )
+                                  ),
+                                  Expanded(
+                                      flex: 2,
+                                      child: Column(
+                                          children: [
+                                            Text("${CurrencyUtils.formatNumber(settle.amount)} đ", style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Colors.orange)),
+                                            Image.asset(
+                                              'assets/images/payment.png',
+                                              width: 32, 
+                                              height: 32,
+                                              errorBuilder: (context, error, stackTrace) => const Icon(Icons.arrow_forward, color: Colors.grey),
+                                            ),
+                                            const Text("Bấm để trả tiền", style: TextStyle(fontSize: 11, color: Colors.blue, decoration: TextDecoration.underline))
+                                          ]
+                                      )
+                                  ),
+                                  Expanded(
+                                      child: Column(
+                                          children: [
+                                            CircleAvatar(backgroundColor: Colors.green[100], child: Text(toInitial, style: const TextStyle(color: Colors.green))),
+                                            const SizedBox(height: 8),
+                                            Text(settle.toUserName ?? "Ẩn danh", style: const TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis)
+                                          ]
+                                      )
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          )
+        ],
       );
     });
   }
 
-  void _showPaymentQR(BuildContext context, TripDetailController controller, var settle) {
-    var matches = controller.trip.value?.members?.where((m) => m.user.name == settle.toUserName);
+  void _showPaymentQR(BuildContext context, TripSettlementController controller, TripDetailController mainController, var settle) {
+    var matches = mainController.trip.value?.members?.where((m) => m.user.name == settle.toUserName);
     var toUser = (matches != null && matches.isNotEmpty) ? matches.first.user : null;
     String? qrImageUrl;
     bool hasData = false;
 
     if (toUser != null) {
-      int priority = toUser.paymentPriority ?? 1;
+      int priority = toUser.paymentPriority;
       bool hasVietQr = (toUser.bankId != null && toUser.bankId!.isNotEmpty) && (toUser.accountNo != null && toUser.accountNo!.isNotEmpty);
       bool hasStaticQr = (toUser.bankQrUrl != null && toUser.bankQrUrl!.isNotEmpty);
       String addInfo = "${settle.fromUserName ?? 'Ban'} thanh toan".replaceAll(' ', '%20');

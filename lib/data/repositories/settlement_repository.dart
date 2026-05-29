@@ -1,5 +1,6 @@
 import '../models/api_response.dart';
 import '../models/settlement_response.dart';
+import '../models/personal_statement_response.dart';
 import '../network/api_service.dart';
 
 class SettlementRepository {
@@ -14,6 +15,18 @@ class SettlementRepository {
       );
     } catch (e) {
       return ApiResponse(success: false, message: "Lỗi tải chốt sổ: $e");
+    }
+  }
+
+  Future<ApiResponse<PersonalStatementResponse>> getPersonalStatement(int tripId, int targetUserId) async {
+    try {
+      final response = await _apiService.dio.get("/api/settlements/trip/$tripId/balance/$targetUserId");
+      return ApiResponse<PersonalStatementResponse>.fromJson(
+        response.data,
+            (data) => PersonalStatementResponse.fromJson(data),
+      );
+    } catch (e) {
+      return ApiResponse(success: false, message: "Lỗi tải sao kê: $e");
     }
   }
 }

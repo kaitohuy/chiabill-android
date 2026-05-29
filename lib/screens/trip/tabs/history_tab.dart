@@ -3,14 +3,18 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import '../../../controllers/profile_controller.dart';
 import '../../../controllers/trip_detail_controller.dart';
+import '../../../controllers/trip_history_controller.dart';
+import '../../../controllers/trip_settlement_controller.dart';
+import '../../../theme/app_colors.dart';
 import '../../../utils/currency_util.dart';
 
 class HistoryTab extends StatelessWidget {
-  final TripDetailController controller;
-  const HistoryTab({super.key, required this.controller});
+  final TripDetailController mainController;
+  const HistoryTab({super.key, required this.mainController});
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.find<TripHistoryController>(tag: mainController.tripId.toString());
     return Column(
         children: [
           Container(
@@ -24,7 +28,7 @@ class HistoryTab extends StatelessWidget {
                       controller.filterPaymentFromUserId.value != null ||
                       controller.filterPaymentToUserId.value != null;
                   return InkWell(
-                    onTap: () => _showPaymentFilterBottomSheet(context, controller),
+                    onTap: () => _showPaymentFilterBottomSheet(context, controller, mainController),
                     borderRadius: BorderRadius.circular(12),
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -47,12 +51,12 @@ class HistoryTab extends StatelessWidget {
           ),
           Expanded(
             child: Obx(() {
-              if (controller.isLoading.value && controller.payments.isEmpty) {
+              if (controller.payments.isEmpty && controller.currentPaymentPage.value == 0) {
                 return const Center(child: CircularProgressIndicator());
               }
               if (controller.payments.isEmpty) {
                 return RefreshIndicator(
-                  onRefresh: () async => controller.fetchData(),
+                  onRefresh: () async => mainController.fetchData(),
                   child: ListView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     children: const [
@@ -73,7 +77,7 @@ class HistoryTab extends StatelessWidget {
               }
               return RefreshIndicator(
                 color: Colors.blue,
-                onRefresh: () async => controller.fetchData(),
+                onRefresh: () async => mainController.fetchData(),
                 child: NotificationListener<ScrollNotification>(
                   onNotification: (ScrollNotification scrollInfo) {
                     if (!controller.isLoadingMorePayments.value && scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200) {
@@ -94,7 +98,7 @@ class HistoryTab extends StatelessWidget {
                       }
 
                       final p = controller.payments[index];
-                      String dateStr = p.createdAt ?? "";
+                      String dateStr = p.createdAt;
                       if (dateStr.length > 16) dateStr = dateStr.substring(0, 16).replaceAll('T', ' ');
 
                       Color statusColor = Colors.orange;
@@ -102,7 +106,7 @@ class HistoryTab extends StatelessWidget {
                       String statusText = "Đang chờ duyệt";
 
                       if (p.status == 'APPROVED') {
-                        statusColor = Colors.green;
+                        statusColor = AppColors.primary;
                         statusIcon = Icons.check_circle;
                         statusText = "Thành công";
                       } else if (p.status == 'REJECTED') {
@@ -113,10 +117,10 @@ class HistoryTab extends StatelessWidget {
 
                       return Card(
                         margin: const EdgeInsets.only(bottom: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: statusColor.withOpacity(0.5))),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: statusColor.withValues(alpha:0.5))),
                         child: ListTile(
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          leading: CircleAvatar(backgroundColor: statusColor.withOpacity(0.1), child: Icon(statusIcon, color: statusColor)),
+                          leading: CircleAvatar(backgroundColor: statusColor.withValues(alpha:0.1), child: Icon(statusIcon, color: statusColor)),
                           title: Text("${p.fromUserName} ➡️ ${p.toUserName}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                           subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -141,7 +145,7 @@ class HistoryTab extends StatelessWidget {
     );
   }
 
-  void _showPaymentFilterBottomSheet(BuildContext context, TripDetailController controller) {
+  void _showPaymentFilterBottomSheet(BuildContext context, TripHistoryController controller, TripDetailController mainController) {
     String? tempStatus = controller.filterPaymentStatus.value;
     int? tempFromId = controller.filterPaymentFromUserId.value;
     int? tempToId = controller.filterPaymentToUserId.value;
@@ -190,12 +194,12 @@ class HistoryTab extends StatelessWidget {
                                     onSelected: (val) => setState(() => tempStatus = val ? 'PENDING' : null)
                                 ),
                                 FilterChip(
-                                    label: Text("Thành công", style: TextStyle(color: tempStatus == 'APPROVED' ? Colors.white : Colors.green)),
+                                    label: Text("Thành công", style: TextStyle(color: tempStatus == 'APPROVED' ? Colors.white : AppColors.primary)),
                                     selected: tempStatus == 'APPROVED',
-                                    selectedColor: Colors.green,
+                                    selectedColor: AppColors.primary,
                                     checkmarkColor: Colors.white,
-                                    backgroundColor: Colors.green.shade50,
-                                    side: BorderSide(color: Colors.green.shade200),
+                                    backgroundColor: AppColors.primaryBackgroundLight,
+                                    side: BorderSide(color: AppColors.primaryLight),
                                     onSelected: (val) => setState(() => tempStatus = val ? 'APPROVED' : null)
                                 ),
                                 FilterChip(
@@ -215,7 +219,7 @@ class HistoryTab extends StatelessWidget {
                             const SizedBox(height: 8),
                             Wrap(
                               spacing: 8, runSpacing: 8,
-                              children: (controller.trip.value?.members ?? []).map((m) {
+                              children: (mainController.trip.value?.members ?? []).map((m) {
                                 bool isSelected = tempFromId == m.user.id;
                                 return FilterChip(
                                     label: Text(m.user.name ?? "Ẩn", style: TextStyle(fontSize: 12, color: isSelected ? Colors.white : Colors.black87)),
@@ -233,7 +237,7 @@ class HistoryTab extends StatelessWidget {
                             const SizedBox(height: 8),
                             Wrap(
                               spacing: 8, runSpacing: 8,
-                              children: (controller.trip.value?.members ?? []).map((m) {
+                              children: (mainController.trip.value?.members ?? []).map((m) {
                                 bool isSelected = tempToId == m.user.id;
                                 return FilterChip(
                                     label: Text(m.user.name ?? "Ẩn", style: TextStyle(fontSize: 12, color: isSelected ? Colors.white : Colors.black87)),
@@ -253,7 +257,7 @@ class HistoryTab extends StatelessWidget {
                     SizedBox(
                       width: double.infinity, height: 50,
                       child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.blue, foregroundColor: Colors.white),
+                          style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
                           onPressed: () {
                             Get.back();
                             controller.applyPaymentFilter(status: tempStatus, fromId: tempFromId, toId: tempToId);
@@ -271,7 +275,7 @@ class HistoryTab extends StatelessWidget {
     );
   }
 
-  void _showHistoryProofDialog(BuildContext context, TripDetailController controller, var payment) {
+  void _showHistoryProofDialog(BuildContext context, TripHistoryController controller, var payment) {
     List<String> images = [];
     if (payment.proofUrl != null && payment.proofUrl.isNotEmpty) images.add(payment.proofUrl);
 
@@ -280,7 +284,7 @@ class HistoryTab extends StatelessWidget {
 
     String? currentUserIdStr;
     if (Get.isRegistered<ProfileController>()) {
-      currentUserIdStr = Get.find<ProfileController>().user.value?.id?.toString();
+      currentUserIdStr = Get.find<ProfileController>().user.value?.id.toString();
     }
 
     if (currentUserIdStr == null) {
@@ -364,17 +368,19 @@ class HistoryTab extends StatelessWidget {
                               buttonColor: Colors.red,
                               onConfirm: () {
                                 Get.back();
-                                controller.rejectPayment(payment.id);
+                                Get.find<TripSettlementController>(tag: mainController.tripId.toString()).rejectPayment(payment.id);
+                                  controller.fetchData();
                               }
                           );
                         },
                         child: const Text("TỪ CHỐI", style: TextStyle(color: Colors.red))
                     ),
                     ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
+                        style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
                         onPressed: () {
                           Get.back();
-                          controller.approvePayment(payment.id);
+                          Get.find<TripSettlementController>(tag: mainController.tripId.toString()).approvePayment(payment.id);
+                                  controller.fetchData();
                         },
                         child: const Text("ĐÃ NHẬN TIỀN")
                     ),

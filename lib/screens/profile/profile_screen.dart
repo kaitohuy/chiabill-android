@@ -1,15 +1,17 @@
+import 'package:chiabill/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import '../../controllers/profile_controller.dart';
 import '../../controllers/auth_controller.dart';
-import '../auth/welcome_screen.dart';
+import 'package:cached_network_image/cached_network_image.dart' as org_cached;
+import 'theme_settings_screen.dart';
+import 'about_screen.dart';
+import 'storage_settings_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends GetView<ProfileController> {
   ProfileScreen({super.key});
 
   final AuthController authController = Get.put(AuthController());
-  final ProfileController controller = Get.put(ProfileController());
 
   // Hàm hiển thị ảnh phóng to toàn màn hình
   void _showFullScreenImage(String imageUrl) {
@@ -24,12 +26,15 @@ class ProfileScreen extends StatelessWidget {
               panEnabled: true,
               minScale: 0.5,
               maxScale: 3,
-              child: Image.network(imageUrl, fit: BoxFit.contain, width: double.infinity, height: double.infinity),
+              child: org_cached.CachedNetworkImage(
+                  imageUrl: imageUrl, fit: BoxFit.contain, width: double.infinity, height: double.infinity,
+                  placeholder: (context, url) => const Center(child: CircularProgressIndicator(color: Colors.white)),
+              ),
             ),
             Positioned(
               top: 40, right: 20,
               child: IconButton(
-                icon: const Icon(Icons.close, color: Colors.white, size: 32),
+                icon: Icon(Icons.close, color: Colors.white, size: 32),
                 onPressed: () => Get.back(),
               ),
             ),
@@ -54,13 +59,13 @@ class ProfileScreen extends StatelessWidget {
         appBar: AppBar(
           title: const Text("Hồ sơ cá nhân", style: TextStyle(fontWeight: FontWeight.bold)),
           backgroundColor: Colors.white,
-          foregroundColor: Colors.lightGreen[800],
+          foregroundColor: AppColors.primaryDark,
           elevation: 0,
           centerTitle: true,
         ),
         body: Obx(() {
           if (controller.isLoading.value && controller.user.value == null) {
-            return const Center(child: CircularProgressIndicator(color: Colors.lightGreen));
+            return Center(child: CircularProgressIndicator(color: AppColors.primary));
           }
 
           final user = controller.user.value;
@@ -69,7 +74,7 @@ class ProfileScreen extends StatelessWidget {
 
           // THÊM REFRESH INDICATOR Ở ĐÂY
           return RefreshIndicator(
-            color: Colors.orange,
+            color: AppColors.primary,
             onRefresh: () async {
               await controller.fetchProfile(); // Kéo xuống để tải lại data từ Server
             },
@@ -90,17 +95,17 @@ class ProfileScreen extends StatelessWidget {
                         onTap: avatarUrl != null ? () => _showFullScreenImage(avatarUrl) : null,
                         child: CircleAvatar(
                           radius: 55,
-                          backgroundColor: Colors.lightGreen[100],
-                          backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
-                          child: avatarUrl == null ? const Icon(Icons.person, size: 60, color: Colors.lightGreen) : null,
+                          backgroundColor: AppColors.primaryBackground,
+                          backgroundImage: avatarUrl != null ? org_cached.CachedNetworkImageProvider(avatarUrl, maxWidth: 300, maxHeight: 300) : null,
+                          child: avatarUrl == null ? Icon(Icons.person, size: 60, color: AppColors.primary) : null,
                         ),
                       ),
                       GestureDetector(
                         onTap: controller.isUploading.value ? null : () => controller.pickAndUploadImage('avatar'),
                         child: Container(
                           padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(color: Colors.orange, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
-                          child: const Icon(Icons.camera_alt, color: Colors.white, size: 18),
+                          decoration: BoxDecoration(color: AppColors.primary, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
+                          child: Icon(Icons.camera_alt, color: Colors.white, size: 18),
                         ),
                       ),
                       if (avatarUrl != null)
@@ -111,16 +116,15 @@ class ProfileScreen extends StatelessWidget {
                             child: Container(
                               padding: const EdgeInsets.all(4),
                               decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-                              child: const Icon(Icons.close, color: Colors.white, size: 16),
+                              child: Icon(Icons.close, color: Colors.white, size: 16),
                             ),
                           ),
                         ),
                       if (controller.isUploading.value)
-                        const Positioned.fill(child: CircularProgressIndicator(color: Colors.orange, strokeWidth: 4)),
+                        Positioned.fill(child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 4)),
                     ],
                   ),
                   const SizedBox(height: 12),
-                  Text(user?.email ?? "", style: const TextStyle(color: Colors.grey, fontSize: 14)),
                   const SizedBox(height: 32),
 
                   // ==========================================
@@ -130,7 +134,7 @@ class ProfileScreen extends StatelessWidget {
                     controller: controller.nameController,
                     decoration: InputDecoration(
                       labelText: "Tên hiển thị",
-                      prefixIcon: const Icon(Icons.badge, color: Colors.lightGreen),
+                      prefixIcon: Icon(Icons.badge, color: AppColors.primary),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       filled: true, fillColor: Colors.white,
                     ),
@@ -143,9 +147,87 @@ class ProfileScreen extends StatelessWidget {
                     keyboardType: TextInputType.phone,
                     decoration: InputDecoration(
                       labelText: "Số điện thoại",
-                      prefixIcon: const Icon(Icons.phone, color: Colors.lightGreen),
+                      prefixIcon: Icon(Icons.phone, color: AppColors.primary),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       filled: true, fillColor: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // Ô hiển thị Email (Read-only vì liên kết Google)
+                  TextField(
+                    controller: TextEditingController(text: user?.email ?? "Chưa liên kết Email"),
+                    readOnly: true,
+                    style: TextStyle(color: Colors.grey),
+                    decoration: InputDecoration(
+                      labelText: "Email (Tài khoản liên kết)",
+                      prefixIcon: Icon(Icons.email, color: Colors.grey),
+                      suffixIcon: const Tooltip(
+                        message: "Email này được dùng để đăng nhập nên không thể đổi",
+                        child: Icon(Icons.lock, color: Colors.grey, size: 20),
+                      ),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      filled: true, fillColor: Colors.grey.shade100,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // CARD GIAO DIỆN
+                  Card(
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.grey.shade300)),
+                    color: Colors.white,
+                    child: ListTile(
+                      leading: Icon(Icons.color_lens, color: AppColors.primary),
+                      title: const Text("Giao diện & Màu sắc", style: TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: const Text("Tùy chỉnh chủ đề màu sắc yêu thích", style: TextStyle(fontSize: 12)),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => Get.to(() => const ThemeSettingsScreen()),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // CARD BỘ NHỚ & DỮ LIỆU
+                  Card(
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.grey.shade300)),
+                    color: Colors.white,
+                    child: ListTile(
+                      leading: Icon(Icons.storage, color: Colors.blue),
+                      title: const Text("Bộ nhớ & Dữ liệu", style: TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: const Text("Dọn dẹp cache, tự động xóa tệp lưu tạm", style: TextStyle(fontSize: 12)),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => Get.to(() => const StorageSettingsScreen()),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // CARD THÙNG RÁC
+                  Card(
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.grey.shade300)),
+                    color: Colors.white,
+                    child: ListTile(
+                      leading: Icon(Icons.delete_outline, color: Colors.orange),
+                      title: const Text("Thùng rác", style: TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: const Text("Phục hồi chuyến đi đã xóa", style: TextStyle(fontSize: 12)),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => Get.toNamed('/trash'),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // CARD VỀ ỨNG DỤNG & HỖ TRỢ
+                  Card(
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.grey.shade300)),
+                    color: Colors.white,
+                    child: ListTile(
+                      leading: Icon(Icons.info_outline, color: Colors.blue),
+                      title: const Text("Về ứng dụng & Hỗ trợ", style: TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: const Text("Tính năng, bảo mật, gửi report & donate", style: TextStyle(fontSize: 12)),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => Get.to(() => const AboutScreen()),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -157,19 +239,19 @@ class ProfileScreen extends StatelessWidget {
                     color: Colors.white,
                     child: Column(
                       children: [
-                        const Padding(
-                          padding: EdgeInsets.all(16.0),
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
                           child: Row(
                             children: [
-                              Icon(Icons.privacy_tip, color: Colors.orange),
-                              SizedBox(width: 8),
-                              Text("Quyền riêng tư", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                              Icon(Icons.privacy_tip, color: AppColors.primary),
+                              const SizedBox(width: 8),
+                              const Text("Quyền riêng tư", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                             ],
                           ),
                         ),
                         const Divider(height: 1),
                         Obx(() => SwitchListTile(
-                          activeThumbColor: Colors.green,
+                          activeThumbColor: AppColors.primary,
                           title: const Text("Cho phép thêm tự động", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                           subtitle: const Text("Người khác có thể thêm bạn trực tiếp vào nhóm qua SĐT/Email mà không cần gửi link.", style: TextStyle(fontSize: 12, color: Colors.grey)),
                           value: controller.allowAutoAdd.value,
@@ -177,7 +259,7 @@ class ProfileScreen extends StatelessWidget {
                         )),
                         const Divider(height: 1),
                         Obx(() => SwitchListTile(
-                          activeThumbColor: Colors.green,
+                          activeThumbColor: AppColors.primary,
                           title: const Text("Tự động duyệt nhận tiền", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                           subtitle: const Text("Tự động đánh dấu Đã nhận (APPROVED) khi có người báo cáo chuyển khoản cho bạn.", style: TextStyle(fontSize: 12, color: Colors.grey)),
                           value: controller.allowAutoApprovePayment.value,
@@ -197,13 +279,13 @@ class ProfileScreen extends StatelessWidget {
                     color: Colors.white,
                     child: Column(
                       children: [
-                        const Padding(
-                          padding: EdgeInsets.all(16.0),
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
                           child: Row(
                             children: [
-                              Icon(Icons.account_balance_wallet, color: Colors.orange),
-                              SizedBox(width: 8),
-                              Text("Cài đặt nhận tiền", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                              Icon(Icons.account_balance_wallet, color: AppColors.primary),
+                              const SizedBox(width: 8),
+                              const Text("Cài đặt nhận tiền", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                             ],
                           ),
                         ),
@@ -248,7 +330,7 @@ class ProfileScreen extends StatelessWidget {
                                             labelText: "Mã ngân hàng (Gõ để tìm...)",
                                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                                             isDense: true,
-                                            suffixIcon: const Icon(Icons.search, size: 20),
+                                            suffixIcon: Icon(Icons.search, size: 14),
                                           ),
                                         );
                                       },
@@ -265,18 +347,18 @@ class ProfileScreen extends StatelessWidget {
                                               controller.bankIdController.clear();
                                               controller.accountNoController.clear();
                                             },
-                                            icon: const Icon(Icons.delete_outline, size: 16, color: Colors.red),
+                                            icon: Icon(Icons.delete_outline, size: 16, color: Colors.red),
                                             label: const Text("Xóa data", style: TextStyle(color: Colors.red))
                                         ),
                                         Obx(() => controller.paymentPriority.value == 1
                                             ? Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                          decoration: BoxDecoration(color: Colors.green[50], borderRadius: BorderRadius.circular(8)),
-                                          child: const Text("✓ Đang là mặc định", style: TextStyle(color: Colors.green, fontSize: 13, fontWeight: FontWeight.bold)),
+                                          decoration: BoxDecoration(color: AppColors.primaryBackgroundLight, borderRadius: BorderRadius.circular(8)),
+                                          child: Text("✓ Đang là mặc định", style: TextStyle(color: AppColors.primary, fontSize: 13, fontWeight: FontWeight.bold)),
                                         )
                                             : OutlinedButton(
                                           onPressed: () => controller.setAsDefault(1),
-                                          style: OutlinedButton.styleFrom(foregroundColor: Colors.green, side: const BorderSide(color: Colors.green)),
+                                          style: OutlinedButton.styleFrom(foregroundColor: AppColors.primary, side: BorderSide(color: AppColors.primary)),
                                           child: const Text("Đặt làm mặc định"),
                                         )
                                         )
@@ -312,9 +394,9 @@ class ProfileScreen extends StatelessWidget {
                                               width: 140, height: 140,
                                               margin: const EdgeInsets.only(bottom: 12),
                                               decoration: BoxDecoration(
-                                                border: Border.all(color: Colors.lightGreen),
+                                                border: Border.all(color: AppColors.primary),
                                                 borderRadius: BorderRadius.circular(12),
-                                                image: DecorationImage(image: NetworkImage(qrUrl), fit: BoxFit.cover),
+                                                image: DecorationImage(image: org_cached.CachedNetworkImageProvider(qrUrl, maxWidth: 500, maxHeight: 500), fit: BoxFit.cover),
                                               ),
                                             ),
                                           ),
@@ -324,7 +406,7 @@ class ProfileScreen extends StatelessWidget {
                                               transform: Matrix4.translationValues(8, -8, 0),
                                               padding: const EdgeInsets.all(6),
                                               decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-                                              child: const Icon(Icons.close, color: Colors.white, size: 16),
+                                              child: Icon(Icons.close, color: Colors.white, size: 16),
                                             ),
                                           ),
                                         ],
@@ -335,20 +417,20 @@ class ProfileScreen extends StatelessWidget {
                                       children: [
                                         OutlinedButton.icon(
                                           onPressed: controller.isUploading.value ? null : () => controller.pickAndUploadImage('bank-qr'),
-                                          icon: const Icon(Icons.qr_code_scanner),
+                                          icon: Icon(Icons.qr_code_scanner),
                                           label: Text((qrUrl == null || qrUrl.isEmpty) ? "Tải ảnh từ máy" : "Đổi ảnh"),
-                                          style: OutlinedButton.styleFrom(foregroundColor: Colors.orange, side: const BorderSide(color: Colors.orange), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                                          style: OutlinedButton.styleFrom(foregroundColor: AppColors.primary, side: BorderSide(color: AppColors.primary), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                                         ),
                                         const SizedBox(width: 12),
                                         Obx(() => controller.paymentPriority.value == 2
                                             ? Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                          decoration: BoxDecoration(color: Colors.green[50], borderRadius: BorderRadius.circular(8)),
-                                          child: const Text("✓ Đang mặc định", style: TextStyle(color: Colors.green, fontSize: 13, fontWeight: FontWeight.bold)),
+                                          decoration: BoxDecoration(color: AppColors.primaryBackgroundLight, borderRadius: BorderRadius.circular(8)),
+                                          child: Text("✓ Đang mặc định", style: TextStyle(color: AppColors.primary, fontSize: 13, fontWeight: FontWeight.bold)),
                                         )
                                             : OutlinedButton(
                                           onPressed: () => controller.setAsDefault(2),
-                                          style: OutlinedButton.styleFrom(foregroundColor: Colors.green, side: const BorderSide(color: Colors.green), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                                          style: OutlinedButton.styleFrom(foregroundColor: AppColors.primary, side: BorderSide(color: AppColors.primary), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                                           child: const Text("Đặt mặc định"),
                                         )
                                         )
@@ -371,7 +453,7 @@ class ProfileScreen extends StatelessWidget {
                   SizedBox(
                     width: double.infinity, height: 50,
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.lightGreen, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                       onPressed: (controller.isLoading.value || controller.isUploading.value) ? null : () => controller.saveProfile(),
                       child: controller.isLoading.value ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white)) : const Text("LƯU THAY ĐỔI", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     ),
@@ -379,10 +461,10 @@ class ProfileScreen extends StatelessWidget {
 
                   const SizedBox(height: 16),
                   Obx(() => OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(minimumSize: const Size(double.infinity, 50), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), side: const BorderSide(color: Colors.grey)),
-                    icon: authController.isLoading.value ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) : Image.network('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/120px-Google_%22G%22_logo.svg.png', width: 20, errorBuilder: (context, error, stackTrace) => const Icon(Icons.g_mobiledata, color: Colors.blue, size: 28)),
-                    label: const Text("LIÊN KẾT TÀI KHOẢN GOOGLE", style: TextStyle(color: Colors.black87)),
-                    onPressed: authController.isLoading.value ? null : () => authController.loginWithGoogle(),
+                    style: OutlinedButton.styleFrom(minimumSize: const Size(double.infinity, 50), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), side: BorderSide(color: Colors.grey)),
+                    icon: authController.isLoading.value ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) : org_cached.CachedNetworkImage(imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/120px-Google_%22G%22_logo.svg.png', width: 20, errorWidget: (context, url, error) => Icon(Icons.g_mobiledata, color: Colors.blue, size: 28)),
+                    label: Text(user?.email != null ? "ĐỔI SANG TÀI KHOẢN KHÁC" : "LIÊN KẾT TÀI KHOẢN GOOGLE", style: const TextStyle(color: Colors.black87)),
+                    onPressed: authController.isLoading.value ? null : () => authController.loginWithGoogle(forceSwitch: user?.email != null),
                   )),
 
                   const SizedBox(height: 24),
@@ -393,7 +475,7 @@ class ProfileScreen extends StatelessWidget {
                   // ==========================================
                   TextButton.icon(
                     onPressed: () => authController.logout(), // CHỈ CẦN GỌI HÀM NÀY
-                    icon: const Icon(Icons.logout, color: Colors.red),
+                    icon: Icon(Icons.logout, color: Colors.red),
                     label: const Text("Đăng xuất", style: TextStyle(color: Colors.red)),
                   )
                 ],

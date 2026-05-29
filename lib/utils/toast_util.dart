@@ -8,7 +8,7 @@ class ToastUtil {
       title,
       message,
       snackPosition: SnackPosition.TOP,
-      backgroundColor: const Color(0xFFE7F4E9).withOpacity(0.95), // Màu xanh lá siêu nhạt
+      backgroundColor: const Color(0xFFE7F4E9).withValues(alpha:0.95), // Màu xanh lá siêu nhạt
       colorText: const Color(0xFF1E4620), // Màu xanh lá đậm cho text
       icon: const Icon(Icons.check_circle_outline, color: Color(0xFF2E7D32), size: 28),
       borderRadius: 16,
@@ -19,7 +19,7 @@ class ToastUtil {
       borderColor: const Color(0xFFB9DFBB),
       boxShadows: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.05),
+          color: Colors.black.withValues(alpha:0.05),
           blurRadius: 10,
           offset: const Offset(0, 4),
         )
@@ -33,7 +33,7 @@ class ToastUtil {
       title,
       message,
       snackPosition: SnackPosition.TOP,
-      backgroundColor: const Color(0xFFFDEBEC).withOpacity(0.95),
+      backgroundColor: const Color(0xFFFDEBEC).withValues(alpha:0.95),
       colorText: const Color(0xFF611A15),
       icon: const Icon(Icons.error_outline, color: Color(0xFFC62828), size: 28),
       borderRadius: 16,
@@ -44,7 +44,7 @@ class ToastUtil {
       borderColor: const Color(0xFFF8B4B4),
       boxShadows: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.05),
+          color: Colors.black.withValues(alpha:0.05),
           blurRadius: 10,
           offset: const Offset(0, 4),
         )
@@ -58,7 +58,7 @@ class ToastUtil {
       title,
       message,
       snackPosition: SnackPosition.TOP,
-      backgroundColor: const Color(0xFFFFF4E5).withOpacity(0.95),
+      backgroundColor: const Color(0xFFFFF4E5).withValues(alpha:0.95),
       colorText: const Color(0xFF663C00),
       icon: const Icon(Icons.warning_amber_outlined, color: Color(0xFFEF6C00), size: 28),
       borderRadius: 16,
@@ -69,7 +69,7 @@ class ToastUtil {
       borderColor: const Color(0xFFFFD599),
       boxShadows: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.05),
+          color: Colors.black.withValues(alpha:0.05),
           blurRadius: 10,
           offset: const Offset(0, 4),
         )
@@ -83,7 +83,7 @@ class ToastUtil {
       title,
       message,
       snackPosition: SnackPosition.TOP,
-      backgroundColor: const Color(0xFFE5F6FD).withOpacity(0.95),
+      backgroundColor: const Color(0xFFE5F6FD).withValues(alpha:0.95),
       colorText: const Color(0xFF014361),
       icon: const Icon(Icons.info_outline, color: Color(0xFF0277BD), size: 28),
       borderRadius: 16,
@@ -94,7 +94,7 @@ class ToastUtil {
       borderColor: const Color(0xFFB3E5FC),
       boxShadows: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.05),
+          color: Colors.black.withValues(alpha:0.05),
           blurRadius: 10,
           offset: const Offset(0, 4),
         )

@@ -5,8 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'screens/auth/welcome_screen.dart';
-import 'screens/home/home_screen.dart'; // Import HomeScreen
+import 'controllers/theme_controller.dart';
+import 'routes/app_pages.dart';
+import 'utils/app_links_util.dart';
+import 'services/offline_sync_service.dart';
+import 'utils/storage_util.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -39,29 +42,37 @@ void main() async {
 
   // 3. ĐĂNG KÝ HÀM CHẠY NGẦM
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  
   await GetStorage.init();
-  runApp(const MyApp());
+  
+  // Khởi chạy dọn dẹp bộ nhớ đệm tự động nếu đến kỳ hoặc vượt dung lượng
+  StorageUtil.checkAndAutoClean();
+
+  // Khởi tạo các Service/Controller toàn cục
+  Get.put(AppLinksService(), permanent: true);
+  final themeController = Get.put(ThemeController(), permanent: true);
+  Get.put(OfflineSyncService(), permanent: true);
+  
+  runApp(MyApp(themeController: themeController));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final ThemeController themeController;
+
+  const MyApp({super.key, required this.themeController});
 
   @override
   Widget build(BuildContext context) {
     // Đọc token từ bộ nhớ máy
     final token = GetStorage().read('token');
+    final hasToken = token != null && token.toString().isNotEmpty;
 
     return GetMaterialApp(
       title: 'Chia Bill',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightGreen),
-        useMaterial3: true,
-      ),
-      // LOGIC MỚI: Nếu có token rồi thì vào Home, chưa có thì vào Welcome
-      home: (token != null && token.toString().isNotEmpty)
-          ? HomeScreen()
-          : WelcomeScreen(),
+      theme: themeController.getThemeData(),
+      initialRoute: hasToken ? Routes.MAIN : Routes.WELCOME,
+      getPages: AppPages.routes,
     );
   }
 }

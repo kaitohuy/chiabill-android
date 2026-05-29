@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import '../data/models/notification_response.dart';
 import '../data/repositories/notification_repository.dart';
-import '../screens/trip/trip_detail_screen.dart';
+import '../routes/app_pages.dart';
 
 class NotificationController extends GetxController {
   final NotificationRepository _repository = NotificationRepository();
@@ -56,10 +56,23 @@ class NotificationController extends GetxController {
           notif.type == "PAYMENT_REQUESTED" ||
           notif.type == "PAYMENT_APPROVED" ||
           notif.type == "MEMBER_KICKED") {
-        Get.to(() => TripDetailScreen(tripId: notif.referenceId!));
+        Get.toNamed(Routes.TRIP_DETAIL, arguments: notif.referenceId!);
       } else if (notif.type == "TRIP_INVITE") {
         // Tùy logic bạn muốn dẫn đi đâu (có thể là màn nhập mã)
       }
     }
+  }
+
+  // Đánh dấu tất cả đã đọc
+  Future<void> markAllAsRead() async {
+    // 1. Cập nhật UI ngay lập tức
+    for (var notif in notifications) {
+      notif.isRead = true;
+    }
+    notifications.refresh();
+    unreadCount.value = 0;
+
+    // 2. Gọi API ngầm
+    await _repository.markAllAsRead();
   }
 }

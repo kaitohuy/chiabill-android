@@ -13,6 +13,11 @@ class CreateTripController extends GetxController {
   final nameController = TextEditingController();
   final descController = TextEditingController();
   final budgetController = TextEditingController(); // Đã có
+  
+  var startDate = DateTime.now().obs;
+  
+  var selectedCategoryName = Rx<String?>("Biển");
+  var selectedCategoryIcon = Rx<String?>("beach_access");
 
   var isLoading = false.obs;
 
@@ -38,27 +43,41 @@ class CreateTripController extends GetxController {
         name: nameController.text.trim(),
         description: descController.text.trim(),
         totalBudget: parsedBudget, // Gắn vào request
+        startDate: startDate.value.toIso8601String(),
+        categoryName: selectedCategoryName.value,
+        categoryIcon: selectedCategoryIcon.value,
       );
 
       final result = await _repository.createTrip(request);
+      LoadingUtil.hide();
 
-      if (result.success && result.data != null) {
-        // ĐÓNG FORM NGAY LẬP TỨC để người dùng thấy app phản hồi nhanh
-        Get.back();
-
+      if (result.success) {
+        // Xóa thông tin cũ trước
         nameController.clear();
         descController.clear();
-        budgetController.clear(); // Xóa data cũ cho lần mở sau
+        budgetController.clear();
+        startDate.value = DateTime.now();
 
-        ToastUtil.showSuccess("Thành công", "Đã tạo chuyến đi ${result.data!.name}");
+        // Đóng form
+        Get.back();
 
-        // Gọi HomeController load lại danh sách chuyến đi mới nhất
-        Get.find<HomeController>().fetchTrips();
+        if (result.data != null) {
+          ToastUtil.showSuccess("Thành công", "Đã tạo chuyến đi ${result.data!.name}");
+        } else {
+          ToastUtil.showSuccess("Đã lưu ngoại tuyến", result.message ?? "Sẽ đồng bộ khi có mạng");
+        }
+
+        // Dùng postFrameCallback để chọn đợi UI settle xong mới refresh
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (Get.isRegistered<HomeController>()) {
+            Get.find<HomeController>().fetchTrips();
+          }
+        });
       } else {
         ToastUtil.showError("Lỗi", result.message ?? "Không thể tạo chuyến đi");
       }
     } catch (e) {
-      ToastUtil.showError("Lỗi hệ thống", "Đã xảy ra lỗi ngoài ý muốn");
+      ToastUtil.showError("Lỗi hệ thống", e.toString());
     } finally {
       isLoading.value = false;
       LoadingUtil.hide();
@@ -67,9 +86,11 @@ class CreateTripController extends GetxController {
 
   @override
   void onClose() {
-    nameController.dispose();
-    descController.dispose();
-    budgetController.dispose(); // NHỚ DISPOSE ĐỂ TRÁNH TRÀN RAM
+    Future.delayed(const Duration(milliseconds: 500), () {
+      nameController.dispose();
+      descController.dispose();
+      budgetController.dispose(); // NHỚ DISPOSE ĐỂ TRÁNH TRÀN RAM
+    });
     super.onClose();
   }
 }

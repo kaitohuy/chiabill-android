@@ -7,6 +7,11 @@ class CreateExpenseRequest {
   final String description;
   final int? categoryId; // ĐÃ ĐỔI TỪ String? category SANG int? categoryId
   final List<SplitRequest> splits;
+  final String? currency;
+  final double? exchangeRate;
+  final bool? isFromFund;
+  final String? clientUuid;
+  final String? splitType;
 
   CreateExpenseRequest({
     required this.tripId,
@@ -15,7 +20,15 @@ class CreateExpenseRequest {
     required this.description,
     this.categoryId, // CẬP NHẬT CONSTRUCTOR
     required this.splits,
+    this.expenseDate,
+    this.currency,
+    this.exchangeRate,
+    this.isFromFund,
+    this.clientUuid,
+    this.splitType,
   });
+
+  final String? expenseDate;
 
   Map<String, dynamic> toJson() => {
     'tripId': tripId,
@@ -23,7 +36,12 @@ class CreateExpenseRequest {
     'totalAmount': totalAmount,
     'description': description,
     'categoryId': categoryId, // CẬP NHẬT JSON KEY CHO KHỚP BACKEND
-    'expenseDate': DateTime.now().toIso8601String().split('.')[0], // Cắt chuỗi cho chuẩn ISO của Spring Boot (nếu cần)
+    'expenseDate': expenseDate ?? DateTime.now().toIso8601String().split('.')[0], // Cắt chuỗi cho chuẩn ISO của Spring Boot (nếu cần)
+    'currency': currency,
+    'exchangeRate': exchangeRate,
+    'isFromFund': isFromFund,
+    'clientUuid': clientUuid,
+    if (splitType != null) 'splitType': splitType,
     'splits': splits.map((e) => e.toJson()).toList(),
   };
 }

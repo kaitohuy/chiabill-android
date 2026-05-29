@@ -15,7 +15,7 @@ class AuthRepository {
               (data) => AuthResponse.fromJson(data)
       );
     } catch (e) {
-      return ApiResponse(success: false, message: "Lỗi kết nối server: $e");
+      return ApiResponse.withError(e, defaultMessage: "Lỗi kết nối server");
     }
   }
 
@@ -31,7 +31,7 @@ class AuthRepository {
             (data) => AuthResponse.fromJson(data),
       );
     } catch (e) {
-      return ApiResponse(success: false, message: "Lỗi xác thực Google: $e");
+      return ApiResponse.withError(e, defaultMessage: "Lỗi xác thực Google");
     }
   }
 }

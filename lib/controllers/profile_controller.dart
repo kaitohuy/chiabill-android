@@ -41,37 +41,41 @@ class ProfileController extends GetxController {
 
   Future<void> fetchProfile() async {
     isLoading.value = true;
-    final result = await _repository.getMyProfile();
-    if (result.success && result.data != null) {
-      user.value = result.data;
+    try {
+      final result = await _repository.getMyProfile();
+      if (isClosed) return;
+      if (result.success && result.data != null) {
+        user.value = result.data;
 
-      // 1. Gán lại Text
-      nameController.text = user.value!.name ?? "";
-      phoneController.text = user.value!.phone ?? ""; // Đã thêm gán Phone
-      bankIdController.text = user.value!.bankId ?? "";
-      accountNoController.text = user.value!.accountNo ?? "";
+        // 1. Gán lại Text
+        nameController.text = user.value!.name ?? "";
+        phoneController.text = user.value!.phone ?? ""; // Đã thêm gán Phone
+        bankIdController.text = user.value!.bankId ?? "";
+        accountNoController.text = user.value!.accountNo ?? "";
 
-      // Gán lại Setting
-      allowAutoAdd.value = user.value!.allowAutoAdd ?? true;
-      allowAutoApprovePayment.value = user.value!.allowAutoApprovePayment ?? true;
+        // Gán lại Setting
+        allowAutoAdd.value = user.value!.allowAutoAdd;
+        allowAutoApprovePayment.value = user.value!.allowAutoApprovePayment;
 
-      // 2. Gán lại URL ảnh
-      currentAvatarUrl.value = (user.value!.avatarUrl == null || user.value!.avatarUrl!.isEmpty)
-          ? null
-          : user.value!.avatarUrl;
+        // 2. Gán lại URL ảnh
+        currentAvatarUrl.value = (user.value!.avatarUrl == null || user.value!.avatarUrl!.isEmpty)
+            ? null
+            : user.value!.avatarUrl;
 
-      currentQrUrl.value = (user.value!.bankQrUrl == null || user.value!.bankQrUrl!.isEmpty)
-          ? null
-          : user.value!.bankQrUrl;
+        currentQrUrl.value = (user.value!.bankQrUrl == null || user.value!.bankQrUrl!.isEmpty)
+            ? null
+            : user.value!.bankQrUrl;
 
-      // 3. Lấy ưu tiên thanh toán
-      paymentPriority.value = result.data!.paymentPriority ?? 1;
+        // 3. Lấy ưu tiên thanh toán
+        paymentPriority.value = result.data!.paymentPriority;
 
-      // Ép đóng toàn bộ các Tab khi mới vào màn hình
-      isVietQrExpanded.value = false;
-      isStaticQrExpanded.value = false;
+        // Ép đóng toàn bộ các Tab khi mới vào màn hình
+        isVietQrExpanded.value = false;
+        isStaticQrExpanded.value = false;
+      }
+    } finally {
+      isLoading.value = false;
     }
-    isLoading.value = false;
   }
 
   Future<void> saveProfile({bool silent = false}) async {
@@ -97,12 +101,15 @@ class ProfileController extends GetxController {
 
       if (result.success) {
         user.value = result.data;
-        if (!silent) ToastUtil.showSuccess("Thành công", "Đã lưu thay đổi");
+        if (!silent) {
+          LoadingUtil.hide();
+          ToastUtil.showSuccess("Thành công", "Đã lưu thay đổi");
+        }
       } else {
         if (!silent) ToastUtil.showError("Lỗi", result.message ?? "Lỗi lưu thông tin");
       }
     } catch (e) {
-      if (!silent) ToastUtil.showError("Lỗi", "Đã xảy ra lỗi khi lưu thông tin");
+      if (!silent) ToastUtil.showError("Lỗi", e.toString());
     } finally {
       if (!silent) {
         isLoading.value = false;
@@ -149,6 +156,7 @@ class ProfileController extends GetxController {
         if (type == 'bank-qr') currentQrUrl.value = result.data;
 
         saveProfile(silent: true);
+        LoadingUtil.hide();
         ToastUtil.showSuccess("Thành công", "Đã cập nhật ảnh!");
       } else {
         ToastUtil.showError("Lỗi", result.message ?? "Không thể tải ảnh");

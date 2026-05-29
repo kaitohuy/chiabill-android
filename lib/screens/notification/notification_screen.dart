@@ -1,17 +1,29 @@
+import 'package:chiabill/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/notification_controller.dart';
 
-class NotificationScreen extends StatelessWidget {
-  NotificationScreen({super.key});
+class NotificationScreen extends StatefulWidget {
+  const NotificationScreen({super.key});
 
+  @override
+  State<NotificationScreen> createState() => _NotificationScreenState();
+}
+
+class _NotificationScreenState extends State<NotificationScreen> {
   final NotificationController controller = Get.find<NotificationController>();
 
   @override
-  Widget build(BuildContext context) {
-    // Gọi tải dữ liệu mỗi khi mở màn hình này
-    controller.fetchNotifications();
+  void initState() {
+    super.initState();
+    // Gọi tải dữ liệu một lần duy nhất khi mở màn hình này
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.fetchNotifications();
+    });
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
@@ -19,10 +31,20 @@ class NotificationScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
         elevation: 1,
+        actions: [
+          Obx(() => controller.notifications.isNotEmpty 
+            ? IconButton(
+                icon: Icon(Icons.done_all, color: AppColors.primary),
+                tooltip: "Đánh dấu tất cả đã đọc",
+                onPressed: () => controller.markAllAsRead(),
+              )
+            : const SizedBox.shrink()
+          ),
+        ],
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator(color: Colors.lightGreen));
+          return Center(child: CircularProgressIndicator(color: AppColors.primary));
         }
 
         if (controller.notifications.isEmpty) {
@@ -50,11 +72,11 @@ class NotificationScreen extends StatelessWidget {
             }
 
             return Container(
-              color: notif.isRead ? Colors.white : Colors.lightGreen.shade50,
+              color: notif.isRead ? Colors.white : AppColors.primary.withValues(alpha: 0.04),
               child: ListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                 leading: CircleAvatar(
-                  backgroundColor: _getIconColor(notif.type).withOpacity(0.2),
+                  backgroundColor: _getIconColor(notif.type).withValues(alpha:0.2),
                   child: Icon(_getIcon(notif.type), color: _getIconColor(notif.type)),
                 ),
                 title: Text(
@@ -70,7 +92,7 @@ class NotificationScreen extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(notif.message, style: TextStyle(color: Colors.grey[700])),
                     const SizedBox(height: 6),
-                    Text(timeStr, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                    Text(timeStr, style: TextStyle(fontSize: 12, color: Colors.grey)),
                   ],
                 ),
                 onTap: () => controller.handleNotificationClick(notif),
@@ -95,7 +117,7 @@ class NotificationScreen extends StatelessWidget {
   Color _getIconColor(String type) {
     if (type == "EXPENSE_CREATED") return Colors.orange;
     if (type == "PAYMENT_REQUESTED") return Colors.redAccent;
-    if (type == "PAYMENT_APPROVED") return Colors.green;
+    if (type == "PAYMENT_APPROVED") return AppColors.primary;
     return Colors.blue;
   }
 }

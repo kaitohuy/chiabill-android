@@ -1,60 +1,54 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'dart:ui';
+import 'dart:async';
 
 class LoadingUtil {
   static bool _isShowing = false;
+  static Timer? _timeoutTimer;
 
-  static void show() {
-    if (_isShowing) return; // Không cho phép mở lồng nhau
+  static void show({int timeoutSeconds = 10}) {
+    if (_isShowing) return;
     _isShowing = true;
+
+    // Tự động đóng sau X giây nếu quên gọi hide()
+    _timeoutTimer?.cancel();
+    _timeoutTimer = Timer(Duration(seconds: timeoutSeconds), () {
+      hide();
+    });
 
     Get.dialog(
       PopScope(
-        canPop: false,
+        canPop: true, // Cho phép pop (cả back button và Get.back)
         onPopInvokedWithResult: (didPop, result) {
-           // Đảm bảo phím Back không đóng được Loading nếu _isShowing vẫn đúng
+           // Đồng bộ state nếu user bấm nút Back vật lý trên Android
+           _isShowing = false; 
         },
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-          child: Center(
-            child: Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(24),
-                child: Image.asset(
-                  'assets/images/loading.gif',
-                  fit: BoxFit.cover,
-                ),
-              ),
+        child: Center(
+          child: Container(
+            width: 120,
+            height: 120,
+            color: Colors.transparent,
+            child: Image.asset(
+              'assets/images/loading.gif',
+              fit: BoxFit.contain,
             ),
           ),
         ),
       ),
       barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.15),
+      barrierColor: Colors.black.withValues(alpha: 0.15),
       useSafeArea: true,
-    );
+    ).then((_) {
+      _isShowing = false;
+    });
   }
 
   static void hide() {
+    _timeoutTimer?.cancel();
     if (!_isShowing) return;
     _isShowing = false;
     
-    if (Get.isDialogOpen ?? false) {
-      Get.back();
-    }
+    // Gọi thẳng Get.back() thay vì check isDialogOpen vì đôi khi dialog đang animate in
+    Get.back();
   }
 }
