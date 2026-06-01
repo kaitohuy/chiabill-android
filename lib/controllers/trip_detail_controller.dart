@@ -1,4 +1,5 @@
 import 'package:chiabill/utils/toast_util.dart';
+import 'package:flutter/foundation.dart';
 import 'package:chiabill/controllers/profile_controller.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -257,7 +258,7 @@ class TripDetailController extends GetxController {
         await file.writeAsBytes(bytes, flush: true);
 
         final savedSize = await file.length();
-        print('[Export] Saved $filePath — $savedSize bytes');
+        debugPrint('[Export] Saved $filePath — $savedSize bytes');
 
         if (savedSize < 100) {
           ToastUtil.showError("Lỗi xuất file", "File tải về bị lỗi ($savedSize bytes)");

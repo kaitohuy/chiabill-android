@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:app_links/app_links.dart';
 import 'package:get/get.dart';
 import '../controllers/home_controller.dart';
@@ -22,21 +23,21 @@ class AppLinksService extends GetxService {
     try {
       final initialUri = await _appLinks.getInitialLink();
       if (initialUri != null) {
-        print("Cold Start Deep Link: $initialUri");
+        debugPrint("Cold Start Deep Link: $initialUri");
         _handleIncomingLink(initialUri);
       }
     } catch (e) {
-      print("Deep Link Cold Start Error: $e");
+      debugPrint("Deep Link Cold Start Error: $e");
     }
 
     // 2. Lắng nghe link khi ứng dụng đang mở (Background / Foreground)
     _linkSubscription = _appLinks.uriLinkStream.listen(
       (uri) {
-        print("Nhận Deep Link mới: $uri");
+        debugPrint("Nhận Deep Link mới: $uri");
         _handleIncomingLink(uri);
       },
       onError: (err) {
-        print("Deep Link Stream Error: $err");
+        debugPrint("Deep Link Stream Error: $err");
       },
     );
   }
@@ -44,7 +45,7 @@ class AppLinksService extends GetxService {
   /// Hàm này được gọi bởi HomeController.onReady() để xử lý link đang chờ
   void checkAndHandlePendingLink() {
     if (_pendingInviteCode != null) {
-      print("Đang xử lý mã mời đang chờ: $_pendingInviteCode");
+      debugPrint("Đang xử lý mã mời đang chờ: $_pendingInviteCode");
       final code = _pendingInviteCode!;
       _pendingInviteCode = null; // Xóa ngay để tránh trùng lặp
       
@@ -56,7 +57,7 @@ class AppLinksService extends GetxService {
   }
 
   void _handleIncomingLink(Uri uri) {
-    print("Xử lý URI: path = ${uri.path}");
+    debugPrint("Xử lý URI: path = ${uri.path}");
     
     if (uri.path.startsWith('/join/')) {
       final segments = uri.pathSegments;
@@ -69,7 +70,7 @@ class AppLinksService extends GetxService {
           if (Get.currentRoute == Routes.MAIN && Get.isRegistered<HomeController>()) {
             _navigateToJoinTrip(inviteCode);
           } else {
-            print("Chưa sẵn sàng, cất mã mời vào hàng chờ: $inviteCode");
+            debugPrint("Chưa sẵn sàng, cất mã mời vào hàng chờ: $inviteCode");
             _pendingInviteCode = inviteCode;
           }
         }

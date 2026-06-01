@@ -1,6 +1,7 @@
 import 'package:chiabill/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../widgets/empty_state.dart';
 import '../../controllers/notification_controller.dart';
 
 class NotificationScreen extends StatefulWidget {
@@ -48,16 +49,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
         }
 
         if (controller.notifications.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.notifications_off_outlined, size: 80, color: Colors.grey[300]),
-                const SizedBox(height: 16),
-                const Text("Chưa có thông báo nào", style: TextStyle(color: Colors.grey)),
-              ],
-            ),
-          );
+          return const EmptyState(text: "Hộp thư của bạn đang trống.\nKhông có thông báo mới nào!");
         }
 
         return ListView.builder(

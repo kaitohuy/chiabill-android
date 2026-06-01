@@ -477,7 +477,60 @@ class ProfileScreen extends GetView<ProfileController> {
                     onPressed: () => authController.logout(), // CHỈ CẦN GỌI HÀM NÀY
                     icon: Icon(Icons.logout, color: Colors.red),
                     label: const Text("Đăng xuất", style: TextStyle(color: Colors.red)),
-                  )
+                  ),
+                  const SizedBox(height: 32),
+                  // ==========================================
+                  // BRANDING FOOTER (RED PHOENIX LOGO)
+                  // ==========================================
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.04),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: Image.asset(
+                              'assets/images/launcher_icon.png',
+                              width: 52,
+                              height: 52,
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          "Chill travel",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey[800],
+                            fontSize: 15,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "Phiên bản 1.0.0 • Đi muôn nơi, chia sẻ mọi cuộc vui!",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.grey[500],
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),

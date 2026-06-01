@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/foundation.dart';
 import '../controllers/home_controller.dart';
 import '../utils/toast_util.dart';
 
@@ -35,7 +36,7 @@ class OfflineSyncService extends GetxService {
     bool wasOffline = isOffline;
     isOffline = result.isEmpty || result.contains(ConnectivityResult.none);
     
-    print('[OfflineSync] wasOffline=$wasOffline, isOffline=$isOffline, result=$result');
+    debugPrint('[OfflineSync] wasOffline=$wasOffline, isOffline=$isOffline, result=$result');
     
     if (!isOffline) {
       // Khi phát hiện thiết bị đang có mạng (kể cả lúc vừa mở app hoặc khôi phục mạng)
@@ -123,11 +124,11 @@ class OfflineSyncService extends GetxService {
     
     List queue = getQueue();
     if (queue.isEmpty) {
-      print('[OfflineSync] Queue rỗng, bỏ qua sync');
+      debugPrint('[OfflineSync] Queue rỗng, bỏ qua sync');
       return;
     }
 
-    print('[OfflineSync] Bắt đầu sync ${queue.length} items...');
+    debugPrint('[OfflineSync] Bắt đầu sync ${queue.length} items...');
     _isSyncing = true;
     ToastUtil.showSuccess("Đang đồng bộ", "Đang tải dữ liệu lưu nháp lên máy chủ...");
 
@@ -148,7 +149,7 @@ class OfflineSyncService extends GetxService {
     // Duyệt qua từng item và gửi lại
     for (var i = 0; i < queue.length; i++) {
       var item = queue[i];
-      print('[OfflineSync] Gửi: ${item['method']} ${item['path']}');
+      debugPrint('[OfflineSync] Gửi: ${item['method']} ${item['path']}');
       try {
         if (item['method'] == 'POST') {
           await dio.post(item['path'], data: item['data']);
@@ -159,12 +160,12 @@ class OfflineSyncService extends GetxService {
         }
         
         // Gửi thành công -> Xóa khỏi queue
-        print('[OfflineSync] Thành công: ${item['path']}');
+        debugPrint('[OfflineSync] Thành công: ${item['path']}');
         queue.removeAt(i);
         i--; // Lùi index vì vừa xóa
         successCount++;
       } catch (e) {
-        print('[OfflineSync] Lỗi: $e');
+        debugPrint('[OfflineSync] Lỗi: $e');
         // Nếu lỗi do mạng, dừng đồng bộ. Nếu lỗi do API (ví dụ 400), có thể bỏ qua hoặc giữ lại
         if (e is DioException && (e.type == DioExceptionType.connectionError || e.type == DioExceptionType.connectionTimeout)) {
           break; // Mất mạng lại rồi, ngưng

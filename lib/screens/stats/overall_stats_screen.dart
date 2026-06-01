@@ -5,6 +5,7 @@ import 'package:fl_chart/fl_chart.dart';
 import '../../controllers/overall_stats_controller.dart';
 import '../../utils/currency_util.dart';
 import '../../utils/trip_category_util.dart';
+import '../../widgets/empty_state.dart';
 import '../trip/trip_detail_screen.dart';
 
 class OverallStatsScreen extends StatefulWidget {
@@ -442,16 +443,7 @@ class _OverallStatsScreenState extends State<OverallStatsScreen> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.flight_takeoff, size: 80, color: Colors.grey[300]),
-          const SizedBox(height: 16),
-          const Text("Chưa có chi tiêu nào trong khoảng thời gian này", style: TextStyle(color: Colors.grey)),
-        ],
-      ),
-    );
+    return const EmptyState(text: "Chưa có chi tiêu nào trong khoảng thời gian này");
   }
 }
 

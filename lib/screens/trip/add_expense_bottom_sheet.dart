@@ -396,9 +396,10 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                                     int totalCount = controller.activeMembers.length;
 
                                     String modeText = "";
-                                    if (controller.splitType.value == "PERCENTAGE") modeText = " (%)";
-                                    else if (controller.splitType.value == "SHARES") modeText = " (Tỉ trọng)";
-                                    else if (controller.splitType.value == "EXACT") modeText = " (Chính xác)";
+                                    if (controller.splitType.value == "PERCENTAGE") {
+                                      modeText = " (%)";
+                                    } else if (controller.splitType.value == "SHARES") {modeText = " (Tỉ trọng)";}
+                                    else if (controller.splitType.value == "EXACT") {modeText = " (Chính xác)";}
 
                                     if (controller.splitType.value != "EQUAL") {
                                       int selectedKeys = controller.splitValues.keys.where((id) => (controller.splitValues[id] ?? 0) > 0).length;

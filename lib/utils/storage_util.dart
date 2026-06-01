@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -46,7 +47,7 @@ class StorageUtil {
       }
       return totalSize / (1024 * 1024);
     } catch (e) {
-      print('[StorageUtil] Error calculating cache size: $e');
+      debugPrint('[StorageUtil] Error calculating cache size: $e');
       return 0;
     }
   }
@@ -66,7 +67,7 @@ class StorageUtil {
       _storage.write(keyLastClean, DateTime.now().toIso8601String());
       return true;
     } catch (e) {
-      print('[StorageUtil] Error clearing cache: $e');
+      debugPrint('[StorageUtil] Error clearing cache: $e');
       return false;
     }
   }
@@ -88,10 +89,10 @@ class StorageUtil {
         
         if (schedule == 'daily' && isNewDay) {
           shouldClean = true;
-          print('[StorageUtil] Auto-clean triggered by Daily schedule (calendar day changed).');
+          debugPrint('[StorageUtil] Auto-clean triggered by Daily schedule (calendar day changed).');
         } else if (schedule == 'weekly' && diffDays >= 7) {
           shouldClean = true;
-          print('[StorageUtil] Auto-clean triggered by Weekly schedule.');
+          debugPrint('[StorageUtil] Auto-clean triggered by Weekly schedule.');
         }
       } else if (lastClean == null) {
         // First run
@@ -105,7 +106,7 @@ class StorageUtil {
           final currentSize = await getCacheSize();
           if (currentSize > maxSizeLimit) {
             shouldClean = true;
-            print('[StorageUtil] Auto-clean triggered by Max Cache Size limit (${currentSize.toStringAsFixed(1)} MB > $maxSizeLimit MB).');
+            debugPrint('[StorageUtil] Auto-clean triggered by Max Cache Size limit (${currentSize.toStringAsFixed(1)} MB > $maxSizeLimit MB).');
           }
         }
       }
@@ -114,7 +115,7 @@ class StorageUtil {
         await clearCache();
       }
     } catch (e) {
-      print('[StorageUtil] Error during auto-clean check: $e');
+      debugPrint('[StorageUtil] Error during auto-clean check: $e');
     }
   }
 }

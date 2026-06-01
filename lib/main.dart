@@ -14,7 +14,7 @@ import 'utils/storage_util.dart';
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  print("Nhận thông báo khi tắt app: ${message.messageId}");
+  debugPrint("Nhận thông báo khi tắt app: ${message.messageId}");
   // OS sẽ tự động hiện popup thông báo vì BE của bạn có truyền block "notification"
 }
 

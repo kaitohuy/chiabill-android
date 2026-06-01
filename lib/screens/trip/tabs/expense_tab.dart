@@ -1,6 +1,7 @@
 import 'package:chiabill/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../widgets/empty_state.dart';
 import '../../../controllers/add_expense_controller.dart';
 import '../../../controllers/trip_detail_controller.dart';
 import '../../../controllers/trip_expense_controller.dart';
@@ -93,10 +94,8 @@ class ExpensesTab extends StatelessWidget {
                   child: ListView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     children: [
-                      SizedBox(height: Get.height * 0.25),
-                      Icon(Icons.receipt_long, size: 80, color: AppColors.primary.withValues(alpha:0.5)),
-                      const SizedBox(height: 16),
-                      const Center(child: Text("Chưa có khoản chi nào.\nChạm vào bất cứ đâu để thêm mới!", textAlign: TextAlign.center, style: TextStyle(color: Colors.grey))),
+                      SizedBox(height: Get.height * 0.15),
+                      const EmptyState(text: "Chưa có khoản chi nào.\nChạm vào bất cứ đâu để thêm mới!"),
                     ],
                   ),
                 );

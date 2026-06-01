@@ -2,6 +2,7 @@ import 'package:chiabill/theme/app_colors.dart';
 import 'package:chiabill/routes/app_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../widgets/empty_state.dart';
 import '../../controllers/home_controller.dart';
 import '../../controllers/notification_controller.dart';
 import '../../controllers/profile_controller.dart';
@@ -90,32 +91,53 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        titleSpacing: 16,
         title: Obx(() {
-                String fullName = profileController.user.value?.name ?? "bạn";
-                if (fullName.trim().isEmpty) fullName = "bạn";
-                List<String> nameParts = fullName.trim().split(" ");
-                String shortName = nameParts.isNotEmpty ? nameParts.last : "bạn";
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Chào $shortName 👋", style: TextStyle(fontSize: 16, color: AppColors.primaryDark, fontWeight: FontWeight.normal)),
-                    Text("Chuyến đi của bạn", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.primaryDarker)),
-                  ],
-                );
-              }),
+          String fullName = profileController.user.value?.name ?? "bạn";
+          if (fullName.trim().isEmpty) fullName = "bạn";
+          List<String> nameParts = fullName.trim().split(" ");
+          String shortName = nameParts.isNotEmpty ? nameParts.last : "bạn";
+          return Row(
+            children: [
+              Image.asset(
+                'assets/images/logo_home.png',
+                height: 48,
+                width: 48,
+                fit: BoxFit.contain,
+              ),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "Chào $shortName",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: AppColors.primaryDark,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    "Cùng đi, cùng chia sẻ!",
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey[800],
+                      fontStyle: FontStyle.italic,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          );
+        }),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
         actions: [
-          IconButton(
-            onPressed: () => Get.toNamed(Routes.CALCULATOR),
-            icon: Image.asset(
-              'assets/images/calculator.png',
-              width: 28,
-              height: 28,
-              errorBuilder: (context, error, stackTrace) => Icon(Icons.calculate_outlined, size: 28, color: AppColors.primary),
-            ),
-          ),
           IconButton(
             onPressed: () => _showJoinTripDialog(context),
             icon: Image.asset(
@@ -126,14 +148,23 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           IconButton(
+            onPressed: () => Get.toNamed(Routes.CALCULATOR),
+            icon: Image.asset(
+              'assets/images/calculator.png',
+              width: 24,
+              height: 24,
+              errorBuilder: (context, error, stackTrace) => Icon(Icons.calculate_outlined, size: 28, color: AppColors.primary),
+            ),
+          ),
+          IconButton(
             icon: Obx(() => Badge(
               isLabelVisible: notifController.unreadCount.value > 0,
               label: Text(notifController.unreadCount.value.toString()),
               backgroundColor: Colors.redAccent,
               child: Image.asset(
                 'assets/images/bell.png',
-                width: 26,
-                height: 26,
+                width: 24,
+                height: 24,
                 errorBuilder: (context, error, stackTrace) => Icon(Icons.notifications_none, size: 26, color: AppColors.primaryDark),
               ),
             )),
@@ -376,10 +407,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
       children: [
-        SizedBox(height: Get.height * 0.3),
-        Icon(Icons.map_outlined, size: 80, color: Colors.grey[300]),
-        const SizedBox(height: 16),
-        const Center(child: Text("Chưa có chuyến đi nào trong tháng này", style: TextStyle(color: Colors.grey))),
+        SizedBox(height: Get.height * 0.15),
+        const EmptyState(text: "Chưa có chuyến đi nào trong khoảng thời gian này.\nHãy nhấn (+) để tạo chuyến đi đầu tiên!"),
       ],
     );
   }

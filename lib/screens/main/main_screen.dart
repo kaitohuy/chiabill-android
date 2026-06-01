@@ -16,6 +16,7 @@ class MainScreen extends GetView<MainController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Obx(() => IndexedStack(
         index: controller.currentIndex.value,
         children: [

@@ -55,15 +55,10 @@ flutter:
     - .env
     - assets/images/
 
-#flutter_launcher_icons:
-#  android: true
-#  ios: true
-#  image_path: "assets/images/icon_foreground.png"
-#  adaptive_icon_background: "assets/images/icon_background.png"
-#  adaptive_icon_foreground: "assets/images/icon_foreground.png"
-#  min_sdk_android: 26
 flutter_launcher_icons:
- android: "launcher_icon"
- ios: true
- image_path: "assets/images/launcher_icon.png"
- min_sdk_android: 21
+  android: true
+  ios: true
+  image_path: "assets/images/launcher_icon.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/images/launcher_icon.png"
+  min_sdk_android: 21

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../widgets/empty_state.dart';
 import '../../../controllers/create_payment_controller.dart';
 import '../../../controllers/trip_detail_controller.dart';
 import '../../../controllers/trip_settlement_controller.dart';
@@ -24,18 +25,9 @@ class SettlementsTab extends StatelessWidget {
           onRefresh: () async => mainController.fetchData(),
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
-            children: const [
-              SizedBox(height: 100),
-              Center(
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.handshake, size: 80, color: Colors.grey),
-                        SizedBox(height: 16),
-                        Text("Mọi người đang hòa tiền nhau,\nhoặc chưa có khoản chi nào!", textAlign: TextAlign.center, style: TextStyle(color: Colors.grey))
-                      ]
-                  )
-              )
+            children: [
+              SizedBox(height: Get.height * 0.15),
+              const EmptyState(text: "Mọi người đang hòa tiền nhau,\nhoặc chưa có khoản chi nào!"),
             ],
           ),
         );

@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import '../../../widgets/empty_state.dart';
 import '../../../controllers/group_fund_controller.dart';
 import '../../../controllers/trip_detail_controller.dart';
 import '../../../controllers/trip_expense_controller.dart';
@@ -785,25 +786,9 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
             const SizedBox(height: 12),
 
             if (list.isEmpty)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey[200]!),
-                ),
-                child: Column(
-                  children: [
-                    Icon(Icons.history_toggle_off, size: 40, color: Colors.grey[400]),
-                    const SizedBox(height: 8),
-                    const Text(
-                      "Chưa có lịch sử đóng góp quỹ nào.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey, fontSize: 13),
-                    ),
-                  ],
-                ),
+              const EmptyState(
+                text: "Chưa có lịch sử đóng góp quỹ nào.",
+                imageHeight: 120.0,
               )
             else
               ListView.builder(

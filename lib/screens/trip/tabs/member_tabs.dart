@@ -1,6 +1,7 @@
 import 'package:chiabill/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../widgets/empty_state.dart';
 import 'package:cached_network_image/cached_network_image.dart' as org_cached;
 import '../../../controllers/trip_detail_controller.dart';
 import '../widgets/kick_member_dialog.dart';
@@ -29,16 +30,7 @@ class MembersTab extends StatelessWidget {
                   builder: (context) {
                     // Xử lý Empty State
                     if (trip == null || trip.members == null || trip.members!.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.people_outline, size: 80, color: Colors.blue.withValues(alpha:0.5)),
-                            const SizedBox(height: 16),
-                            const Text("Chưa có thành viên nào.\nChạm vào bất cứ đâu để thêm!", textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
-                          ],
-                        ),
-                      );
+                      return const EmptyState(text: "Chưa có thành viên nào.\nChạm vào bất cứ đâu để thêm!");
                     }
 
                     // Danh sách thành viên

@@ -1,5 +1,6 @@
 import 'package:chiabill/utils/toast_util.dart';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
 import '../data/network/api_service.dart';
@@ -84,9 +85,9 @@ class FcmController extends GetxController {
         "token": token,
         "platform": platform
       });
-      print("Đã đăng ký token với Backend thành công!");
+      debugPrint("Đã đăng ký token với Backend thành công!");
     } catch (e) {
-      print("Lỗi gửi token lên BE: $e");
+      debugPrint("Lỗi gửi token lên BE: $e");
     }
   }
 

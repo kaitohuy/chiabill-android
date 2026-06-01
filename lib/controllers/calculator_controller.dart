@@ -10,7 +10,7 @@ class CalculatorController extends GetxController {
   var isAdvanced = false.obs; // Trạng thái bàn phím
   final box = GetStorage();
   
-  final String HISTORY_KEY = 'calculator_history';
+  final String historyKey = 'calculator_history';
 
   @override
   void onInit() {
@@ -19,14 +19,14 @@ class CalculatorController extends GetxController {
   }
 
   void loadHistory() {
-    List<dynamic>? saved = box.read<List<dynamic>>(HISTORY_KEY);
+    List<dynamic>? saved = box.read<List<dynamic>>(historyKey);
     if (saved != null) {
       history.value = saved.map((e) => e.toString()).toList();
     }
   }
 
   void saveHistory() {
-    box.write(HISTORY_KEY, history.toList());
+    box.write(historyKey, history.toList());
   }
 
   void toggleAdvanced() {
@@ -171,7 +171,9 @@ class CalculatorController extends GetxController {
       input.value = res.replaceAll(',', '');
       result.value = res;
       Get.back();
-    } catch (e) {}
+    } catch (e) {
+      // Ignore parsing errors
+    }
   }
 
   double _evaluateExpression(String expr) {
@@ -180,17 +182,17 @@ class CalculatorController extends GetxController {
     expr = expr.replaceAll('%', '/100');
     
     // Tự động đóng ngoặc nếu thiếu
-    int openBrackets = '\('.allMatches(expr).length;
-    int closeBrackets = '\)'.allMatches(expr).length;
+    int openBrackets = '('.allMatches(expr).length;
+    int closeBrackets = ')'.allMatches(expr).length;
     for (int i = 0; i < openBrackets - closeBrackets; i++) {
       expr += ')';
     }
 
     try {
-      Parser p = Parser();
+      ShuntingYardParser p = ShuntingYardParser();
       Expression exp = p.parse(expr);
       ContextModel cm = ContextModel();
-      double eval = exp.evaluate(EvaluationType.REAL, cm);
+      double eval = RealEvaluator(cm).evaluate(exp).toDouble();
       return eval;
     } catch (e) {
       throw Exception("Invalid expr");
