@@ -7,17 +7,26 @@ import '../../../controllers/trip_detail_controller.dart';
 import '../widgets/kick_member_dialog.dart';
 import '../../../utils/ui_util.dart';
 
-class MembersTab extends StatelessWidget {
+class MembersTab extends StatefulWidget {
   final TripDetailController controller;
   final VoidCallback onAddMemberTap; // Thêm callback để mở hộp thoại từ khoảng trống
 
   const MembersTab({super.key, required this.controller, required this.onAddMemberTap});
 
   @override
+  State<MembersTab> createState() => _MembersTabState();
+}
+
+class _MembersTabState extends State<MembersTab> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Obx(() {
-      if (controller.isLoading.value) return const Center(child: CircularProgressIndicator());
-      final trip = controller.trip.value;
+      if (widget.controller.isLoading.value) return const Center(child: CircularProgressIndicator());
+      final trip = widget.controller.trip.value;
 
       return Column(
         children: [
@@ -25,7 +34,7 @@ class MembersTab extends StatelessWidget {
             // 🌟 BỌC GESTURE DETECTOR ĐỂ BẮT CLICK KHOẢNG TRỐNG
             child: GestureDetector(
               behavior: HitTestBehavior.translucent,
-              onTap: () => UIUtil.smartTap(context, onAddMemberTap),
+              onTap: () => UIUtil.smartTap(context, widget.onAddMemberTap),
               child: Builder(
                   builder: (context) {
                     // Xử lý Empty State
@@ -36,7 +45,7 @@ class MembersTab extends StatelessWidget {
                     // Danh sách thành viên
                     return RefreshIndicator(
                         color: AppColors.primary,
-                        onRefresh: () async => controller.fetchData(),
+                        onRefresh: () async => widget.controller.fetchData(),
                         child: ListView.builder(
                           physics: const AlwaysScrollableScrollPhysics(),
                           padding: const EdgeInsets.all(16),
@@ -84,7 +93,7 @@ class MembersTab extends StatelessWidget {
                                   onTap: () {
                                     Get.bottomSheet(
                                         Container(
-                                          padding: EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 24 + MediaQuery.of(context).padding.bottom),
+                                          padding: const EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 24),
                                           decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.min,
@@ -98,7 +107,7 @@ class MembersTab extends StatelessWidget {
                                                   subtitle: Text(member.email ?? "Không có thông tin")
                                               ),
 
-                                              if (controller.isOwner && !isMemberOwner) ...[
+                                              if (widget.controller.isOwner && !isMemberOwner) ...[
                                                 const Divider(),
                                                 const Text("Quản trị thành viên", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
                                                 const SizedBox(height: 8),
@@ -106,7 +115,7 @@ class MembersTab extends StatelessWidget {
                                                 ListTile(
                                                     leading: Icon(Icons.swap_horiz, color: Colors.blue),
                                                     title: const Text("Chuyển quyền Chủ phòng"),
-                                                    onTap: () { Get.back(); controller.transferOwner(member.id); }
+                                                    onTap: () { Get.back(); widget.controller.transferOwner(member.id); }
                                                 ),
                                                 ListTile(
                                                     leading: Icon(isDisabled ? Icons.play_arrow : Icons.pause, color: Colors.orange),
@@ -114,9 +123,9 @@ class MembersTab extends StatelessWidget {
                                                     onTap: () {
                                                       Get.back();
                                                       if (isDisabled) {
-                                                        controller.activateMember(member.id);
+                                                        widget.controller.activateMember(member.id);
                                                       } else {
-                                                        controller.disableMember(member.id);
+                                                        widget.controller.disableMember(member.id);
                                                       }
                                                     }
                                                 ),
@@ -128,7 +137,7 @@ class MembersTab extends StatelessWidget {
                                                       Get.dialog(
                                                           KickMemberDialog(
                                                               userName: member.name ?? "Thành viên",
-                                                              onConfirm: (forgive) => controller.kickMember(member.id, forgive)
+                                                              onConfirm: (forgive) => widget.controller.kickMember(member.id, forgive)
                                                           )
                                                       );
                                                     }
@@ -151,7 +160,7 @@ class MembersTab extends StatelessWidget {
           ),
 
           // NÚT RỜI NHÓM NẰM CỐ ĐỊNH Ở DƯỚI
-          if (!controller.isOwner)
+          if (!widget.controller.isOwner)
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: SizedBox(
@@ -192,7 +201,7 @@ class MembersTab extends StatelessWidget {
                             ),
                             onPressed: () {
                               Get.back();
-                              controller.leaveTrip();
+                              widget.controller.leaveTrip();
                             },
                             child: const Text("XÁC NHẬN", style: TextStyle(fontWeight: FontWeight.bold)),
                           ),

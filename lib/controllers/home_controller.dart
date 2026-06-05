@@ -25,6 +25,13 @@ class HomeController extends GetxController {
   var selectedMonth = DateTime.now().month.obs;
   var selectedYear = DateTime.now().year.obs;
 
+  // CHẾ ĐỘ HIỂN THỊ: LIST VIEW / GALLERY (GRID) VIEW
+  var isGridView = false.obs;
+
+  void toggleViewMode() {
+    isGridView.value = !isGridView.value;
+  }
+
   @override
   void onReady() {
     super.onReady();

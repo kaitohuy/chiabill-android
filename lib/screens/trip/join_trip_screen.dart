@@ -12,7 +12,7 @@ class JoinTripScreen extends StatefulWidget {
 }
 
 class _JoinTripScreenState extends State<JoinTripScreen> {
-  final JoinTripController controller = Get.put(JoinTripController());
+  final JoinTripController controller = Get.find<JoinTripController>();
   late String inviteCode;
 
   @override

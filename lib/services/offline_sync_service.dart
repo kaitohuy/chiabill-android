@@ -14,12 +14,17 @@ class OfflineSyncService extends GetxService {
   var syncTrigger = 0.obs;
   bool _isSyncing = false;
   bool isOffline = false;
+  List<ConnectivityResult>? _lastResult;
 
   @override
   void onInit() {
     super.onInit();
-    _initConnectivity();
-    _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
+    // Trì hoãn việc kiểm tra kết nối mạng lúc khởi động 2 giây để nhường luồng vẽ mượt mà giao diện,
+    // tránh nhảy frame do các cuộc gọi kênh nền (platform channel calls) đồng thời.
+    Future.delayed(const Duration(seconds: 2), () {
+      _initConnectivity();
+      _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
+    });
   }
 
   Future<void> _initConnectivity() async {
@@ -33,6 +38,12 @@ class OfflineSyncService extends GetxService {
   }
 
   void _updateConnectionStatus(List<ConnectivityResult> result) {
+    // Tránh xử lý trùng lặp khi stream phát lại trạng thái cũ ngay lúc khởi động
+    if (_lastResult != null && listEquals(_lastResult, result)) {
+      return;
+    }
+    _lastResult = result;
+
     bool wasOffline = isOffline;
     isOffline = result.isEmpty || result.contains(ConnectivityResult.none);
     

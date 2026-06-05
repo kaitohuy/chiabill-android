@@ -1,14 +1,12 @@
 import 'package:chiabill/utils/toast_util.dart';
-import 'package:flutter/foundation.dart';
+import 'package:chiabill/utils/export_helper.dart';
 import 'package:chiabill/controllers/profile_controller.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
 import 'package:chiabill/utils/loading_util.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../data/models/trip_response.dart';
 import '../services/trip_service.dart';
@@ -157,7 +155,7 @@ class TripDetailController extends GetxController {
     
     isSharingInvite.value = true;
     final String codeToShare = activeInviteCode.value;
-    final String baseUrl = dotenv.env['BASE_URL'] ?? "https://chiabill-server.onrender.com";
+    final String baseUrl = dotenv.env['BASE_URL'] ?? "";
     final String shareText = 'Mời bạn tham gia nhóm trên ChiaBill:\n$baseUrl/join/$codeToShare';
 
     try {
@@ -245,39 +243,21 @@ class TripDetailController extends GetxController {
       if (result.success && result.data != null) {
         final List<int> bytes = List<int>.from(result.data!);
 
-        // Sử dụng thư mục tạm an toàn để tránh crash Scoped Storage trên Android 11+
-        final tempDir = await getTemporaryDirectory();
         final ext = format == 'excel' ? 'xlsx' : 'pdf';
         final safeName = (trip.value?.name ?? 'ChuyenDi')
             .replaceAll(RegExp(r'[^\w\s]'), '')
             .replaceAll(' ', '_');
         final fileName = "BaoCao_${safeName}_$tripId.$ext";
-        final filePath = "${tempDir.path}/$fileName";
 
-        final file = File(filePath);
-        await file.writeAsBytes(bytes, flush: true);
-
-        final savedSize = await file.length();
-        debugPrint('[Export] Saved $filePath — $savedSize bytes');
-
-        if (savedSize < 100) {
-          ToastUtil.showError("Lỗi xuất file", "File tải về bị lỗi ($savedSize bytes)");
-          return;
-        }
-
-        // Hiển thị thông báo mở hộp thoại chia sẻ
-        ToastUtil.showSuccess("Đã xuất báo cáo", "📁 Đang chuẩn bị chia sẻ tệp...");
-
-        // Mở share sheet để user có thể chia sẻ hoặc mở ngay
         final mimeType = format == 'excel'
             ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             : 'application/pdf';
 
-        await SharePlus.instance.share(
-          ShareParams(
-            text: 'Bao cao chi tieu chuyen di: ${trip.value?.name}',
-            files: [XFile(filePath, mimeType: mimeType)],
-          ),
+        ExportHelper.showExportActionSheet(
+          bytes: bytes,
+          fileName: fileName,
+          mimeType: mimeType,
+          shareText: 'Báo cáo chi tiêu chuyến đi: ${trip.value?.name}',
         );
       } else {
         ToastUtil.showError("Lỗi xuất file", result.message ?? "Không thể tải báo cáo");

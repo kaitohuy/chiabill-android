@@ -6,18 +6,18 @@ import '../../controllers/create_trip_controller.dart';
 import '../../utils/trip_category_util.dart';
 
 class CreateTripBottomSheet extends StatelessWidget {
-  CreateTripBottomSheet({super.key});
+  const CreateTripBottomSheet({super.key});
 
-  final CreateTripController controller = Get.put(CreateTripController());
+  CreateTripController get controller => Get.find<CreateTripController>();
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(
-        left: 24, 
-        right: 24, 
-        top: 24, 
-        bottom: 24 + MediaQuery.of(context).padding.bottom,
+        left: 24,
+        right: 24,
+        top: 24,
+        bottom: 24,
       ),
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -38,7 +38,7 @@ class CreateTripBottomSheet extends StatelessWidget {
                 labelText: "Tên chuyến đi (VD: Vũng Tàu 2N1Đ)",
                 prefixIcon: Icon(Icons.map, color: AppColors.primary),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                counterText: "", // Ẩn bộ đếm chữ xấu xí nếu không cần
+                counterText: "", 
               ),
             ),
             const SizedBox(height: 16),
@@ -50,10 +50,76 @@ class CreateTripBottomSheet extends StatelessWidget {
                 labelText: "Mô tả (Không bắt buộc)",
                 prefixIcon: Icon(Icons.description, color: AppColors.primary),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                counterText: "", // Ẩn bộ đếm
+                counterText: "",
               ),
               maxLines: 2,
             ),
+            const SizedBox(height: 20),
+
+            const Text("Thời gian chuyến đi", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Obx(() {
+              final start = controller.startDate.value;
+              final end = controller.endDate.value;
+              String dateRangeStr = "";
+              if (end == null) {
+                dateRangeStr = "${start.day.toString().padLeft(2, '0')}/${start.month.toString().padLeft(2, '0')}/${start.year}";
+              } else {
+                final duration = end.difference(start).inDays + 1;
+                dateRangeStr = "${start.day.toString().padLeft(2, '0')}/${start.month.toString().padLeft(2, '0')}/${start.year} - ${end.day.toString().padLeft(2, '0')}/${end.month.toString().padLeft(2, '0')}/${end.year} ($duration ngày)";
+              }
+
+              return InkWell(
+                onTap: () async {
+                  final picked = await showDateRangePicker(
+                    context: context,
+                    firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                    lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+                    initialDateRange: DateTimeRange(
+                      start: start,
+                      end: end ?? start.add(const Duration(days: 1)),
+                    ),
+                    builder: (context, child) {
+                      return Theme(
+                        data: Theme.of(context).copyWith(
+                          colorScheme: ColorScheme.light(
+                            primary: AppColors.primary,
+                            onPrimary: Colors.white,
+                            onSurface: Colors.black87,
+                          ),
+                        ),
+                        child: child!,
+                      );
+                    },
+                  );
+                  if (picked != null) {
+                    controller.startDate.value = picked.start;
+                    controller.endDate.value = picked.end;
+                  }
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.calendar_month, color: AppColors.primary),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          dateRangeStr,
+                          style: const TextStyle(fontSize: 15, color: Colors.black87),
+                        ),
+                      ),
+                      const Icon(Icons.arrow_drop_down, color: Colors.grey),
+                    ],
+                  ),
+                ),
+              );
+            }),
             const SizedBox(height: 24),
 
             const Text("Chủ đề chuyến đi", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
@@ -103,6 +169,80 @@ class CreateTripBottomSheet extends StatelessWidget {
                 },
               ),
             ),
+            const SizedBox(height: 24),
+            const Text("Ảnh bìa chuyến đi (Không bắt buộc)", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
+            Obx(() {
+              final file = controller.selectedCoverFile.value;
+              return Container(
+                width: double.infinity,
+                height: 140,
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade300),
+                  image: file != null
+                      ? DecorationImage(
+                          image: FileImage(file),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
+                ),
+                child: Stack(
+                  children: [
+                    if (file == null)
+                      InkWell(
+                        onTap: () => controller.pickCoverImage(),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.add_photo_alternate_outlined, size: 36, color: AppColors.primary),
+                              const SizedBox(height: 8),
+                              Text(
+                                "Chọn ảnh từ thư viện",
+                                style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    else
+                      Positioned.fill(
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () => controller.pickCoverImage(),
+                            borderRadius: BorderRadius.circular(12),
+                            child: const SizedBox(),
+                          ),
+                        ),
+                      ),
+                    if (file != null)
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: GestureDetector(
+                          onTap: () => controller.clearCoverImage(),
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: Colors.black54,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.close,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              );
+            }),
             const SizedBox(height: 24),
 
             Obx(() => SizedBox(

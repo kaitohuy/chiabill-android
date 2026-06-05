@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import '../data/models/user_response.dart';
 import '../data/models/update_profile_request.dart';
 import '../data/repositories/user_repository.dart';
+import 'auth_controller.dart';
 
 class ProfileController extends GetxController {
   final UserRepository _repository = UserRepository();
@@ -165,6 +166,36 @@ class ProfileController extends GetxController {
       ToastUtil.showError("Lỗi", "Đã xảy ra lỗi khi tải ảnh");
     } finally {
       isUploading.value = false;
+      LoadingUtil.hide();
+    }
+  }
+
+  Future<void> deleteAccount() async {
+    try {
+      isLoading.value = true;
+      LoadingUtil.show();
+      
+      final result = await _repository.deleteAccount();
+      
+      LoadingUtil.hide();
+      if (result.success) {
+        ToastUtil.showSuccess("Thành công", "Tài khoản của bạn đã được xóa.");
+        
+        // Sử dụng Get.find để lấy AuthController và đăng xuất
+        if (Get.isRegistered<AuthController>()) {
+          await Get.find<AuthController>().logout();
+        } else {
+          final authCtrl = Get.put(AuthController());
+          await authCtrl.logout();
+        }
+      } else {
+        ToastUtil.showError("Lỗi", result.message ?? "Không thể xóa tài khoản");
+      }
+    } catch (e) {
+      LoadingUtil.hide();
+      ToastUtil.showError("Lỗi", e.toString());
+    } finally {
+      isLoading.value = false;
       LoadingUtil.hide();
     }
   }

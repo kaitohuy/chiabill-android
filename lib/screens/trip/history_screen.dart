@@ -1,4 +1,5 @@
 import 'package:chiabill/theme/app_colors.dart';
+import 'package:chiabill/widgets/empty_state.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/trip_detail_controller.dart';
@@ -91,14 +92,13 @@ class HistoryScreen extends StatelessWidget {
                 onRefresh: () => controller.fetchTripHistory(),
                 child: ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  children: const [
-                    SizedBox(height: 100),
+                  children: [
+                    const SizedBox(height: 100),
                     Center(
                       child: Column(
                         children: [
-                          Icon(Icons.assignment_outlined, size: 80, color: Colors.grey),
-                          SizedBox(height: 16),
-                          Text("Chưa có nhật ký hoạt động nào", style: TextStyle(color: Colors.grey)),
+                          SizedBox(height: Get.height * 0.05),
+                          const EmptyState(text: "Chưa có nhật ký hoạt động nào"),
                         ],
                       ),
                     ),

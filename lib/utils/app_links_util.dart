@@ -13,7 +13,11 @@ class AppLinksService extends GetxService {
   @override
   void onInit() {
     super.onInit();
-    _initDeepLinks();
+    // Trì hoãn xử lý Deep Link 1 giây để tránh nghẽn luồng lúc khởi động mượt mà,
+    // nhường tài nguyên cho khung hình đầu tiên của Flutter được vẽ trọn vẹn.
+    Future.delayed(const Duration(seconds: 1), () {
+      _initDeepLinks();
+    });
   }
 
   Future<void> _initDeepLinks() async {

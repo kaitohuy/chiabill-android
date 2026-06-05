@@ -5,6 +5,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
 import '../data/network/api_service.dart';
 import '../routes/app_pages.dart';
+import '../services/alarm_service.dart';
+import '../screens/trip/itinerary_screen.dart';
 
 class FcmController extends GetxController {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
@@ -13,10 +15,18 @@ class FcmController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    setupFCM();
+    // Trì hoãn việc cấu hình FCM và kích hoạt Flutter Engine chạy ngầm thêm 3 giây.
+    // Việc này giúp tránh xung đột Vulkan/GPU driver lúc khởi động app trên dòng máy Xiaomi,
+    // đồng thời tối ưu hóa luồng để loại bỏ hoàn toàn log BLASTBufferQueue.
+    Future.delayed(const Duration(seconds: 3), () {
+      setupFCM();
+    });
   }
 
   Future<void> setupFCM() async {
+    // Check local notification launch details
+    AlarmService.checkAppLaunchNotification();
+
     NotificationSettings settings = await _firebaseMessaging.requestPermission(
       alert: true, badge: true, sound: true,
     );
@@ -31,12 +41,21 @@ class FcmController extends GetxController {
 
       // 1. FOREGROUND: App đang mở
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-        if (message.notification != null) {
-          ToastUtil.showInfo(
-            message.notification!.title ?? "Thông báo mới",
-            message.notification!.body ?? "",
-          );
-        }
+        final title = message.data['title'] ?? message.notification?.title ?? "Thông báo mới";
+        final body = message.data['body'] ?? message.notification?.body ?? "";
+        final type = message.data['type'];
+        final referenceId = message.data['referenceId'];
+        final imageUrl = message.data['imageUrl'] ?? message.notification?.android?.imageUrl;
+
+        ToastUtil.showInfo(title, body);
+
+        AlarmService.showInstantNotification(
+          id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+          title: title,
+          body: body,
+          payload: (type != null && referenceId != null) ? '$type|$referenceId' : null,
+          imageUrl: imageUrl,
+        );
       });
 
       // 2. BACKGROUND: App đang ẩn dưới nền
@@ -66,13 +85,13 @@ class FcmController extends GetxController {
     final String? referenceId = data['referenceId'];
 
     if (type != null && referenceId != null) {
-      int tripId = int.parse(referenceId); // Ép kiểu String từ Firebase sang Int
+      int tripId = int.parse(referenceId);
 
-      if (type == "EXPENSE_CREATED" || type == "PAYMENT_REQUESTED" || type == "PAYMENT_APPROVED") {
-        // Thực hiện điều hướng
+      if (type == "ITINERARY") {
+        Get.to(() => ItineraryScreen(tripId: tripId));
+      } else if (type == "EXPENSE_CREATED" || type == "PAYMENT_REQUESTED" || type == "PAYMENT_APPROVED") {
         Get.toNamed(Routes.TRIP_DETAIL, arguments: tripId);
       }
-      // Thêm các nhánh khác tùy ý bạn sau này...
     }
   }
 

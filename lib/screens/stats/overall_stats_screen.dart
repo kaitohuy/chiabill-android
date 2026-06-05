@@ -15,7 +15,10 @@ class OverallStatsScreen extends StatefulWidget {
   State<OverallStatsScreen> createState() => _OverallStatsScreenState();
 }
 
-class _OverallStatsScreenState extends State<OverallStatsScreen> {
+class _OverallStatsScreenState extends State<OverallStatsScreen> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   final OverallStatsController controller = Get.find<OverallStatsController>();
   late ScrollController _monthScrollController;
   int touchedIndex = -1;
@@ -58,6 +61,7 @@ class _OverallStatsScreenState extends State<OverallStatsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(

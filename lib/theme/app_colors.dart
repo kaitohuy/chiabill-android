@@ -1,15 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../controllers/theme_controller.dart';
 
 class AppColors {
-  // Trả về màu Primary hiện tại của Theme
-  static Color get primary => Get.theme.colorScheme.primary;
+  // Trả về màu Primary hiện tại của Theme từ ThemeController để đồng bộ tức thì
+  static Color get primary {
+    try {
+      if (Get.isRegistered<ThemeController>()) {
+        return Get.find<ThemeController>().currentTheme.value.primary;
+      }
+    } catch (_) {}
+    return Get.theme.colorScheme.primary;
+  }
 
   // Lấy các sắc độ động
   static Color get primaryDark => _darken(primary, 0.2);
   static Color get primaryDarker => _darken(primary, 0.4);
   static Color get primaryLight => _lighten(primary, 0.2);
   static Color get primaryLighter => _lighten(primary, 0.4);
+  
+  static Gradient get primaryGradient => LinearGradient(
+        colors: [primary, _lighten(primary, 0.15)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      );
   
   // Background nhẹ nhàng
   static Color get primaryBackground => primary.withValues(alpha: 0.1);

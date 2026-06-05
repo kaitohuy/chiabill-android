@@ -48,7 +48,7 @@ class _VoluntaryContributionSheetState extends State<VoluntaryContributionSheet>
           top: 24,
           left: 24,
           right: 24,
-          bottom: MediaQuery.of(context).padding.bottom + 24,
+          bottom: 24,
         ),
         child: SingleChildScrollView(
           child: Column(

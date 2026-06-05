@@ -10,8 +10,10 @@ import '../../controllers/trip_detail_controller.dart';
 import '../../controllers/theme_controller.dart';
 import '../../controllers/ghost_controller.dart';
 import '../../controllers/trip_expense_controller.dart';
+import '../../controllers/itinerary_controller.dart';
 import 'add_expense_bottom_sheet.dart';
 import 'history_screen.dart';
+import 'itinerary_screen.dart';
 import 'import_member_screen.dart';
 import 'tabs/group_fund_tab.dart';
 import 'tabs/settlements_tab.dart';
@@ -26,6 +28,8 @@ class TripDetailScreen extends StatefulWidget {
 
 class _TripDetailScreenState extends State<TripDetailScreen> {
   late TripDetailController controller;
+  late PageController _pageController;
+  late Worker _tabWorker;
 
   @override
   void initState() {
@@ -33,18 +37,40 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     Get.put(ProfileController(), permanent: true);
     Get.delete<TripDetailController>(tag: widget.tripId.toString(), force: true);
     controller = Get.put(TripDetailController(widget.tripId), tag: widget.tripId.toString());
+
+    _pageController = PageController(initialPage: controller.currentTab.value);
+
+    // Đồng bộ từ Controller sang PageView (khi người dùng click tab bar)
+    _tabWorker = ever(controller.currentTab, (int index) {
+      if (mounted && _pageController.hasClients && _pageController.page?.round() != index) {
+        final int currentPage = _pageController.page?.round() ?? controller.currentTab.value;
+        if ((index - currentPage).abs() == 1) {
+          _pageController.animateToPage(
+            index,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        } else {
+          _pageController.jumpToPage(index);
+        }
+      }
+    });
   }
 
   @override
   void dispose() {
+    _tabWorker.dispose();
+    _pageController.dispose();
     Get.delete<TripDetailController>(tag: widget.tripId.toString(), force: true);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final bool isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: AppColors.primary,
@@ -55,36 +81,24 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           padding: const EdgeInsets.only(left: 8),
           child: Text(
             controller.trip.value?.name ?? "Chi tiết",
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 20),
+            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 20),
           ),
         )),
         actions: [
           IconButton(
-            icon: Icon(Icons.share_outlined, color: Colors.white),
+            icon: const Icon(Icons.share_outlined, color: Colors.white),
             onPressed: () => _showCreateInviteDialog(context, controller),
           ),
-          Obx(() => controller.currentTab.value == 0 
-            ? IconButton(
-                icon: Icon(Icons.calendar_month_outlined, color: Colors.white),
-                onPressed: () async {
-                  final DateTime? picked = await showDatePicker(
-                    context: context,
-                    initialDate: Get.find<TripExpenseController>(tag: controller.tripId.toString()).selectedExpenseDate.value ?? DateTime.now(),
-                    firstDate: DateTime(2020),
-                    lastDate: DateTime(2030),
-                  );
-                  if (picked != null) {
-                    Get.find<TripExpenseController>(tag: controller.tripId.toString()).onExpenseDateChanged(picked);
-                  }
-                },
-              )
-            : const SizedBox.shrink()),
           IconButton(
-            icon: Icon(Icons.history, color: Colors.white),
+            icon: const Icon(Icons.explore_outlined, color: Colors.white),
+            onPressed: () => Get.to(() => ItineraryScreen(tripId: controller.tripId)),
+          ),
+          IconButton(
+            icon: const Icon(Icons.history, color: Colors.white),
             onPressed: () => Get.to(() => HistoryScreen(mainController: controller)),
           ),
           IconButton(
-            icon: Icon(Icons.file_download_outlined, color: Colors.white),
+            icon: const Icon(Icons.file_download_outlined, color: Colors.white),
             onPressed: () => _showExportDialog(context, controller),
           ),
         ],
@@ -94,47 +108,139 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           return Center(child: CircularProgressIndicator(color: AppColors.primary));
         }
 
-        switch (controller.currentTab.value) {
-          case 0: return ExpensesTab(mainController: controller);
-          case 1: return GroupFundTab(mainController: controller);
-          case 2: return SettlementsTab(mainController: controller);
-          case 3: return MembersTab(
-              controller: controller,
-              onAddMemberTap: () => _showAddMemberOptions(context, controller)
-          );
-          default: return ExpensesTab(mainController: controller);
-        }
-      }),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: Obx(() {
-        Get.find<ThemeController>().currentTheme.value;
-        return FloatingActionButton(
-          onPressed: _handleFabPress,
-          backgroundColor: AppColors.primary,
-          shape: const CircleBorder(),
-          elevation: 4,
-          child: Icon(Icons.add, color: Colors.white, size: 32),
+        final itineraryCtrl = Get.put(
+          ItineraryController(controller.tripId),
+          tag: controller.tripId.toString(),
+        );
+
+        return Column(
+          children: [
+            Obx(() {
+              if (itineraryCtrl.hasLoadedOnce.value && itineraryCtrl.itineraryList.isEmpty && !itineraryCtrl.isBannerDismissed.value) {
+                return Container(
+                  margin: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.red.shade400, Colors.orange.shade400],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.red.withValues(alpha: 0.15),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      )
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => Get.to(() => ItineraryScreen(tripId: controller.tripId)),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.explore, color: Colors.white, size: 24),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text(
+                                      "Lên lịch trình du lịch ngay!",
+                                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      "Quản lý lịch trình, import/export Excel lịch trình.",
+                                      style: TextStyle(fontSize: 11, color: Colors.white.withValues(alpha: 0.8)),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Icon(Icons.arrow_forward_ios, color: Colors.white70, size: 14),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      GestureDetector(
+                        onTap: () {
+                          itineraryCtrl.isBannerDismissed.value = true;
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.close, color: Colors.white, size: 16),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            }),
+            Expanded(
+              child: PageView(
+                controller: _pageController,
+                onPageChanged: (index) {
+                  controller.currentTab.value = index;
+                },
+                children: [
+                  ExpensesTab(mainController: controller),
+                  GroupFundTab(mainController: controller),
+                  SettlementsTab(mainController: controller),
+                  MembersTab(
+                    controller: controller,
+                    onAddMemberTap: () => _showAddMemberOptions(context, controller),
+                  ),
+                ],
+              ),
+            ),
+          ],
         );
       }),
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.white,
-        elevation: 10,
-        notchMargin: 8,
-        shape: const CircularNotchedRectangle(),
-        child: SizedBox(
-          height: 60, // Đồng bộ với MainScreen
-          child: Obx(() => Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildBottomTab(0, Icons.list_alt_outlined, Icons.list_alt, "Chi tiêu"),
-              _buildBottomTab(1, Icons.account_balance_outlined, Icons.account_balance, "Quỹ chung"),
-              const SizedBox(width: 48), // Khoảng trống cho FAB
-              _buildBottomTab(2, Icons.account_balance_wallet_outlined, Icons.account_balance_wallet, "Nợ nần"),
-              _buildBottomTab(3, Icons.people_outline, Icons.people, "Thành viên"),
-            ],
-          )),
-        ),
-      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: isKeyboardOpen
+          ? null
+          : Obx(() {
+              Get.find<ThemeController>().currentTheme.value;
+              return FloatingActionButton(
+                onPressed: _handleFabPress,
+                backgroundColor: AppColors.primary,
+                shape: const CircleBorder(),
+                elevation: 4,
+                child: const Icon(Icons.add, color: Colors.white, size: 32),
+              );
+            }),
+      bottomNavigationBar: isKeyboardOpen
+          ? null
+          : BottomAppBar(
+              color: Colors.white,
+              elevation: 10,
+              notchMargin: 8,
+              shape: const CircularNotchedRectangle(),
+              child: SizedBox(
+                height: 60, // Đồng bộ với MainScreen
+                child: Obx(() => Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildBottomTab(0, Icons.list_alt_outlined, Icons.list_alt, "Chi tiêu"),
+                    _buildBottomTab(1, Icons.account_balance_outlined, Icons.account_balance, "Quỹ chung"),
+                    const SizedBox(width: 48), // Khoảng trống cho FAB
+                    _buildBottomTab(2, Icons.account_balance_wallet_outlined, Icons.account_balance_wallet, "Nợ nần"),
+                    _buildBottomTab(3, Icons.people_outline, Icons.people, "Thành viên"),
+                  ],
+                )),
+              ),
+            ),
     );
   }
 
@@ -178,7 +284,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           controller: addController, // Truyền controller vào
         ), 
         isScrollControlled: true
-      );
+      ).then((_) {
+        Get.delete<AddExpenseController>(tag: tag);
+      });
     }
   }
 
@@ -199,7 +307,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
               top: 8,
               left: 24,
               right: 24,
-              bottom: MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom + 24,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 24,
             ),
             decoration: const BoxDecoration(
               color: Colors.white,
@@ -411,7 +519,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   void _showAddMemberOptions(BuildContext context, TripDetailController controller) {
     Get.bottomSheet(
       Container(
-        padding: EdgeInsets.only(top: 20, left: 0, right: 0, bottom: MediaQuery.of(context).padding.bottom + 20),
+        padding: const EdgeInsets.only(top: 20, left: 0, right: 0, bottom: 20),
         decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -518,7 +626,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
           )),
         ],
       ),
-    );
+    ).then((_) {
+      Get.delete<GhostController>();
+    });
   }
 
   void _showCreateInviteDialog(BuildContext context, TripDetailController controller) {

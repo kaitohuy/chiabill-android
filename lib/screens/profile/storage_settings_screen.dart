@@ -185,72 +185,104 @@ class _StorageSettingsScreenState extends State<StorageSettingsScreen> {
               child: Column(
                 children: [
                   // 1. Tự động dọn dẹp theo thời gian
-                  ListTile(
-                    leading: Icon(Icons.schedule, color: AppColors.primary),
-                    title: const Text("Tự động dọn dẹp định kỳ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                    subtitle: Text(
-                      _currentSchedule == 'daily'
-                          ? "Hàng ngày (Khuyên dùng)"
-                          : _currentSchedule == 'weekly'
-                              ? "Hàng tuần (Mặc định)"
-                              : "Đang tắt tự động dọn dẹp",
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    trailing: SizedBox(
-                      width: 110,
-                      child: DropdownButton<String>(
-                        value: _currentSchedule,
-                        underline: const SizedBox(),
-                        icon: const Icon(Icons.arrow_drop_down),
-                        isDense: true,
-                        alignment: Alignment.centerRight,
-                        items: const [
-                          DropdownMenuItem(value: 'daily', child: Text("Hàng ngày")),
-                          DropdownMenuItem(value: 'weekly', child: Text("Hàng tuần")),
-                          DropdownMenuItem(value: 'off', child: Text("Tắt")),
-                        ],
-                        onChanged: (val) {
-                          if (val != null) {
-                            StorageUtil.setCleanSchedule(val);
-                            setState(() => _currentSchedule = val);
-                          }
-                        },
-                      ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    child: Row(
+                      children: [
+                        Icon(Icons.schedule, color: AppColors.primary),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(
+                                "Tự động dọn dẹp định kỳ",
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _currentSchedule == 'daily'
+                                    ? "Hàng ngày (Khuyên dùng)"
+                                    : _currentSchedule == 'weekly'
+                                        ? "Hàng tuần (Mặc định)"
+                                        : "Đang tắt tự động dọn dẹp",
+                                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        DropdownButton<String>(
+                          value: _currentSchedule,
+                          underline: const SizedBox(),
+                          icon: const Icon(Icons.arrow_drop_down),
+                          isDense: true,
+                          alignment: Alignment.centerRight,
+                          items: const [
+                            DropdownMenuItem(value: 'daily', child: Text("Hàng ngày")),
+                            DropdownMenuItem(value: 'weekly', child: Text("Hàng tuần")),
+                            DropdownMenuItem(value: 'off', child: Text("Tắt")),
+                          ],
+                          onChanged: (val) {
+                            if (val != null) {
+                              StorageUtil.setCleanSchedule(val);
+                              setState(() => _currentSchedule = val);
+                            }
+                          },
+                        ),
+                      ],
                     ),
                   ),
                   const Divider(height: 1),
                   // 2. Giới hạn dung lượng cache tối đa
-                  ListTile(
-                    leading: Icon(Icons.pie_chart_outline, color: AppColors.primary),
-                    title: const Text("Giới hạn dung lượng tối đa", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                    subtitle: Text(
-                      _currentMaxSize > 0
-                          ? "Tự dọn dẹp khi vượt quá $_currentMaxSize MB"
-                          : "Không giới hạn dung lượng",
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    trailing: SizedBox(
-                      width: 110,
-                      child: DropdownButton<int>(
-                        value: _currentMaxSize,
-                        underline: const SizedBox(),
-                        icon: const Icon(Icons.arrow_drop_down),
-                        isDense: true,
-                        alignment: Alignment.centerRight,
-                        items: const [
-                          DropdownMenuItem(value: 20, child: Text("20 MB")),
-                          DropdownMenuItem(value: 50, child: Text("50 MB")),
-                          DropdownMenuItem(value: 100, child: Text("100 MB")),
-                          DropdownMenuItem(value: 0, child: Text("Không giới hạn")),
-                        ],
-                        onChanged: (val) {
-                          if (val != null) {
-                            StorageUtil.setMaxCacheSize(val);
-                            setState(() => _currentMaxSize = val);
-                            _loadCacheSize(); // Reload size to check against limit
-                          }
-                        },
-                      ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    child: Row(
+                      children: [
+                        Icon(Icons.pie_chart_outline, color: AppColors.primary),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(
+                                "Giới hạn dung lượng tối đa",
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _currentMaxSize > 0
+                                    ? "Tự dọn dẹp khi vượt quá $_currentMaxSize MB"
+                                    : "Không giới hạn dung lượng",
+                                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        DropdownButton<int>(
+                          value: _currentMaxSize,
+                          underline: const SizedBox(),
+                          icon: const Icon(Icons.arrow_drop_down),
+                          isDense: true,
+                          alignment: Alignment.centerRight,
+                          items: const [
+                            DropdownMenuItem(value: 20, child: Text("20 MB")),
+                            DropdownMenuItem(value: 50, child: Text("50 MB")),
+                            DropdownMenuItem(value: 100, child: Text("100 MB")),
+                            DropdownMenuItem(value: 0, child: Text("Không giới hạn")),
+                          ],
+                          onChanged: (val) {
+                            if (val != null) {
+                              StorageUtil.setMaxCacheSize(val);
+                              setState(() => _currentMaxSize = val);
+                              _loadCacheSize(); // Reload size to check against limit
+                            }
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 ],

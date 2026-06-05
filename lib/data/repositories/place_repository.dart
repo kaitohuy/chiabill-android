@@ -7,6 +7,27 @@ import '../network/api_service.dart';
 class PlaceRepository {
   final ApiService _apiService = ApiService();
 
+  Future<ApiResponse<List<PlaceModel>>> getPlaces({String? category, int page = 0, int size = 10}) async {
+    try {
+      final response = await _apiService.dio.get(
+        '/api/v1/places',
+        queryParameters: {
+          if (category != null && category != 'Tất cả') 'category': category,
+          'page': page,
+          'size': size,
+        },
+      );
+      if (response.data != null && response.data['success'] == true) {
+        final List<dynamic> data = response.data['data']['content'];
+        final places = data.map((json) => PlaceModel.fromJson(json)).toList();
+        return ApiResponse(success: true, data: places);
+      }
+      return ApiResponse(success: false, message: response.data['message']);
+    } catch (e) {
+      return ApiResponse(success: false, message: e.toString());
+    }
+  }
+
   Future<ApiResponse<List<PlaceModel>>> getPlacesNearby(double lat, double lng, {double radius = 50.0, int limit = 100}) async {
     try {
       final response = await _apiService.dio.get(

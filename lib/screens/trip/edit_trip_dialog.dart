@@ -1,7 +1,9 @@
+import 'dart:io';
 import 'package:chiabill/theme/app_colors.dart';
 import 'package:chiabill/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../data/repositories/trip_repository.dart';
 import '../../controllers/home_controller.dart';
 import '../../controllers/trip_detail_controller.dart';
@@ -24,8 +26,24 @@ class _EditTripDialogState extends State<EditTripDialog> {
   late TextEditingController budgetController; // 1. ĐÃ KHAI BÁO THÊM Ở ĐÂY
 
   bool isLoading = false;
-  DateTime? selectedDate;
+  DateTime? selectedStartDate;
+  DateTime? selectedEndDate;
   final TripRepository _repo = TripRepository();
+  final ImagePicker _picker = ImagePicker();
+  File? selectedCoverFile;
+
+  Future<void> _pickCoverImage() async {
+    final XFile? image = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 60,
+      maxWidth: 1080,
+    );
+    if (image != null) {
+      setState(() {
+        selectedCoverFile = File(image.path);
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -41,7 +59,10 @@ class _EditTripDialogState extends State<EditTripDialog> {
     budgetController = TextEditingController(text: initialBudget);
     
     if (widget.trip.startDate != null) {
-      selectedDate = DateTime.tryParse(widget.trip.startDate!);
+      selectedStartDate = DateTime.tryParse(widget.trip.startDate!);
+    }
+    if (widget.trip.endDate != null) {
+      selectedEndDate = DateTime.tryParse(widget.trip.endDate!);
     }
   }
 
@@ -75,10 +96,17 @@ class _EditTripDialogState extends State<EditTripDialog> {
           name,
           descController.text.trim(),
           parsedBudget, // <-- Biến mới được thêm
-          selectedDate?.toIso8601String()
+          selectedStartDate?.toIso8601String(),
+          selectedEndDate?.toIso8601String()
       );
 
       if (result.success) {
+        if (selectedCoverFile != null) {
+          final uploadRes = await _repo.updateTripCover(widget.trip.id, selectedCoverFile!);
+          if (!uploadRes.success) {
+            ToastUtil.showError("Lỗi", "Không thể tải lên ảnh bìa mới: ${uploadRes.message}");
+          }
+        }
         // Đóng ngay khi thành công
         Get.back(); 
         ToastUtil.showSuccess("Thành công", "Đã cập nhật chuyến đi");
@@ -148,39 +176,33 @@ class _EditTripDialogState extends State<EditTripDialog> {
               // Date Picker
               InkWell(
                 onTap: () async {
-                  Get.bottomSheet(
-                    Container(
-                      padding: const EdgeInsets.all(24),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text("Sửa ngày bắt đầu", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 16),
-                          SizedBox(
-                            height: 300,
-                            child: Theme(
-                                data: Theme.of(context).copyWith(
-                                  colorScheme: ColorScheme.light(primary: AppColors.primary),
-                                ),
-                                child: CalendarDatePicker(
-                                  initialDate: selectedDate ?? DateTime.now(),
-                                  firstDate: DateTime(2000),
-                                  lastDate: DateTime(2101),
-                                  onDateChanged: (pickedDate) {
-                                    setState(() => selectedDate = pickedDate);
-                                    Get.back();
-                                  },
-                                )
-                            ),
-                          ),
-                        ],
-                      ),
+                  final picked = await showDateRangePicker(
+                    context: context,
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2101),
+                    initialDateRange: DateTimeRange(
+                      start: selectedStartDate ?? DateTime.now(),
+                      end: selectedEndDate ?? (selectedStartDate ?? DateTime.now()).add(const Duration(days: 1)),
                     ),
+                    builder: (context, child) {
+                      return Theme(
+                        data: Theme.of(context).copyWith(
+                          colorScheme: ColorScheme.light(
+                            primary: AppColors.primary,
+                            onPrimary: Colors.white,
+                            onSurface: Colors.black87,
+                          ),
+                        ),
+                        child: child!,
+                      );
+                    },
                   );
+                  if (picked != null) {
+                    setState(() {
+                      selectedStartDate = picked.start;
+                      selectedEndDate = picked.end;
+                    });
+                  }
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
@@ -196,19 +218,116 @@ class _EditTripDialogState extends State<EditTripDialog> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text("Ngày bắt đầu", style: TextStyle(fontSize: 11, color: Colors.grey)),
+                            const Text("Thời gian chuyến đi", style: TextStyle(fontSize: 11, color: Colors.grey)),
                             Text(
-                              selectedDate != null 
-                                ? "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}"
+                              selectedStartDate != null
+                                ? (selectedEndDate != null
+                                    ? "${selectedStartDate!.day.toString().padLeft(2, '0')}/${selectedStartDate!.month.toString().padLeft(2, '0')}/${selectedStartDate!.year} - ${selectedEndDate!.day.toString().padLeft(2, '0')}/${selectedEndDate!.month.toString().padLeft(2, '0')}/${selectedEndDate!.year}"
+                                    : "${selectedStartDate!.day.toString().padLeft(2, '0')}/${selectedStartDate!.month.toString().padLeft(2, '0')}/${selectedStartDate!.year}")
                                 : "Chưa chọn",
-                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
                             ),
                           ],
                         ),
                       ),
-                      Icon(Icons.edit, size: 16, color: Colors.grey),
+                      const Icon(Icons.edit, size: 16, color: Colors.grey),
                     ],
                   ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              
+              // Budget Input Field
+              TextField(
+                controller: budgetController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: "Tổng ngân sách (Không bắt buộc)",
+                  prefixIcon: Icon(Icons.monetization_on, color: AppColors.primary),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text("Ảnh bìa chuyến đi (Không bắt buộc)", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                height: 140,
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey.shade300),
+                  image: selectedCoverFile != null
+                      ? DecorationImage(
+                          image: FileImage(selectedCoverFile!),
+                          fit: BoxFit.cover,
+                        )
+                      : (widget.trip.coverUrl != null && widget.trip.coverUrl!.isNotEmpty
+                          ? DecorationImage(
+                              image: NetworkImage(widget.trip.coverUrl!),
+                              fit: BoxFit.cover,
+                            )
+                          : null),
+                ),
+                child: Stack(
+                  children: [
+                    if (selectedCoverFile == null && (widget.trip.coverUrl == null || widget.trip.coverUrl!.isEmpty))
+                      InkWell(
+                        onTap: _pickCoverImage,
+                        borderRadius: BorderRadius.circular(16),
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.add_photo_alternate_outlined, size: 36, color: AppColors.primary),
+                              const SizedBox(height: 8),
+                              Text(
+                                "Chọn ảnh từ thư viện",
+                                style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    else
+                      Positioned.fill(
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: _pickCoverImage,
+                            borderRadius: BorderRadius.circular(16),
+                            child: const SizedBox(),
+                          ),
+                        ),
+                      ),
+                    if (selectedCoverFile != null || (widget.trip.coverUrl != null && widget.trip.coverUrl!.isNotEmpty))
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selectedCoverFile = null;
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: Colors.black54,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.close,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ],

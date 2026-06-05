@@ -5,9 +5,9 @@ import 'package:get/get.dart';
 import '../../controllers/auth_controller.dart';
 
 class WelcomeScreen extends StatelessWidget {
-  WelcomeScreen({super.key});
+  const WelcomeScreen({super.key});
 
-  final AuthController authController = Get.put(AuthController());
+  AuthController get authController => Get.put(AuthController());
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +65,7 @@ class WelcomeScreen extends StatelessWidget {
                 // 3. SLOGAN (Xuất hiện nối tiếp Tên App)
                 // ==========================================
                 const Text(
-                  "Đi chơi hết mình,\nchia tiền hết ý!",
+                  "Chia bill đều,\n sẽ có chill travel!",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 18,

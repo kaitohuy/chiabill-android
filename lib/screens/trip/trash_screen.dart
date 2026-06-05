@@ -9,10 +9,6 @@ class TrashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Đăng ký controller nếu chưa có
-    if (!Get.isRegistered<TrashController>()) {
-      Get.put(TrashController());
-    }
     final controller = Get.find<TrashController>();
 
     return Scaffold(

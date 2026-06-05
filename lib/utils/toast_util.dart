@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 class ToastUtil {
   // Thành công: Xanh lá cây nhạt (Mã màu từ ảnh tham khảo)
   static void showSuccess(String title, String message) {
+    Get.closeAllSnackbars();
     Get.snackbar(
       title,
       message,
@@ -29,6 +30,7 @@ class ToastUtil {
 
   // Lỗi: Đỏ nhạt
   static void showError(String title, String message) {
+    Get.closeAllSnackbars();
     Get.snackbar(
       title,
       message,
@@ -54,6 +56,7 @@ class ToastUtil {
 
   // Cảnh báo: Vàng nhạt
   static void showWarning(String title, String message) {
+    Get.closeAllSnackbars();
     Get.snackbar(
       title,
       message,
@@ -79,6 +82,7 @@ class ToastUtil {
 
   // Thông tin: Xanh dương nhạt
   static void showInfo(String title, String message) {
+    Get.closeAllSnackbars();
     Get.snackbar(
       title,
       message,

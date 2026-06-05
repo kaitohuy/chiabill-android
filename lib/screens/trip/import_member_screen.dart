@@ -165,7 +165,7 @@ class ImportMemberScreen extends StatelessWidget {
         if (controller.selectedTripId.value == null || controller.availableMembers.isEmpty) return const SizedBox.shrink();
         
         return Container(
-          padding: EdgeInsets.only(left: 16, right: 16, top: 16, bottom: MediaQuery.of(context).padding.bottom + 16),
+          padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 16),
           decoration: BoxDecoration(
             color: Colors.white,
             boxShadow: [BoxShadow(color: Colors.black.withValues(alpha:0.05), blurRadius: 10, offset: const Offset(0, -5))]

@@ -16,8 +16,7 @@ class ApiService {
 
   ApiService._internal() {
     _dio = Dio();
-    _dio.options.baseUrl = dotenv.env['BASE_URL'] ?? "http://192.168.4.29:8080";
-    //_dio.options.baseUrl = "http://192.168.4.29:8080";
+    _dio.options.baseUrl = dotenv.env['BASE_URL'] ?? "";
     _dio.options.connectTimeout = const Duration(seconds: 10);
     _dio.options.receiveTimeout = const Duration(seconds: 15);
 

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:chiabill/data/models/create_trip_request.dart';
 import 'package:dio/dio.dart';
 
@@ -97,12 +98,13 @@ class TripRepository {
   // ==================================================
   // ĐÃ CẬP NHẬT: Thêm tham số totalBudget vào hàm Sửa chuyến đi
   // ==================================================
-  Future<ApiResponse<TripResponse>> updateTrip(int tripId, String name, String? description, double? totalBudget, String? startDate) async {
+  Future<ApiResponse<TripResponse>> updateTrip(int tripId, String name, String? description, double? totalBudget, String? startDate, String? endDate) async {
     try {
       Map<String, dynamic> requestData = {
         "name": name,
         "description": description ?? "",
-        "startDate": startDate
+        "startDate": startDate,
+        "endDate": endDate
       };
 
       // Nếu có sửa ngân sách thì nhét thêm vào requestData
@@ -117,6 +119,22 @@ class TripRepository {
       return ApiResponse<TripResponse>.fromJson(response.data, (data) => TripResponse.fromJson(data));
     } catch (e) {
       return ApiResponse.withError(e, defaultMessage: "Lỗi cập nhật chuyến đi");
+    }
+  }
+
+  Future<ApiResponse<TripResponse>> updateTripCover(int tripId, File file) async {
+    try {
+      String fileName = file.path.split('/').last;
+      FormData formData = FormData.fromMap({
+        "file": await MultipartFile.fromFile(file.path, filename: fileName),
+      });
+      final response = await _apiService.dio.put(
+        "/api/trips/$tripId/cover",
+        data: formData,
+      );
+      return ApiResponse<TripResponse>.fromJson(response.data, (data) => TripResponse.fromJson(data));
+    } catch (e) {
+      return ApiResponse.withError(e, defaultMessage: "Lỗi tải ảnh bìa");
     }
   }
 

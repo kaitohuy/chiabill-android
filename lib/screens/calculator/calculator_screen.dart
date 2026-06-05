@@ -5,11 +5,11 @@ import '../../theme/app_colors.dart';
 import 'widgets/calculator_history_sheet.dart';
 
 class CalculatorScreen extends StatelessWidget {
-  CalculatorScreen({super.key});
+  const CalculatorScreen({super.key});
 
-  final CalculatorController controller = Get.put(CalculatorController());
+  CalculatorController get controller => Get.find<CalculatorController>();
 
-  final List<String> basicButtons = [
+  static const List<String> basicButtons = [
     'C', '⌫', '𝑓x', '÷',
     '7', '8', '9', '×',
     '4', '5', '6', '-',
@@ -17,7 +17,7 @@ class CalculatorScreen extends StatelessWidget {
     '000', '0', '.', '='
   ];
 
-  final List<String> advancedButtons = [
+  static const List<String> advancedButtons = [
     'C', '⌫', '123', '÷',
     '(', ')', '%', '×',
     'π', 'e', '^', '-',

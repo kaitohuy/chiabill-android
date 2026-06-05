@@ -7,6 +7,7 @@ import '../../../controllers/trip_history_controller.dart';
 import '../../../controllers/trip_settlement_controller.dart';
 import '../../../theme/app_colors.dart';
 import '../../../utils/currency_util.dart';
+import '../../../widgets/empty_state.dart';
 
 class HistoryTab extends StatelessWidget {
   final TripDetailController mainController;
@@ -59,15 +60,14 @@ class HistoryTab extends StatelessWidget {
                   onRefresh: () async => mainController.fetchData(),
                   child: ListView(
                     physics: const AlwaysScrollableScrollPhysics(),
-                    children: const [
-                      SizedBox(height: 100),
+                    children: [
+                      const SizedBox(height: 100),
                       Center(
                           child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.history_toggle_off, size: 80, color: Colors.grey),
-                                SizedBox(height: 16),
-                                Text("Chưa có lịch sử giao dịch nào!", textAlign: TextAlign.center, style: TextStyle(color: Colors.grey))
+                                SizedBox(height: Get.height * 0.05),
+                                const EmptyState(text: "Chưa có lịch sử giao dịch nào!"),
                               ]
                           )
                       )
@@ -303,7 +303,7 @@ class HistoryTab extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Giao dịch: ${CurrencyUtils.formatNumber(payment.amount())}đ", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              Text("Giao dịch: ${CurrencyUtils.formatNumber(payment.amount)}đ", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
               const SizedBox(height: 8),
               Text("${payment.fromUserName} ➡️ ${payment.toUserName}", style: const TextStyle(color: Colors.grey)),
               const Divider(height: 24),

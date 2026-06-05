@@ -66,7 +66,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
           left: 24, 
           right: 24, 
           top: 24, 
-          bottom: 24 + MediaQuery.of(context).padding.bottom,
+          bottom: 24,
         ),
         child: Column(
             mainAxisSize: MainAxisSize.min,

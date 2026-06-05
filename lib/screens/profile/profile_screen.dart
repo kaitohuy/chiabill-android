@@ -6,12 +6,13 @@ import '../../controllers/auth_controller.dart';
 import 'package:cached_network_image/cached_network_image.dart' as org_cached;
 import 'theme_settings_screen.dart';
 import 'about_screen.dart';
+import 'support_screen.dart';
 import 'storage_settings_screen.dart';
 
 class ProfileScreen extends GetView<ProfileController> {
-  ProfileScreen({super.key});
+  const ProfileScreen({super.key});
 
-  final AuthController authController = Get.put(AuthController());
+  AuthController get authController => Get.put(AuthController());
 
   // Hàm hiển thị ảnh phóng to toàn màn hình
   void _showFullScreenImage(String imageUrl) {
@@ -40,6 +41,45 @@ class ProfileScreen extends GetView<ProfileController> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // Hàm hiển thị dialog xác nhận xóa tài khoản nguy hiểm
+  void _showDeleteAccountDialog(BuildContext context) {
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: const [
+            Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
+            SizedBox(width: 8),
+            Text("Xác nhận xóa tài khoản", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          ],
+        ),
+        content: const Text(
+          "Bạn có chắc chắn muốn xóa tài khoản? Toàn bộ thông tin cá nhân, chuyến đi và lịch sử chia tiền của bạn sẽ bị xóa hoặc vô danh hóa vĩnh viễn và không thể khôi phục lại.",
+          style: TextStyle(fontSize: 14, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text("HỦY BỎ", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              elevation: 0,
+            ),
+            onPressed: () {
+              Get.back();
+              controller.deleteAccount();
+            },
+            child: const Text("XÓA TÀI KHOẢN", style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
       ),
     );
   }
@@ -193,7 +233,7 @@ class ProfileScreen extends GetView<ProfileController> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.grey.shade300)),
                     color: Colors.white,
                     child: ListTile(
-                      leading: Icon(Icons.storage, color: Colors.blue),
+                      leading: Icon(Icons.storage, color: AppColors.primary),
                       title: const Text("Bộ nhớ & Dữ liệu", style: TextStyle(fontWeight: FontWeight.bold)),
                       subtitle: const Text("Dọn dẹp cache, tự động xóa tệp lưu tạm", style: TextStyle(fontSize: 12)),
                       trailing: const Icon(Icons.chevron_right),
@@ -208,7 +248,7 @@ class ProfileScreen extends GetView<ProfileController> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.grey.shade300)),
                     color: Colors.white,
                     child: ListTile(
-                      leading: Icon(Icons.delete_outline, color: Colors.orange),
+                      leading: Icon(Icons.delete_outline, color: AppColors.primary),
                       title: const Text("Thùng rác", style: TextStyle(fontWeight: FontWeight.bold)),
                       subtitle: const Text("Phục hồi chuyến đi đã xóa", style: TextStyle(fontSize: 12)),
                       trailing: const Icon(Icons.chevron_right),
@@ -217,17 +257,32 @@ class ProfileScreen extends GetView<ProfileController> {
                   ),
                   const SizedBox(height: 16),
 
-                  // CARD VỀ ỨNG DỤNG & HỖ TRỢ
+                  // CARD VỀ ỨNG DỤNG
                   Card(
                     elevation: 0,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.grey.shade300)),
                     color: Colors.white,
                     child: ListTile(
-                      leading: Icon(Icons.info_outline, color: Colors.blue),
-                      title: const Text("Về ứng dụng & Hỗ trợ", style: TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: const Text("Tính năng, bảo mật, gửi report & donate", style: TextStyle(fontSize: 12)),
+                      leading: Icon(Icons.info_outline, color: AppColors.primary),
+                      title: const Text("Về ứng dụng", style: TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: const Text("Tính năng nổi bật và chính sách bảo mật", style: TextStyle(fontSize: 12)),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => Get.to(() => const AboutScreen()),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // CARD HỖ TRỢ
+                  Card(
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.grey.shade300)),
+                    color: Colors.white,
+                    child: ListTile(
+                      leading: Icon(Icons.contact_support_outlined, color: AppColors.primary),
+                      title: const Text("Hỗ trợ & Góp ý", style: TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: const Text("Báo cáo lỗi, đóng góp ý kiến, donate & liên hệ", style: TextStyle(fontSize: 12)),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => Get.to(() => const SupportScreen()),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -448,7 +503,7 @@ class ProfileScreen extends GetView<ProfileController> {
                   const SizedBox(height: 32),
 
                   // ==========================================
-                  // 4. CÁC NÚT BẤM
+                  // 4. CÁC NÚT BẤM CHÍNH
                   // ==========================================
                   SizedBox(
                     width: double.infinity, height: 50,
@@ -459,78 +514,50 @@ class ProfileScreen extends GetView<ProfileController> {
                     ),
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   Obx(() => OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(minimumSize: const Size(double.infinity, 50), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), side: BorderSide(color: Colors.grey)),
+                    style: OutlinedButton.styleFrom(minimumSize: const Size(double.infinity, 50), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), side: BorderSide(color: Colors.grey.shade400)),
                     icon: authController.isLoading.value ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) : org_cached.CachedNetworkImage(imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/120px-Google_%22G%22_logo.svg.png', width: 20, errorWidget: (context, url, error) => Icon(Icons.g_mobiledata, color: Colors.blue, size: 28)),
                     label: Text(user?.email != null ? "ĐỔI SANG TÀI KHOẢN KHÁC" : "LIÊN KẾT TÀI KHOẢN GOOGLE", style: const TextStyle(color: Colors.black87)),
                     onPressed: authController.isLoading.value ? null : () => authController.loginWithGoogle(forceSwitch: user?.email != null),
                   )),
 
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      side: const BorderSide(color: Colors.redAccent),
+                      foregroundColor: Colors.redAccent,
+                    ),
+                    icon: const Icon(Icons.logout, color: Colors.redAccent, size: 20),
+                    label: const Text("ĐĂNG XUẤT", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                    onPressed: () => authController.logout(),
+                  ),
+
                   const SizedBox(height: 24),
-                  const Divider(),
+                  const Divider(height: 1, thickness: 1),
+                  const SizedBox(height: 16),
 
                   // ==========================================
-                  // 5. ĐĂNG XUẤT (SỬA LẠI CHỖ NÀY)
+                  // 5. VÙNG NGUY HIỂM (XÓA TÀI KHOẢN)
                   // ==========================================
-                  TextButton.icon(
-                    onPressed: () => authController.logout(), // CHỈ CẦN GỌI HÀM NÀY
-                    icon: Icon(Icons.logout, color: Colors.red),
-                    label: const Text("Đăng xuất", style: TextStyle(color: Colors.red)),
-                  ),
-                  const SizedBox(height: 32),
-                  // ==========================================
-                  // BRANDING FOOTER (RED PHOENIX LOGO)
-                  // ==========================================
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.04),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
-                            child: Image.asset(
-                              'assets/images/launcher_icon.png',
-                              width: 52,
-                              height: 52,
-                              fit: BoxFit.contain,
-                            ),
-                          ),
+                  Center(
+                    child: TextButton.icon(
+                      onPressed: () => _showDeleteAccountDialog(context),
+                      icon: const Icon(Icons.delete_forever, color: Colors.grey, size: 18),
+                      label: Text(
+                        "Xóa tài khoản vĩnh viễn",
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 13,
+                          decoration: TextDecoration.underline,
+                          decorationColor: Colors.grey.shade600,
                         ),
-                        const SizedBox(height: 12),
-                        Text(
-                          "Chill travel",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey[800],
-                            fontSize: 15,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          "Phiên bản 1.0.0 • Đi muôn nơi, chia sẻ mọi cuộc vui!",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Colors.grey[500],
-                            fontSize: 11,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
+
                 ],
               ),
             ),

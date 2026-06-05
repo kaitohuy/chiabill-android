@@ -9,13 +9,29 @@ import 'controllers/theme_controller.dart';
 import 'routes/app_pages.dart';
 import 'utils/app_links_util.dart';
 import 'services/offline_sync_service.dart';
+import 'services/alarm_service.dart';
 import 'utils/storage_util.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   debugPrint("Nhận thông báo khi tắt app: ${message.messageId}");
-  // OS sẽ tự động hiện popup thông báo vì BE của bạn có truyền block "notification"
+  if (message.data.containsKey('title') || message.data.containsKey('body')) {
+    final title = message.data['title'] ?? 'Thông báo mới';
+    final body = message.data['body'] ?? '';
+    final type = message.data['type'];
+    final referenceId = message.data['referenceId'];
+    final imageUrl = message.data['imageUrl'];
+
+    await AlarmService.init();
+    await AlarmService.showInstantNotification(
+      id: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      title: title,
+      body: body,
+      payload: (type != null && referenceId != null) ? '$type|$referenceId' : null,
+      imageUrl: imageUrl,
+    );
+  }
 }
 
 void main() async {
@@ -37,16 +53,26 @@ void main() async {
   // Đảm bảo app vẽ tràn màn hình (Edge-to-Edge)
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
-  await dotenv.load(fileName: ".env");
-  await Firebase.initializeApp();
+  // Khởi chạy song song (đồng thời) các tác vụ bất đồng bộ nặng lúc khởi động để tối đa hóa hiệu năng luồng
+  await Future.wait([
+    dotenv.load(fileName: ".env"),
+    Firebase.initializeApp(),
+    GetStorage.init(),
+    AlarmService.init(),
+  ]);
 
-  // 3. ĐĂNG KÝ HÀM CHẠY NGẦM
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  // Yêu cầu quyền thông báo của Android 13+
+  AlarmService.requestPermissions();
+
+  // 3. ĐĂNG KÝ HÀM CHẠY NGẦM (Trì hoãn 4 giây để tránh tạo thêm luồng FlutterEngine chạy ngầm làm nghẽn Vulkan lúc khởi động app)
+  Future.delayed(const Duration(seconds: 4), () {
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  });
   
-  await GetStorage.init();
-  
-  // Khởi chạy dọn dẹp bộ nhớ đệm tự động nếu đến kỳ hoặc vượt dung lượng
-  StorageUtil.checkAndAutoClean();
+  // Chờ app khởi dựng và render mượt mà xong, sau đó mới chạy tác vụ dọn dẹp bộ nhớ ở background sau 5 giây để tránh áp lực I/O lúc khởi động
+  Future.delayed(const Duration(seconds: 5), () {
+    StorageUtil.checkAndAutoClean();
+  });
 
   // Khởi tạo các Service/Controller toàn cục
   Get.put(AppLinksService(), permanent: true);
@@ -73,6 +99,15 @@ class MyApp extends StatelessWidget {
       theme: themeController.getThemeData(),
       initialRoute: hasToken ? Routes.MAIN : Routes.WELCOME,
       getPages: AppPages.routes,
+      builder: (context, child) {
+        return GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () {
+            FocusManager.instance.primaryFocus?.unfocus();
+          },
+          child: child,
+        );
+      },
     );
   }
 }

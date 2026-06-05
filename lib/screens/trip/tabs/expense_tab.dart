@@ -5,19 +5,31 @@ import '../../../widgets/empty_state.dart';
 import '../../../controllers/add_expense_controller.dart';
 import '../../../controllers/trip_detail_controller.dart';
 import '../../../controllers/trip_expense_controller.dart';
+import '../../../controllers/itinerary_controller.dart';
+import '../../../data/models/itinerary_item_response.dart';
+import '../../trip/itinerary_screen.dart';
 import '../../../utils/currency_util.dart';
 import '../add_expense_bottom_sheet.dart';
 import 'package:cached_network_image/cached_network_image.dart' as org_cached;
 import '../../../utils/ui_util.dart';
 
-class ExpensesTab extends StatelessWidget {
+class ExpensesTab extends StatefulWidget {
   final TripDetailController mainController;
   const ExpensesTab({super.key, required this.mainController});
 
-  TripExpenseController get controller => Get.find<TripExpenseController>(tag: mainController.tripId.toString());
+  @override
+  State<ExpensesTab> createState() => _ExpensesTabState();
+}
+
+class _ExpensesTabState extends State<ExpensesTab> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  TripExpenseController get controller => Get.find<TripExpenseController>(tag: widget.mainController.tripId.toString());
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     
     return Column(
       children: [
@@ -44,7 +56,7 @@ class ExpensesTab extends StatelessWidget {
               Obx(() {
                 bool hasFilter = controller.filterCategoryId.value != null || controller.filterPayerId.value != null;
                 return InkWell(
-                  onTap: () => _showExpenseFilterBottomSheet(context, controller, mainController),
+                  onTap: () => _showExpenseFilterBottomSheet(context, controller, widget.mainController),
                   borderRadius: BorderRadius.circular(15),
                   child: Container(
                       padding: const EdgeInsets.all(12),
@@ -56,6 +68,32 @@ class ExpensesTab extends StatelessWidget {
                   ),
                 );
               }),
+              const SizedBox(width: 10),
+              Obx(() {
+                bool hasDateFilter = controller.selectedExpenseDate.value != null;
+                return InkWell(
+                  onTap: () async {
+                    final DateTime? picked = await showDatePicker(
+                      context: context,
+                      initialDate: controller.selectedExpenseDate.value ?? DateTime.now(),
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime(2030),
+                    );
+                    if (picked != null) {
+                      controller.onExpenseDateChanged(picked);
+                    }
+                  },
+                  borderRadius: BorderRadius.circular(15),
+                  child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                          color: hasDateFilter ? AppColors.primary : Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(15)
+                      ),
+                      child: Icon(Icons.calendar_month_outlined, size: 20, color: hasDateFilter ? Colors.white : Colors.grey.shade700)
+                  ),
+                );
+              }),
             ],
           ),
         ),
@@ -63,20 +101,23 @@ class ExpensesTab extends StatelessWidget {
         // Thanh chọn ngày ngang
         _buildDateFilter(),
 
+        // Banner lịch trình hôm nay
+        _buildQuickItineraryBanner(),
+
         Expanded(
           child: GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTap: () => UIUtil.smartTap(context, () {
-              if (mainController.trip.value != null && controller.expenses.isEmpty) {
+              if (widget.mainController.trip.value != null && controller.expenses.isEmpty) {
                 const tag = 'add_bg';
                 final addController = Get.put(
-                    AddExpenseController(mainController.trip.value!),
+                    AddExpenseController(widget.mainController.trip.value!),
                     tag: tag
                 );
 
                 Get.bottomSheet(
                   AddExpenseBottomSheet(
-                    trip: mainController.trip.value!,
+                    trip: widget.mainController.trip.value!,
                     controller: addController,
                   ), 
                   isScrollControlled: true
@@ -84,13 +125,13 @@ class ExpensesTab extends StatelessWidget {
               }
             }),
             child: Obx(() {
-              if (mainController.isLoading.value && controller.expenses.isEmpty) {
+              if (widget.mainController.isLoading.value && controller.expenses.isEmpty) {
                 return const Center(child: CircularProgressIndicator());
               }
               if (controller.expenses.isEmpty) {
                 return RefreshIndicator(
                   color: AppColors.primary,
-                  onRefresh: () async => mainController.fetchData(),
+                  onRefresh: () async => widget.mainController.fetchData(),
                   child: ListView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     children: [
@@ -103,7 +144,7 @@ class ExpensesTab extends StatelessWidget {
 
               return RefreshIndicator(
                 color: AppColors.primary,
-                onRefresh: () async => mainController.fetchData(),
+                onRefresh: () async => widget.mainController.fetchData(),
                 child: NotificationListener<ScrollNotification>(
                     onNotification: (ScrollNotification scrollInfo) {
                       if (!controller.isLoadingMoreExpenses.value && scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200) {
@@ -140,15 +181,15 @@ class ExpensesTab extends StatelessWidget {
                             borderRadius: BorderRadius.circular(16),
                             onTap: () {
                               final tag = 'edit_${expense.id}';
-                              // Khởi tạo controller ềEđây thay vì bên trong build của BottomSheet
+                              // Khởi tạo controller đềEđây thay vì bên trong build của BottomSheet
                               final addController = Get.put(
-                                  AddExpenseController(mainController.trip.value!, expenseToEdit: expense),
+                                  AddExpenseController(widget.mainController.trip.value!, expenseToEdit: expense),
                                   tag: tag
                               );
 
                               Get.bottomSheet(
                                   AddExpenseBottomSheet(
-                                    trip: mainController.trip.value!,
+                                    trip: widget.mainController.trip.value!,
                                     expenseToEdit: expense,
                                     controller: addController,
                                   ),
@@ -639,6 +680,213 @@ class ExpensesTab extends StatelessWidget {
         Get.back();
         controller.deleteExpense(expenseId);
       },
+    );
+  }
+
+  Widget _buildQuickItineraryBanner() {
+    final itineraryCtrl = Get.put(
+      ItineraryController(widget.mainController.tripId),
+      tag: widget.mainController.tripId.toString(),
+    );
+
+    return Obx(() {
+      if (itineraryCtrl.itineraryList.isEmpty) {
+        return const SizedBox.shrink();
+      }
+
+      // Xác định ngày mục tiêu dựa vào filter ngày (nếu có)
+      final targetDate = controller.selectedExpenseDate.value ?? DateTime.now();
+      final days = itineraryCtrl.tripDays;
+
+      // Tìm chỉ số ngày của targetDate trong danh sách các ngày của chuyến đi
+      int targetDayIdx = -1;
+      for (int i = 0; i < days.length; i++) {
+        final d = days[i];
+        if (d.year == targetDate.year && d.month == targetDate.month && d.day == targetDate.day) {
+          targetDayIdx = i;
+          break;
+        }
+      }
+
+      // Nếu có filter ngày và ngày được chọn không nằm trong chuyến đi -> Ẩn banner
+      if (controller.selectedExpenseDate.value != null && targetDayIdx == -1) {
+        return const SizedBox.shrink();
+      }
+
+      int todayIdx = 0;
+      if (targetDayIdx != -1) {
+        todayIdx = targetDayIdx;
+      } else {
+        // Mặc định tính theo ngày hôm nay nếu không filter hoặc hôm nay không phải ngày đi
+        if (itineraryCtrl.startDate != null) {
+          final start = DateTime.tryParse(itineraryCtrl.startDate!);
+          if (start != null) {
+            final today = DateTime.now();
+            final diff = today.difference(start).inDays;
+            if (diff >= 0 && diff < days.length) {
+              todayIdx = diff;
+            }
+          }
+        }
+      }
+
+      final dayNum = todayIdx + 1;
+      final dayActivities = itineraryCtrl.groupedItinerary[dayNum] ?? [];
+
+      if (dayActivities.isEmpty) {
+        // Nếu đang filter ngày và ngày đó không có hoạt động nào -> Ẩn banner
+        if (controller.selectedExpenseDate.value != null) {
+          return const SizedBox.shrink();
+        }
+        // Ngược lại, nếu là xem tất cả/hôm nay không có hoạt động, hiện hoạt động đầu tiên của ngày 1
+        final firstDayAct = itineraryCtrl.groupedItinerary[1] ?? [];
+        if (firstDayAct.isEmpty) return const SizedBox.shrink();
+        
+        final nextItem = firstDayAct.first;
+        return _buildActiveBannerCard(dayNum, nextItem, isUpcoming: true);
+      }
+
+      // Tìm hoạt động sắp tới tiếp theo (chỉ check giờ nếu targetDate là hôm nay)
+      final now = DateTime.now();
+      bool isToday = targetDate.year == now.year && targetDate.month == now.month && targetDate.day == now.day;
+      ItineraryItemResponse? nextItem;
+
+      if (isToday) {
+        for (var act in dayActivities) {
+          if (act.timeRange != null) {
+            try {
+              final parts = act.timeRange!.split('-');
+              final startPart = parts.first.trim().toLowerCase();
+              int? hour;
+              int? min;
+              if (startPart.contains(':')) {
+                final hourMin = startPart.split(':');
+                hour = int.parse(hourMin.first);
+                min = int.parse(hourMin.last.replaceAll(RegExp(r'[^0-9]'), ''));
+              } else if (startPart.contains('h')) {
+                final hourMin = startPart.split('h');
+                hour = int.parse(hourMin.first);
+                final minStr = hourMin.last.replaceAll(RegExp(r'[^0-9]'), '');
+                min = minStr.isEmpty ? 0 : int.parse(minStr);
+              } else {
+                hour = int.parse(startPart);
+                min = 0;
+              }
+              
+              final actTime = DateTime(now.year, now.month, now.day, hour, min);
+              if (actTime.isAfter(now)) {
+                nextItem = act;
+                break;
+              }
+            } catch (_) {}
+          }
+        }
+      }
+      
+      nextItem ??= dayActivities.first;
+
+      return _buildActiveBannerCard(dayNum, nextItem, isUpcoming: !isToday);
+    });
+  }
+
+  Widget _buildActiveBannerCard(int dayNum, ItineraryItemResponse item, {required bool isUpcoming}) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.15), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          )
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => Get.to(() => ItineraryScreen(tripId: widget.mainController.tripId)),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryBackground,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.explore, color: AppColors.primary, size: 24),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              isUpcoming ? "Lịch trình sắp tới (Ngày $dayNum)" : "Lịch trình hôm nay (Ngày $dayNum)",
+                              style: TextStyle(
+                                fontSize: 11, 
+                                fontWeight: FontWeight.bold, 
+                                color: AppColors.primary,
+                              ),
+                            ),
+                            if (item.timeRange != null) ...[
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade100,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  item.timeRange!,
+                                  style: TextStyle(fontSize: 10, color: Colors.grey.shade600, fontWeight: FontWeight.w600),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          item.activity,
+                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (item.location != null && item.location!.isNotEmpty) ...[
+                          const SizedBox(height: 2),
+                          Row(
+                            children: [
+                              Icon(Icons.pin_drop, size: 12, color: Colors.grey.shade400),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  item.location!,
+                                  style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  Icon(Icons.arrow_forward_ios, color: Colors.grey.shade400, size: 14),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

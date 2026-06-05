@@ -10,23 +10,32 @@ import '../create_payment_bottom_sheet.dart';
 import '../pay_on_behalf_screen.dart';
 import '../balance_detail_bottom_sheet.dart';
 
-class SettlementsTab extends StatelessWidget {
+class SettlementsTab extends StatefulWidget {
   final TripDetailController mainController;
   const SettlementsTab({super.key, required this.mainController});
 
   @override
+  State<SettlementsTab> createState() => _SettlementsTabState();
+}
+
+class _SettlementsTabState extends State<SettlementsTab> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
-    final controller = Get.find<TripSettlementController>(tag: mainController.tripId.toString());
+    super.build(context);
+    final controller = Get.find<TripSettlementController>(tag: widget.mainController.tripId.toString());
     return Obx(() {
       if (controller.isLoading.value) return const Center(child: CircularProgressIndicator());
 
       if (controller.settlements.isEmpty) {
         return RefreshIndicator(
-          onRefresh: () async => mainController.fetchData(),
+          onRefresh: () async => widget.mainController.fetchData(),
           child: ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             children: [
-              SizedBox(height: Get.height * 0.15),
+              SizedBox(height: Get.height * 0.25),
               const EmptyState(text: "Mọi người đang hòa tiền nhau,\nhoặc chưa có khoản chi nào!"),
             ],
           ),
@@ -115,7 +124,7 @@ class SettlementsTab extends StatelessWidget {
                 GestureDetector(
                   onTap: () {
                     Get.to(() => PayOnBehalfScreen(
-                      tripId: mainController.tripId, 
+                      tripId: widget.mainController.tripId, 
                       settlements: controller.settlements
                     ));
                   },
@@ -133,7 +142,7 @@ class SettlementsTab extends StatelessWidget {
           Expanded(
             child: RefreshIndicator(
               color: Colors.orange,
-              onRefresh: () async => mainController.fetchData(),
+              onRefresh: () async => widget.mainController.fetchData(),
               child: controller.filteredSettlements.isEmpty
                   ? ListView(
                       children: const [
@@ -166,9 +175,9 @@ class SettlementsTab extends StatelessWidget {
                             onTap: () {
                               Get.bottomSheet(
                                 BalanceDetailBottomSheet(
-                                  tripId: mainController.tripId,
+                                  tripId: widget.mainController.tripId,
                                   settlement: settle,
-                                  onPayPressed: () => _showPaymentQR(context, controller, mainController, settle),
+                                  onPayPressed: () => _showPaymentQR(context, controller, widget.mainController, settle),
                                 ),
                                 isScrollControlled: true,
                               );

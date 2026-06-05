@@ -25,7 +25,7 @@ class CreatePaymentBottomSheet extends StatelessWidget {
         left: 20, 
         right: 20, 
         top: 24, 
-        bottom: 24 + bottomInset + MediaQuery.of(context).padding.bottom,
+        bottom: 24 + bottomInset,
       ),
       decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       child: Column(

@@ -20,8 +20,15 @@ class TourismController extends GetxController {
   // --- Storage keys ---
   static const _kMapStyle            = 'map_style';
   static const _kMaptilerNoticeShown = 'maptiler_notice_shown';
+  static const _kGoogleMapsNoticeShown = 'google_maps_notice_shown';
 
   // --- State ---
+  final RxBool isMapView = true.obs;
+  final RxList<PlaceModel> galleryPlaces = <PlaceModel>[].obs;
+  final RxInt galleryPage = 0.obs;
+  final RxBool galleryHasMore = true.obs;
+  final RxBool isGalleryLoadingMore = false.obs;
+
   final RxList<PlaceModel> places        = <PlaceModel>[].obs;
   final RxList<PlaceModel> searchResults = <PlaceModel>[].obs;
   final RxBool isLoading   = false.obs;
@@ -29,18 +36,23 @@ class TourismController extends GetxController {
   final TextEditingController searchController = TextEditingController();
   final RxString selectedCategory = 'Tất cả'.obs;
 
-  List<PlaceModel> get filteredPlaces {
+  final RxList<PlaceModel> filteredPlaces        = <PlaceModel>[].obs;
+  final RxList<PlaceModel> filteredSearchResults = <PlaceModel>[].obs;
+
+  void _updateFilteredPlaces() {
     if (selectedCategory.value == 'Tất cả') {
-      return places;
+      filteredPlaces.value = places;
+    } else {
+      filteredPlaces.value = places.where((p) => p.category == selectedCategory.value).toList();
     }
-    return places.where((p) => p.category == selectedCategory.value).toList();
   }
 
-  List<PlaceModel> get filteredSearchResults {
+  void _updateFilteredSearchResults() {
     if (selectedCategory.value == 'Tất cả') {
-      return searchResults;
+      filteredSearchResults.value = searchResults;
+    } else {
+      filteredSearchResults.value = searchResults.where((p) => p.category == selectedCategory.value).toList();
     }
-    return searchResults.where((p) => p.category == selectedCategory.value).toList();
   }
 
   // Vietnam default coordinates
@@ -53,16 +65,17 @@ class TourismController extends GetxController {
   /// Flag để Screen lắng nghe và tự quyết định hiện Dialog hay không.
   /// True = cần hiện thông báo MapTiler, False = không cần.
   final RxBool shouldShowMaptilerNotice = false.obs;
+  final RxBool shouldShowGoogleMapsNotice = false.obs;
 
   /// True = đang dùng Google Maps, False = đang dùng MapTiler.
-  final RxBool isUsingGoogleMaps = true.obs;
+  final RxBool isUsingGoogleMaps = false.obs;
 
   @override
   void onInit() {
     super.onInit();
 
     // Khôi phục style đã lưu
-    final savedStyle = _storage.read<String>(_kMapStyle) ?? 'streets-v2';
+    final savedStyle = _storage.read<String>(_kMapStyle) ?? 'basic-v2';
     currentMapStyle = savedStyle.obs;
 
     // Tự động persist mỗi khi đổi style
@@ -70,31 +83,87 @@ class TourismController extends GetxController {
       _storage.write(_kMapStyle, style);
     });
 
-    // Khi chuyển về Google Maps → reset flag để lần sau đổi về MapTiler sẽ hiện notice lại
+    // Khi chuyển đổi nhà cung cấp bản đồ → ẩn thông báo cũ và kiểm tra hiện thông báo mới (nếu chưa từng xem)
     ever(isUsingGoogleMaps, (usingGoogle) {
       if (usingGoogle) {
-        _storage.write(_kMaptilerNoticeShown, false);
         shouldShowMaptilerNotice.value = false;
+        _checkAndSetGoogleMapsNotice();
       } else {
-        // Vừa chuyển sang MapTiler: kiểm tra có cần hiện thông báo không
+        shouldShowGoogleMapsNotice.value = false;
         _checkAndSetMaptilerNotice();
       }
     });
 
+    // Tự động đồng bộ các danh sách đã lọc
+    ever(places, (_) => _updateFilteredPlaces());
+    ever(searchResults, (_) => _updateFilteredSearchResults());
+    ever(selectedCategory, (_) {
+      _updateFilteredPlaces();
+      _updateFilteredSearchResults();
+      fetchGalleryPlaces(isRefresh: true);
+    });
+
+    // Khởi tạo giá trị ban đầu
+    _updateFilteredPlaces();
+    _updateFilteredSearchResults();
+
     fetchPlacesNearby(defaultCenter.latitude, defaultCenter.longitude, 20000.0);
+    fetchGalleryPlaces(isRefresh: true);
     _fetchMapConfig();
+  }
+
+  Future<void> fetchGalleryPlaces({bool isRefresh = true}) async {
+    if (isRefresh) {
+      galleryPage.value = 0;
+      galleryHasMore.value = true;
+      isLoading.value = true;
+    } else {
+      if (isGalleryLoadingMore.value || !galleryHasMore.value) return;
+      isGalleryLoadingMore.value = true;
+    }
+
+    final response = await _placeRepository.getPlaces(
+      category: selectedCategory.value,
+      page: galleryPage.value,
+      size: 10,
+    );
+
+    if (response.success && response.data != null) {
+      final newPlaces = response.data!;
+      if (isRefresh) {
+        galleryPlaces.value = newPlaces;
+      } else {
+        galleryPlaces.addAll(newPlaces);
+      }
+      
+      if (newPlaces.length < 10) {
+        galleryHasMore.value = false;
+      } else {
+        galleryPage.value++;
+      }
+    } else {
+      ToastUtil.showError("Lỗi", "Không thể tải danh sách địa điểm");
+    }
+
+    if (isRefresh) {
+      isLoading.value = false;
+    } else {
+      isGalleryLoadingMore.value = false;
+    }
   }
 
   /// Lấy cấu hình bản đồ từ Server để biết nên dùng Google Maps hay MapTiler
   Future<void> _fetchMapConfig() async {
     try {
-      isUsingGoogleMaps.value = true;
+      isUsingGoogleMaps.value = false;
     } catch (e) {
-      isUsingGoogleMaps.value = true;
+      isUsingGoogleMaps.value = false;
     }
 
     if (!isUsingGoogleMaps.value) {
       _checkAndSetMaptilerNotice();
+    } else {
+      _checkAndSetGoogleMapsNotice();
     }
   }
 
@@ -109,6 +178,19 @@ class TourismController extends GetxController {
   void markMaptilerNoticeSeen() {
     _storage.write(_kMaptilerNoticeShown, true);
     shouldShowMaptilerNotice.value = false;
+  }
+
+  void _checkAndSetGoogleMapsNotice() {
+    final alreadyShown = _storage.read<bool>(_kGoogleMapsNoticeShown) ?? false;
+    if (!alreadyShown) {
+      shouldShowGoogleMapsNotice.value = true;
+    }
+  }
+
+  /// Gọi bởi Screen sau khi đã hiển thị dialog thành công.
+  void markGoogleMapsNoticeSeen() {
+    _storage.write(_kGoogleMapsNoticeShown, true);
+    shouldShowGoogleMapsNotice.value = false;
   }
 
   Future<void> fetchPlacesNearby(double lat, double lng, double radius) async {

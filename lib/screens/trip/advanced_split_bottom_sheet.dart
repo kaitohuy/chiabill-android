@@ -52,7 +52,7 @@ class _AdvancedSplitBottomSheetState extends State<AdvancedSplitBottomSheet> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).padding.bottom,
+        bottom: 16,
         left: 16,
         right: 16,
         top: 16,

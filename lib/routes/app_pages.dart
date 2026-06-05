@@ -3,6 +3,10 @@ import 'package:get/get.dart';
 import '../controllers/home_controller.dart';
 import '../controllers/notification_controller.dart';
 import '../controllers/profile_controller.dart';
+import '../controllers/auth_controller.dart';
+import '../controllers/join_trip_controller.dart';
+import '../controllers/trash_controller.dart';
+import '../controllers/calculator_controller.dart';
 import '../screens/auth/welcome_screen.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/main/main_screen.dart';
@@ -39,7 +43,10 @@ class AppPages {
   static final routes = [
     GetPage(
       name: Routes.WELCOME,
-      page: () => WelcomeScreen(),
+      page: () => const WelcomeScreen(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<AuthController>(() => AuthController(), fenix: true);
+      }),
     ),
     GetPage(
       name: Routes.MAIN,
@@ -70,14 +77,23 @@ class AppPages {
     GetPage(
       name: Routes.JOIN_TRIP,
       page: () => const JoinTripScreen(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<JoinTripController>(() => JoinTripController());
+      }),
     ),
     GetPage(
       name: Routes.TRASH,
       page: () => const TrashScreen(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<TrashController>(() => TrashController());
+      }),
     ),
     GetPage(
       name: Routes.CALCULATOR,
-      page: () => CalculatorScreen(),
+      page: () => const CalculatorScreen(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<CalculatorController>(() => CalculatorController());
+      }),
     ),
   ];
 }

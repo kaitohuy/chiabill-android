@@ -41,7 +41,10 @@ class GroupFundTab extends StatefulWidget {
   State<GroupFundTab> createState() => _GroupFundTabState();
 }
 
-class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderStateMixin {
+class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   late GroupFundController fundController;
   late TabController _tabController;
   int touchedIndex = -1;
@@ -69,6 +72,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final trip = widget.mainController.trip.value;
     final currentUserId = widget.mainController.currentUserId;
     final isOwner = trip?.ownerId == currentUserId;
@@ -570,7 +574,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
             top: 24,
             left: 24,
             right: 24,
-            bottom: MediaQuery.of(context).padding.bottom + 24,
+            bottom: 24,
           ),
           decoration: const BoxDecoration(
             color: Colors.white,

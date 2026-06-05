@@ -217,7 +217,7 @@ class PayOnBehalfScreen extends StatelessWidget {
       bottomNavigationBar: Obx(() {
         if (controller.selectedFromUserIds.isEmpty) return const SizedBox.shrink();
         return Container(
-          padding: EdgeInsets.only(left: 16, right: 16, top: 16, bottom: MediaQuery.of(context).padding.bottom + 16),
+          padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 16),
           decoration: BoxDecoration(
             color: Colors.white,
             boxShadow: [BoxShadow(color: Colors.black.withValues(alpha:0.08), blurRadius: 12, offset: const Offset(0, -4))],
@@ -316,7 +316,7 @@ class PayOnBehalfScreen extends StatelessWidget {
   void _showUploadProofBottomSheet(BuildContext context, PayOnBehalfController controller) {
     Get.bottomSheet(
       Container(
-        padding: EdgeInsets.only(left: 20, right: 20, top: 24, bottom: 24 + MediaQuery.of(context).padding.bottom),
+        padding: const EdgeInsets.only(left: 20, right: 20, top: 24, bottom: 24),
         decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
         child: Obx(() {
           return Column(

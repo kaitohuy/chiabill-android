@@ -5,6 +5,7 @@ class TripResponse {
   final int id;
   final String name;
   final String? description;
+  final String? coverUrl;
   final String? currency;
   final double? totalBudget;
   final UserResponse? createdBy;
@@ -12,6 +13,7 @@ class TripResponse {
   final List<TripMemberResponse>? members;
   final String? createdAt;
   final String? startDate;
+  final String? endDate;
   final int? memberCount;
   final String? categoryName;
   final String? categoryIcon;
@@ -20,6 +22,7 @@ class TripResponse {
     required this.id,
     required this.name,
     this.description,
+    this.coverUrl,
     this.currency,
     this.totalBudget,
     this.createdBy,
@@ -27,6 +30,7 @@ class TripResponse {
     this.members,
     this.createdAt,
     this.startDate,
+    this.endDate,
     this.memberCount,
     this.categoryName,
     this.categoryIcon,
@@ -37,6 +41,7 @@ class TripResponse {
       id: json['id'] as int,
       name: json['name'] as String,
       description: json['description'] as String?,
+      coverUrl: json['coverUrl'] as String?,
       currency: json['currency'] as String?,
       totalBudget: json['totalBudget'] != null ? double.parse(json['totalBudget'].toString()) : null,
       createdBy: json['createdBy'] != null ? UserResponse.fromJson(json['createdBy']) : null,
@@ -46,6 +51,7 @@ class TripResponse {
           : null,
       createdAt: json['createdAt'] as String?,
       startDate: json['startDate'] as String?,
+      endDate: json['endDate'] as String?,
       memberCount: json['memberCount'] as int?,
       categoryName: json['categoryName'] as String?,
       categoryIcon: json['categoryIcon'] as String?,

@@ -45,4 +45,14 @@ class UserRepository {
       return ApiResponse(success: false, message: "Lỗi tải ảnh lên: $e");
     }
   }
+
+  // 4. Xóa tài khoản
+  Future<ApiResponse<void>> deleteAccount() async {
+    try {
+      final response = await _apiService.dio.delete("/api/users/me");
+      return ApiResponse<void>.fromJson(response.data, (data) => null);
+    } catch (e) {
+      return ApiResponse(success: false, message: "Lỗi xóa tài khoản: $e");
+    }
+  }
 }
