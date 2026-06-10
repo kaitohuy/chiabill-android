@@ -13,6 +13,8 @@ class CreateExpenseRequest {
   final String? clientUuid;
   final String? splitType;
 
+  final String? receiptUrl;
+
   CreateExpenseRequest({
     required this.tripId,
     required this.payerId,
@@ -26,6 +28,7 @@ class CreateExpenseRequest {
     this.isFromFund,
     this.clientUuid,
     this.splitType,
+    this.receiptUrl,
   });
 
   final String? expenseDate;
@@ -42,6 +45,7 @@ class CreateExpenseRequest {
     'isFromFund': isFromFund,
     'clientUuid': clientUuid,
     if (splitType != null) 'splitType': splitType,
+    'receiptUrl': receiptUrl,
     'splits': splits.map((e) => e.toJson()).toList(),
   };
 }

@@ -13,6 +13,8 @@ class UpdateExpenseRequest {
   final String? clientUuid;
   final String? splitType;
 
+  final String? receiptUrl;
+
   UpdateExpenseRequest({
     required this.payerId,
     required this.totalAmount,
@@ -25,6 +27,7 @@ class UpdateExpenseRequest {
     this.isFromFund,
     this.clientUuid,
     this.splitType,
+    this.receiptUrl,
   });
 
   Map<String, dynamic> toJson() => {
@@ -39,5 +42,6 @@ class UpdateExpenseRequest {
     'isFromFund': isFromFund,
     'clientUuid': clientUuid,
     if (splitType != null) 'splitType': splitType,
+    'receiptUrl': receiptUrl,
   };
 }

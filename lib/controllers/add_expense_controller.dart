@@ -1,6 +1,9 @@
+import 'dart:io';
+import 'package:chiabill/utils/loading_util.dart';
 import 'package:chiabill/utils/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import '../data/models/create_expense_request.dart';
 import '../data/models/expense_category_respone.dart';
 import '../data/models/split_request.dart';
@@ -25,6 +28,88 @@ class AddExpenseController extends GetxController {
   final ExpenseRepository _repository = ExpenseRepository();
   final CategoryRepository _categoryRepo = CategoryRepository();
   final GroupFundService _fundService = GroupFundService();
+
+  // Receipt Image Selection & Processing
+  var selectedReceiptFile = Rxn<File>();
+  var receiptUrl = RxnString();
+  var isUploadingImage = false.obs;
+  var isScanningImage = false.obs;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> pickReceiptImage(ImageSource source) async {
+    final XFile? image = await _picker.pickImage(
+      source: source,
+      imageQuality: 60,
+      maxWidth: 1080,
+    );
+    if (image != null) {
+      final file = File(image.path);
+      selectedReceiptFile.value = file;
+      scanAndUploadReceipt(file);
+    }
+  }
+
+  void clearReceiptImage() {
+    selectedReceiptFile.value = null;
+    receiptUrl.value = null;
+    isUploadingImage.value = false;
+  }
+
+  Future<void> scanAndUploadReceipt(File file) async {
+    // 1. Chạy AI OCR (Chặn UI xoay loading)
+    isScanningImage.value = true;
+    LoadingUtil.show();
+
+    // Chạy song song: upload Cloudinary chạy nền không chặn
+    _uploadReceiptToCloudinaryAsync(file);
+
+    try {
+      final ocrResult = await _repository.scanReceipt(trip.id, file);
+      if (ocrResult.success && ocrResult.data != null) {
+        final data = ocrResult.data!;
+        
+        if (data.totalAmount > 0) {
+          amountController.text = CurrencyUtils.formatNumber(data.totalAmount);
+          _updateCalculatedVnd();
+        }
+        
+        if (data.description.isNotEmpty) {
+          descController.text = data.description;
+        }
+        
+        if (data.categoryId != null) {
+          if (categories.any((c) => c.id == data.categoryId)) {
+            selectedCategoryId.value = data.categoryId;
+          }
+        }
+        
+        ToastUtil.showSuccess("Đã quét hóa đơn", "Tự động điền số tiền và nội dung bằng AI thành công!");
+      } else {
+        ToastUtil.showWarning("AI bận", ocrResult.message ?? "Không thể tự động quét hóa đơn. Vui lòng tự điền thông tin.");
+      }
+    } catch (e) {
+      ToastUtil.showWarning("AI bận", "Có lỗi xảy ra khi quét hóa đơn. Vui lòng tự điền thông tin.");
+    } finally {
+      isScanningImage.value = false;
+      LoadingUtil.hide();
+    }
+  }
+
+  Future<void> _uploadReceiptToCloudinaryAsync(File file) async {
+    isUploadingImage.value = true;
+    try {
+      final result = await _repository.uploadImage(file);
+      if (result.success && result.data != null) {
+        receiptUrl.value = result.data;
+      } else {
+        ToastUtil.showError("Lỗi tải ảnh", result.message ?? "Không thể lưu trữ ảnh minh chứng lên đám mây.");
+      }
+    } catch (e) {
+      ToastUtil.showError("Lỗi hệ thống", "Không thể kết nối máy chủ để lưu ảnh.");
+    } finally {
+      isUploadingImage.value = false;
+    }
+  }
   var isFromFund = false.obs;
   var fundBalance = 0.0.obs;
   var isFundActivated = false.obs;
@@ -77,6 +162,7 @@ class AddExpenseController extends GetxController {
       descController.text = expenseToEdit!.description;
       selectedPayerId.value = expenseToEdit!.payer?.id ?? (trip.createdBy?.id ?? 0);
       selectedCategoryId.value = expenseToEdit!.categoryId;
+      receiptUrl.value = expenseToEdit!.receiptUrl;
       if (expenseToEdit!.expenseDate != null) {
         try {
           selectedDate.value = DateTime.parse(expenseToEdit!.expenseDate!);
@@ -239,6 +325,11 @@ class AddExpenseController extends GetxController {
   }
 
   Future<void> submitExpense() async {
+    if (isUploadingImage.value) {
+      ToastUtil.showWarning("Đang xử lý", "Vui lòng đợi ảnh hóa đơn tải lên hoàn thành");
+      return;
+    }
+
     double? originalAmount = double.tryParse(amountController.text.replaceAll(',', ''));
     if (originalAmount == null || originalAmount <= 0) {
       ToastUtil.showWarning("Lỗi", "Số tiền không hợp lệ");
@@ -304,6 +395,7 @@ class AddExpenseController extends GetxController {
           splits: splits,
           isFromFund: isFromFund.value,
           splitType: splitType.value,
+          receiptUrl: receiptUrl.value,
         );
         final result = await _repository.updateExpense(expenseToEdit!.id, updateRequest);
         isSuccess = result.success;
@@ -330,6 +422,7 @@ class AddExpenseController extends GetxController {
             isFromFund: true,
             clientUuid: _generateUuid(),
             splitType: splitType.value,
+            receiptUrl: receiptUrl.value,
           );
 
           final result1 = await _repository.createExpense(createRequest1);
@@ -349,6 +442,7 @@ class AddExpenseController extends GetxController {
               isFromFund: false,
               clientUuid: _generateUuid(),
               splitType: splitType.value,
+              receiptUrl: receiptUrl.value,
             );
             final result2 = await _repository.createExpense(createRequest2);
             isSuccess = result2.success;
@@ -371,6 +465,7 @@ class AddExpenseController extends GetxController {
           isFromFund: isFromFund.value,
           clientUuid: _generateUuid(),
           splitType: splitType.value,
+          receiptUrl: receiptUrl.value,
         );
         final result = await _repository.createExpense(createRequest);
         isSuccess = result.success;

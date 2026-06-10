@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:ui';
+import 'package:image_picker/image_picker.dart';
 import 'package:chiabill/theme/app_colors.dart';
 import 'package:chiabill/utils/toast_util.dart';
 import 'package:flutter/material.dart';
@@ -77,6 +80,157 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primary)
         ),
         const SizedBox(height: 20),
+
+        // =====================================
+        // VÙNG UPLOAD ẢNH HÓA ĐƠN & QUÉT AI (DASHED BOX)
+        // =====================================
+        Obx(() {
+          final file = controller.selectedReceiptFile.value;
+          final url = controller.receiptUrl.value;
+          final isUploading = controller.isUploadingImage.value;
+          final isScanning = controller.isScanningImage.value;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  if (file == null && url == null) {
+                    _showImageSourceDialog(context, controller);
+                  } else {
+                    _showImageFullscreen(context, file, url);
+                  }
+                },
+                child: Container(
+                  width: double.infinity,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha:0.03),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: CustomPaint(
+                    painter: DashedBorderPainter(
+                      color: AppColors.primary.withValues(alpha:0.35),
+                      strokeWidth: 1.5,
+                      gap: 6.0,
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          if (file != null)
+                            Image.file(file, width: double.infinity, height: double.infinity, fit: BoxFit.cover)
+                          else if (url != null && url.isNotEmpty)
+                            Image.network(url, width: double.infinity, height: double.infinity, fit: BoxFit.cover)
+                          else
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary.withValues(alpha:0.08),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(Icons.add_a_photo_outlined, size: 28, color: AppColors.primary),
+                                ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  "Quét hóa đơn bằng camera hoặc chọn từ album ảnh",
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          
+                          // Nút xóa ảnh
+                          if (file != null || (url != null && url.isNotEmpty))
+                            Positioned(
+                              top: 8,
+                              right: 8,
+                              child: GestureDetector(
+                                onTap: () {
+                                  controller.clearReceiptImage();
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.black54,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.close, size: 18, color: Colors.white),
+                                ),
+                              ),
+                            ),
+
+                          // Trạng thái Cloudinary Upload (nền)
+                          if (isUploading)
+                            Positioned(
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              child: Container(
+                                color: Colors.black54,
+                                padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const SizedBox(
+                                      width: 12,
+                                      height: 12,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      "Đang lưu trữ ảnh lên đám mây...",
+                                      style: TextStyle(fontSize: 11, color: Colors.white70),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                          // Trạng thái quét AI
+                          if (isScanning)
+                            Container(
+                              color: Colors.black54,
+                              width: double.infinity,
+                              height: double.infinity,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  const Text(
+                                    "AI đang đọc hóa đơn...",
+                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  const Text(
+                                    "Sẽ hoàn tất trong giây lát",
+                                    style: TextStyle(color: Colors.white70, fontSize: 11),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+          );
+        }),
 
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -745,4 +899,142 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
       )
     );
   }
+
+  void _showImageSourceDialog(BuildContext context, AddExpenseController controller) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 16),
+              const Text(
+                "Chọn ảnh hóa đơn",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha:0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.camera_alt, color: AppColors.primary),
+                ),
+                title: const Text("Chụp từ Camera"),
+                onTap: () {
+                  Navigator.pop(context);
+                  controller.pickReceiptImage(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha:0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.photo_library, color: AppColors.primary),
+                ),
+                title: const Text("Chọn từ Thư viện"),
+                onTap: () {
+                  Navigator.pop(context);
+                  controller.pickReceiptImage(ImageSource.gallery);
+                },
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showImageFullscreen(BuildContext context, File? file, String? url) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: EdgeInsets.zero,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                width: double.infinity,
+                height: double.infinity,
+                color: Colors.black87,
+              ),
+            ),
+            InteractiveViewer(
+              maxScale: 4.0,
+              child: file != null
+                  ? Image.file(file)
+                  : Image.network(url ?? ""),
+            ),
+            Positioned(
+              top: 40,
+              right: 20,
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class DashedBorderPainter extends CustomPainter {
+  final Color color;
+  final double strokeWidth;
+  final double gap;
+
+  DashedBorderPainter({
+    this.color = Colors.grey,
+    this.strokeWidth = 1.0,
+    this.gap = 4.0,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()
+      ..color = color
+      ..strokeWidth = strokeWidth
+      ..style = PaintingStyle.stroke;
+
+    final Path path = Path();
+    path.addRRect(RRect.fromRectAndRadius(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      const Radius.circular(12),
+    ));
+
+    final Path dashedPath = Path();
+    double distance = 0.0;
+    for (PathMetric measurePath in path.computeMetrics()) {
+      while (distance < measurePath.length) {
+        dashedPath.addPath(
+          measurePath.extractPath(distance, distance + gap),
+          Offset.zero,
+        );
+        distance += gap * 2;
+      }
+    }
+    canvas.drawPath(dashedPath, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant DashedBorderPainter oldDelegate) =>
+      color != oldDelegate.color ||
+      strokeWidth != oldDelegate.strokeWidth ||
+      gap != oldDelegate.gap;
 }

@@ -48,7 +48,18 @@ class LoadingUtil {
     if (!_isShowing) return;
     _isShowing = false;
     
-    // Gọi thẳng Get.back() thay vì check isDialogOpen vì đôi khi dialog đang animate in
-    Get.back();
+    // Tránh race condition khi gọi hide() quá nhanh ngay sau show()
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.isDialogOpen == true) {
+        Get.back();
+      } else {
+        // Dự phòng nếu dialog đang trong quá trình chuyển cảnh
+        Future.delayed(const Duration(milliseconds: 250), () {
+          if (Get.isDialogOpen == true) {
+            Get.back();
+          }
+        });
+      }
+    });
   }
 }

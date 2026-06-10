@@ -49,9 +49,12 @@ class OverallStatsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchSummary();
-    fetchAllTimeStats();
-    fetchOverallStats();
+    // Trì hoãn load thống kê để ưu tiên tải Chuyến đi ở màn hình chính
+    Future.delayed(const Duration(milliseconds: 300), () {
+      fetchSummary();
+      fetchAllTimeStats();
+      fetchOverallStats();
+    });
   }
 
   Future<void> fetchSummary() async {

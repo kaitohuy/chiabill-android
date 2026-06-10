@@ -107,8 +107,11 @@ class TourismController extends GetxController {
     _updateFilteredPlaces();
     _updateFilteredSearchResults();
 
-    fetchPlacesNearby(defaultCenter.latitude, defaultCenter.longitude, 20000.0);
-    fetchGalleryPlaces(isRefresh: true);
+    // Trì hoãn tải dữ liệu du lịch để tránh nghẽn mạng lúc vừa đăng nhập vào màn hình chính
+    Future.delayed(const Duration(milliseconds: 600), () {
+      fetchPlacesNearby(defaultCenter.latitude, defaultCenter.longitude, 20000.0);
+      fetchGalleryPlaces(isRefresh: true);
+    });
     _fetchMapConfig();
   }
 

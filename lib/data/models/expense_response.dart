@@ -18,6 +18,7 @@ class ExpenseResponse {
   final bool isFromFund;
   final String? clientUuid;
   final String? splitType;
+  final String? receiptUrl;
 
   ExpenseResponse({
     required this.id,
@@ -34,6 +35,7 @@ class ExpenseResponse {
     this.isFromFund = false,
     this.clientUuid,
     this.splitType,
+    this.receiptUrl,
   });
 
   factory ExpenseResponse.fromJson(Map<String, dynamic> json) {
@@ -55,6 +57,7 @@ class ExpenseResponse {
       isFromFund: json['isFromFund'] as bool? ?? false,
       clientUuid: json['clientUuid'] as String?,
       splitType: json['splitType'] as String?,
+      receiptUrl: json['receiptUrl'] as String?,
     );
   }
 }

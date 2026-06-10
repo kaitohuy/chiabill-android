@@ -27,7 +27,7 @@ class ApiResponse<T> {
           dioException.type.toString() == 'DioExceptionType.connectionError') {
         return ApiResponse<T>(
           success: false, 
-          message: "Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại kết nối mạng hoặc IP Server. (Nếu sử dụng Render Free Tier, máy chủ có thể mất 30 giây - 1 phút để tự động thức dậy)."
+          message: "Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại kết nối mạng hoặc IP Server."
         );
       }
 

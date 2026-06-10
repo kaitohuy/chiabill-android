@@ -1,4 +1,7 @@
+import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:chiabill/data/models/update_expense_request.dart';
+import 'package:chiabill/data/models/scan_receipt_response.dart';
 
 import '../models/api_response.dart';
 import '../models/category_stat_response.dart';
@@ -144,6 +147,46 @@ class ExpenseRepository {
       );
     } catch (e) {
       return ApiResponse.withError(e, defaultMessage: "Lỗi lấy tỷ giá");
+    }
+  }
+
+  Future<ApiResponse<ScanReceiptResponse>> scanReceipt(int tripId, File file) async {
+    try {
+      String fileName = file.path.split('/').last;
+      FormData formData = FormData.fromMap({
+        "file": await MultipartFile.fromFile(file.path, filename: fileName),
+        "tripId": tripId,
+      });
+      final response = await _apiService.dio.post(
+        "/api/expenses/scan-receipt",
+        data: formData,
+      );
+      return ApiResponse<ScanReceiptResponse>.fromJson(
+        response.data,
+        (data) => ScanReceiptResponse.fromJson(data as Map<String, dynamic>),
+      );
+    } catch (e) {
+      return ApiResponse.withError(e, defaultMessage: "Lỗi quét hóa đơn bằng AI");
+    }
+  }
+
+  Future<ApiResponse<String>> uploadImage(File file) async {
+    try {
+      String fileName = file.path.split('/').last;
+      FormData formData = FormData.fromMap({
+        "file": await MultipartFile.fromFile(file.path, filename: fileName),
+      });
+      final response = await _apiService.dio.post(
+        "/api/images/upload",
+        data: formData,
+      );
+      return ApiResponse<String>(
+        success: response.data['success'] ?? false,
+        data: response.data['data'] as String?,
+        message: response.data['message'] as String?,
+      );
+    } catch (e) {
+      return ApiResponse.withError(e, defaultMessage: "Lỗi tải ảnh lên hệ thống");
     }
   }
 }
