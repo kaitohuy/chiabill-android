@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
 import '../../controllers/itinerary_controller.dart';
+import '../../controllers/trip_detail_controller.dart';
 import '../../data/models/itinerary_item_response.dart';
 import '../../data/models/trip_response.dart';
 import '../../utils/currency_util.dart';
@@ -21,6 +22,13 @@ class ItineraryScreen extends StatelessWidget {
   const ItineraryScreen({super.key, required this.tripId});
 
   ItineraryController get controller => Get.find<ItineraryController>(tag: tripId.toString());
+
+  bool get _isCurrentUserDisabled {
+    if (Get.isRegistered<TripDetailController>(tag: tripId.toString())) {
+      return Get.find<TripDetailController>(tag: tripId.toString()).isCurrentUserDisabled;
+    }
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,10 +103,22 @@ class ItineraryScreen extends StatelessWidget {
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert, color: Colors.white),
             onSelected: (value) {
+              if (value == 'export') {
+                _handleExportExcel();
+                return;
+              }
+              if (_isCurrentUserDisabled) {
+                Get.snackbar(
+                  "Thông báo",
+                  "Bạn đã bị tạm ngưng hoạt động trong chuyến đi này, không thể thực hiện thao tác này.",
+                  backgroundColor: Colors.redAccent,
+                  colorText: Colors.white,
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+                return;
+              }
               if (value == 'import') {
                 _handleImportExcel(context);
-              } else if (value == 'export') {
-                _handleExportExcel();
               } else if (value == 'clone') {
                 _handleCloneFromOtherTrip(context);
               }
@@ -164,13 +184,25 @@ class ItineraryScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.primary,
         child: const Icon(Icons.add, color: Colors.white),
-        onPressed: () => _openDetailDialog(
-          context,
-          item: ItineraryItemResponse(
-            dayNumber: controller.selectedDayIndex.value + 1,
-            activity: "",
-          ),
-        ),
+        onPressed: () {
+          if (_isCurrentUserDisabled) {
+            Get.snackbar(
+              "Thông báo",
+              "Bạn đã bị tạm ngưng hoạt động trong chuyến đi này, không thể thực hiện thao tác này.",
+              backgroundColor: Colors.redAccent,
+              colorText: Colors.white,
+              snackPosition: SnackPosition.BOTTOM,
+            );
+            return;
+          }
+          _openDetailDialog(
+            context,
+            item: ItineraryItemResponse(
+              dayNumber: controller.selectedDayIndex.value + 1,
+              activity: "",
+            ),
+          );
+        },
       ),
     );
   }
@@ -343,6 +375,16 @@ class ItineraryScreen extends StatelessWidget {
         return SizedBox(key: ValueKey("none_$index"));
       },
       onReorder: (oldIndex, newIndex) async {
+        if (_isCurrentUserDisabled) {
+          Get.snackbar(
+            "Thông báo",
+            "Bạn đã bị tạm ngưng hoạt động trong chuyến đi này, không thể thực hiện thao tác này.",
+            backgroundColor: Colors.redAccent,
+            colorText: Colors.white,
+            snackPosition: SnackPosition.BOTTOM,
+          );
+          return;
+        }
         if (newIndex > oldIndex) {
           newIndex -= 1;
         }
@@ -389,328 +431,325 @@ class ItineraryScreen extends StatelessWidget {
     final isFirst = index == 0;
     final isLast = index == totalCount - 1;
 
-    return IntrinsicHeight(
+    return Stack(
       key: ValueKey("act_${item.id}"),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Timeline line & dot (thẳng hàng pixel-perfect nhờ SizedBox cố định width)
-          SizedBox(
-            width: 24,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // Timeline line & dot (vẽ bằng Stack + Positioned để tối ưu hiệu năng)
+        Positioned(
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: 24,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Container(
+                  width: 2,
+                  color: isFirst ? Colors.transparent : Colors.grey.shade300,
+                ),
+              ),
+              Container(
+                width: 14,
+                height: 14,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: AppColors.primary,
+                    width: 3.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.3),
+                      blurRadius: 4,
+                      spreadRadius: 1,
+                    )
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  width: 2,
+                  color: isLast ? Colors.transparent : Colors.grey.shade300,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Card content
+        Padding(
+          padding: const EdgeInsets.only(left: 36, top: 8, bottom: 8),
+          child: Slidable(
+            key: ValueKey(item.id),
+            endActionPane: ActionPane(
+              motion: const ScrollMotion(),
               children: [
-                Expanded(
-                  child: Container(
-                    width: 2,
-                    color: isFirst ? Colors.transparent : Colors.grey.shade300,
-                  ),
+                SlidableAction(
+                  onPressed: (context) => _openDetailDialog(context, item: item),
+                  backgroundColor: Colors.amber.shade600,
+                  foregroundColor: Colors.white,
+                  icon: Icons.edit,
+                  label: 'Sửa',
+                  borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
                 ),
-                Container(
-                  width: 14,
-                  height: 14,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: AppColors.primary,
-                      width: 3.5,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.3),
-                        blurRadius: 4,
-                        spreadRadius: 1,
-                      )
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Container(
-                    width: 2,
-                    color: isLast ? Colors.transparent : Colors.grey.shade300,
-                  ),
+                SlidableAction(
+                  onPressed: (context) => _handleDeleteItem(item.id),
+                  backgroundColor: Colors.redAccent,
+                  foregroundColor: Colors.white,
+                  icon: Icons.delete,
+                  label: 'Xóa',
+                  borderRadius: const BorderRadius.horizontal(right: Radius.circular(16)),
                 ),
               ],
             ),
-          ),
-          const SizedBox(width: 12),
-
-          // Card content
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Slidable(
-                key: ValueKey(item.id),
-                endActionPane: ActionPane(
-                  motion: const ScrollMotion(),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  )
+                ],
+              ),
+              child: IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    SlidableAction(
-                      onPressed: (context) => _openDetailDialog(context, item: item),
-                      backgroundColor: Colors.amber.shade600,
-                      foregroundColor: Colors.white,
-                      icon: Icons.edit,
-                      label: 'Sửa',
-                      borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
-                    ),
-                    SlidableAction(
-                      onPressed: (context) => _handleDeleteItem(item.id),
-                      backgroundColor: Colors.redAccent,
-                      foregroundColor: Colors.white,
-                      icon: Icons.delete,
-                      label: 'Xóa',
-                      borderRadius: const BorderRadius.horizontal(right: Radius.circular(16)),
-                    ),
-                  ],
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.04),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      )
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      // Left primary bar
-                      Container(
-                        width: 4,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(16),
-                            bottomLeft: Radius.circular(16),
-                          ),
+                    // Left primary bar
+                    Container(
+                      width: 4,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          bottomLeft: Radius.circular(16),
                         ),
                       ),
-                      Expanded(
-                        child: ClipRRect(
-                          borderRadius: const BorderRadius.horizontal(right: Radius.circular(16)),
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () => _openDetailDialog(context, item: item),
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // Time
+                    ),
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.horizontal(right: Radius.circular(16)),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () => _openDetailDialog(context, item: item),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Time
+                                  Row(
+                                    children: [
+                                      Icon(Icons.access_time, size: 14, color: AppColors.primary),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        item.timeRange ?? "Cả ngày",
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
+                                      const Spacer(),
+                                      // Drag indicator
+                                      Icon(Icons.drag_indicator, size: 18, color: Colors.grey.shade400),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+
+                                  // Activity name
+                                  Text(
+                                    item.activity,
+                                    style: const TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+
+                                  // Location
+                                  if (item.location != null && item.location!.isNotEmpty) ...[
+                                    const SizedBox(height: 6),
                                     Row(
                                       children: [
-                                        Icon(Icons.access_time, size: 14, color: AppColors.primary),
+                                        const Icon(Icons.pin_drop_outlined, size: 14, color: Colors.grey),
                                         const SizedBox(width: 6),
-                                        Text(
-                                          item.timeRange ?? "Cả ngày",
-                                          style: TextStyle(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColors.primary,
+                                        Expanded(
+                                          child: Text(
+                                            item.location!,
+                                            style: const TextStyle(fontSize: 13, color: Colors.grey),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
-                                        const Spacer(),
-                                        // Drag indicator
-                                        Icon(Icons.drag_indicator, size: 18, color: Colors.grey.shade400),
                                       ],
                                     ),
-                                    const SizedBox(height: 8),
+                                  ],
 
-                                    // Activity name
-                                    Text(
-                                      item.activity,
-                                      style: const TextStyle(
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black87,
+                                  // Estimated Cost
+                                  if (item.estimatedCost != null && item.estimatedCost! > 0) ...[
+                                    const SizedBox(height: 6),
+                                    Row(
+                                      children: [
+                                        Icon(Icons.payment_outlined, size: 14, color: Colors.amber.shade700),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          "Chi phí dự kiến: ${CurrencyUtils.formatNumber(item.estimatedCost!)} đ",
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.amber.shade800,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+
+                                  // Notes
+                                  if (item.note != null && item.note!.isNotEmpty) ...[
+                                    const SizedBox(height: 8),
+                                    Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.shade50,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Text(
+                                        "💡 ${item.note}",
+                                        style: const TextStyle(
+                                          fontSize: 12.5,
+                                          color: Colors.blueGrey,
+                                          fontStyle: FontStyle.italic,
+                                        ),
                                       ),
                                     ),
-
-                                    // Location
-                                    if (item.location != null && item.location!.isNotEmpty) ...[
-                                      const SizedBox(height: 6),
-                                      Row(
-                                        children: [
-                                          const Icon(Icons.pin_drop_outlined, size: 14, color: Colors.grey),
-                                          const SizedBox(width: 6),
-                                          Expanded(
-                                            child: Text(
-                                              item.location!,
-                                              style: const TextStyle(fontSize: 13, color: Colors.grey),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-
-                                    // Estimated Cost
-                                    if (item.estimatedCost != null && item.estimatedCost! > 0) ...[
-                                      const SizedBox(height: 6),
-                                      Row(
-                                        children: [
-                                          Icon(Icons.payment_outlined, size: 14, color: Colors.amber.shade700),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            "Chi phí dự kiến: ${CurrencyUtils.formatNumber(item.estimatedCost!)} đ",
-                                            style: TextStyle(
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w600,
-                                              color: Colors.amber.shade800,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-
-                                    // Notes
-                                    if (item.note != null && item.note!.isNotEmpty) ...[
-                                      const SizedBox(height: 8),
-                                      Container(
-                                        width: double.infinity,
-                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey.shade50,
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                        child: Text(
-                                          "💡 ${item.note}",
-                                          style: const TextStyle(
-                                            fontSize: 12.5,
-                                            color: Colors.blueGrey,
-                                            fontStyle: FontStyle.italic,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
                                   ],
-                                ),
+                                ],
                               ),
                             ),
                           ),
                         ),
                       ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGapCard(BuildContext context, GapNode node, int index, int totalCount) {
+    return Stack(
+      key: ValueKey("gap_${node.timeRange}"),
+      children: [
+        // Timeline line & dot (vẽ bằng Stack + Positioned để tối ưu hiệu năng)
+        Positioned(
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: 24,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: CustomPaint(
+                  size: const Size(24, double.infinity),
+                  painter: LineDashedPainter(color: Colors.grey.shade300),
+                ),
+              ),
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              Expanded(
+                child: CustomPaint(
+                  size: const Size(24, double.infinity),
+                  painter: LineDashedPainter(color: Colors.grey.shade300),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Gap Card
+        Padding(
+          padding: const EdgeInsets.only(left: 36, top: 8, bottom: 8),
+          child: CustomPaint(
+            painter: DashedRectPainter(
+              color: Colors.grey.shade300,
+              borderRadius: 12.0,
+              dashLength: 5,
+              gap: 3,
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: InkWell(
+                onTap: () {
+                  Get.dialog(ItineraryDetailDialog(
+                    tripId: tripId,
+                    item: ItineraryItemResponse(
+                      dayNumber: node.dayNumber,
+                      timeRange: node.timeRange,
+                      activity: "",
+                    ),
+                  ));
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Row(
+                    children: [
+                      Icon(Icons.hourglass_empty, size: 16, color: Colors.grey.shade500),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Thời gian tự do (${node.timeRange})",
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              "Chạm để thêm nhanh hoạt động",
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey.shade400,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(Icons.add_circle_outline, size: 20, color: AppColors.primary.withValues(alpha: 0.6)),
                     ],
                   ),
                 ),
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGapCard(BuildContext context, GapNode node, int index, int totalCount) {
-    return IntrinsicHeight(
-      key: ValueKey("gap_${node.timeRange}"),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Timeline line & dot (thẳng hàng pixel-perfect nhờ SizedBox cố định width)
-          SizedBox(
-            width: 24,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: CustomPaint(
-                    size: const Size(24, double.infinity),
-                    painter: LineDashedPainter(color: Colors.grey.shade300),
-                  ),
-                ),
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                Expanded(
-                  child: CustomPaint(
-                    size: const Size(24, double.infinity),
-                    painter: LineDashedPainter(color: Colors.grey.shade300),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-
-          // Gap Card
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: CustomPaint(
-                painter: DashedRectPainter(
-                  color: Colors.grey.shade300,
-                  borderRadius: 12.0,
-                  dashLength: 5,
-                  gap: 3,
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: InkWell(
-                    onTap: () {
-                      Get.dialog(ItineraryDetailDialog(
-                        tripId: tripId,
-                        item: ItineraryItemResponse(
-                          dayNumber: node.dayNumber,
-                          timeRange: node.timeRange,
-                          activity: "",
-                        ),
-                      ));
-                    },
-                    borderRadius: BorderRadius.circular(12),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      child: Row(
-                        children: [
-                          Icon(Icons.hourglass_empty, size: 16, color: Colors.grey.shade500),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Thời gian tự do (${node.timeRange})",
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.grey.shade600,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  "Chạm để thêm nhanh hoạt động",
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: Colors.grey.shade400,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Icon(Icons.add_circle_outline, size: 20, color: AppColors.primary.withValues(alpha: 0.6)),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -724,6 +763,16 @@ class ItineraryScreen extends StatelessWidget {
   /// Xóa hoạt động
   void _handleDeleteItem(int? itemId) {
     if (itemId == null) return;
+    if (_isCurrentUserDisabled) {
+      Get.snackbar(
+        "Thông báo",
+        "Bạn đã bị tạm ngưng hoạt động trong chuyến đi này, không thể thực hiện thao tác này.",
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -743,22 +792,18 @@ class ItineraryScreen extends StatelessWidget {
     );
   }
 
-  /// Tiến trình Nhập Excel thông minh
   void _handleImportExcel(BuildContext context) async {
     try {
-      LoadingUtil.show();
       final preParsed = await ExcelHelper.pickAndPreParseExcel();
-      LoadingUtil.hide();
-
       if (preParsed == null) return;
 
       // Mở Bottom Sheet khớp cột
+      if (Get.isBottomSheetOpen == true) return;
       Get.bottomSheet(
         ColumnMatchingSheet(tripId: tripId, result: preParsed),
         isScrollControlled: true,
       );
     } catch (e) {
-      LoadingUtil.hide();
       ToastUtil.showError("Lỗi hệ thống", "Không thể phân tích file Excel này: $e");
     }
   }
@@ -808,13 +853,14 @@ class ItineraryScreen extends StatelessWidget {
         return;
       }
 
+      if (Get.isBottomSheetOpen == true) return;
       Get.bottomSheet(
         Container(
           decoration: const BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 16 + MediaQuery.of(context).padding.bottom),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,

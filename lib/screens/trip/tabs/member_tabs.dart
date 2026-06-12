@@ -90,15 +90,16 @@ class _MembersTabState extends State<MembersTab> with AutomaticKeepAliveClientMi
                                   trailing: Icon(Icons.settings, color: Colors.grey, size: 22),
 
                                   // 🌟 MENU ADMIN QUẢN LÝ THÀNH VIÊN KHI BẤM VÀO
+
                                   onTap: () {
                                     Get.bottomSheet(
                                         Container(
-                                          padding: const EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 24),
+                                          padding: EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 48 + MediaQuery.of(context).padding.bottom),
                                           decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              Text(member.name ?? "Thành viên", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                                              Text(member.name ?? "Thành viên", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                                               const SizedBox(height: 16),
 
                                               ListTile(

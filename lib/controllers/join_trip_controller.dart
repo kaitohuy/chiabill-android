@@ -41,6 +41,15 @@ class JoinTripController extends GetxController {
       LoadingUtil.hide();
 
       if (result.success && result.data != null) {
+        FocusManager.instance.primaryFocus?.unfocus();
+
+        // Xóa thông tin cũ
+        codeController.clear();
+        inviteInfo.value = null;
+
+        // Chờ bàn phím và loading đóng hẳn
+        await Future.delayed(const Duration(milliseconds: 300));
+
         // Nếu đang mở dưới dạng Dialog (ở Home) thì đóng popup
         if (Get.isDialogOpen ?? false) {
           Get.back();
@@ -50,11 +59,9 @@ class JoinTripController extends GetxController {
           Get.offNamed('/trip-detail', arguments: result.data!.id);
         }
 
-        ToastUtil.showSuccess("Chào mừng!", "Bạn đã tham gia chuyến đi thành công");
-
-        // Xóa thông tin cũ
-        codeController.clear();
-        inviteInfo.value = null;
+        Future.delayed(const Duration(milliseconds: 350), () {
+          ToastUtil.showSuccess("Chào mừng!", "Bạn đã tham gia chuyến đi thành công");
+        });
 
         // Làm mới danh sách hiển thị ở trang chủ ngầm phòng trường hợp quay lại
         if (Get.isRegistered<HomeController>()) {

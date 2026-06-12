@@ -59,11 +59,18 @@ class CreatePaymentController extends GetxController {
       final result = await _repo.createPayment(tripId, settlement.toUserId!, amount, selectedImage.value);
 
       if (result.success) {
+        FocusManager.instance.primaryFocus?.unfocus();
+        
+        // Chờ bàn phím ẩn
+        await Future.delayed(const Duration(milliseconds: 150));
+
         // Đóng ngay lập tức (Xóa QR + Xóa form)
         Get.back(); 
         Get.back(); 
 
-        ToastUtil.showSuccess("Thành công", "Đã gửi yêu cầu thanh toán. Đang chờ xác nhận!");
+        Future.delayed(const Duration(milliseconds: 300), () {
+          ToastUtil.showSuccess("Thành công", "Đã gửi yêu cầu thanh toán. Đang chờ xác nhận!");
+        });
 
         // Xóa thông tin cũ
         amountController.clear();

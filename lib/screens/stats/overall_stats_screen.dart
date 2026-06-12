@@ -28,6 +28,9 @@ class _OverallStatsScreenState extends State<OverallStatsScreen> with AutomaticK
     super.initState();
     _monthScrollController = ScrollController();
     
+    // Đảm bảo dữ liệu hiển thị ngay lập tức khi tab được mở
+    controller.fetchAll();
+    
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToCurrent(jump: true);
     });
@@ -86,11 +89,7 @@ class _OverallStatsScreenState extends State<OverallStatsScreen> with AutomaticK
           // 2. Main Content
           Expanded(
             child: RefreshIndicator(
-              onRefresh: () async {
-                controller.fetchSummary();
-                controller.fetchAllTimeStats();
-                controller.fetchOverallStats();
-              },
+              onRefresh: () => controller.fetchAll(force: true),
               color: AppColors.primary,
               child: Obx(() {
                 if (controller.isLoading.value) {
@@ -146,7 +145,7 @@ class _OverallStatsScreenState extends State<OverallStatsScreen> with AutomaticK
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Obx(() => Text("Tổng (năm ${controller.selectedYear.value})", style: TextStyle(color: controller.isAllTimeMode.value ? Colors.grey : AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold))),
+                  Obx(() => Text("Tổng (năm ${controller.selectedYear.value})", style: TextStyle(color: controller.isAllTimeMode.value ? Colors.grey : AppColors.primary, fontSize: 14, fontWeight: FontWeight.bold))),
                   const SizedBox(height: 8),
                   Obx(() => Text(
                     "${CurrencyUtils.formatNumber(controller.yearlyTotalExpense.value)} đ",
@@ -170,7 +169,7 @@ class _OverallStatsScreenState extends State<OverallStatsScreen> with AutomaticK
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Tổng tất cả", style: TextStyle(color: controller.isAllTimeMode.value ? AppColors.primary : Colors.grey, fontSize: 12, fontWeight: FontWeight.bold)),
+                    Text("Tổng tất cả", style: TextStyle(color: controller.isAllTimeMode.value ? AppColors.primary : Colors.grey, fontSize: 14, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   Obx(() => Text(
                     "${CurrencyUtils.formatNumber(controller.allTimeTotalExpense.value)} đ",

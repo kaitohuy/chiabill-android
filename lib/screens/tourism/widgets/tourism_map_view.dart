@@ -12,6 +12,7 @@ import '../../../controllers/main_controller.dart';
 import '../../../utils/marker_generator.dart';
 import '../place_detail_screen.dart';
 import '../create_place_screen.dart';
+import '../../../controllers/user_guide_controller.dart';
 
 class TourismMapView extends StatefulWidget {
   const TourismMapView({super.key});
@@ -22,8 +23,8 @@ class TourismMapView extends StatefulWidget {
 
 class _TourismMapViewState extends State<TourismMapView> {
   // Cấu hình ngưỡng Zoom để hiển thị Marker (Áp dụng cho cả Google Maps và Flutter Map)
-  static const double zoomShowLabel = 9.0;   // Zoom >= 6.0 sẽ hiện nhãn tên địa điểm
-  static const double zoomShowImage = 10.0;  // Zoom >= 10.0 sẽ hiện ghim ảnh + tên
+  static const double zoomShowLabel = 8.0;   // Zoom >= 6.0 sẽ hiện nhãn tên địa điểm
+  static const double zoomShowImage = 9.0;  // Zoom >= 10.0 sẽ hiện ghim ảnh + tên
 
   final TourismController controller = Get.find<TourismController>();
   Timer? _debounceTimer;
@@ -34,6 +35,9 @@ class _TourismMapViewState extends State<TourismMapView> {
   double _lastZoom = 0.0;
 
   Worker? _mapToggleWorker;
+  
+  final Rxn<LatLngBounds> _flutterMapBounds = Rxn<LatLngBounds>();
+  Timer? _flutterMapBoundsTimer;
 
   @override
   void initState() {
@@ -66,11 +70,13 @@ class _TourismMapViewState extends State<TourismMapView> {
   @override
   void dispose() {
     _debounceTimer?.cancel();
+    _flutterMapBoundsTimer?.cancel();
     _placesWorker?.dispose();
     _categoryWorker?.dispose();
     _mapToggleWorker?.dispose();
     _customIconsWithText.clear();
     _defaultIconNoText = null;
+    MarkerGenerator.clearCache();
     super.dispose();
   }
 
@@ -167,6 +173,13 @@ class _TourismMapViewState extends State<TourismMapView> {
           if (hasGesture && !position.center.latitude.isNaN && !position.center.longitude.isNaN) {
             controller.currentCenter.value = position.center;
           }
+          
+          _flutterMapBoundsTimer?.cancel();
+          _flutterMapBoundsTimer = Timer(const Duration(milliseconds: 200), () {
+            if (mounted) {
+              _flutterMapBounds.value = position.visibleBounds;
+            }
+          });
         },
       ),
       children: [
@@ -184,10 +197,14 @@ class _TourismMapViewState extends State<TourismMapView> {
             size: const Size(40, 40),
             alignment: Alignment.center,
             padding: const EdgeInsets.all(50),
-            markers: controller.filteredPlaces.map((place) {
-              final double zoom = controller.currentZoom.value;
-              final bool showImage = zoom >= zoomShowImage;
-              final bool showLabelOnly = zoom >= zoomShowLabel && zoom < zoomShowImage;
+            markers: controller.filteredPlaces.where((place) {
+              final bounds = _flutterMapBounds.value;
+              if (bounds == null) return true;
+              return bounds.contains(LatLng(place.latitude, place.longitude));
+            }).map((place) {
+              final style = controller.markerStyle.value;
+              final bool showImage = style == MapMarkerStyle.image;
+              final bool showLabelOnly = style == MapMarkerStyle.label;
 
               Widget markerWidget;
 
@@ -602,6 +619,7 @@ class _TourismMapViewState extends State<TourismMapView> {
             mainAxisSize: MainAxisSize.min,
             children: [
               FloatingActionButton(
+                key: Get.find<UserGuideController>().mapProviderToggleKey,
                 heroTag: 'map_toggle',
                 onPressed: () {
                   controller.isUsingGoogleMaps.value = !controller.isUsingGoogleMaps.value;
@@ -619,6 +637,7 @@ class _TourismMapViewState extends State<TourismMapView> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       FloatingActionButton(
+                        key: Get.find<UserGuideController>().mapLayersKey,
                         heroTag: 'map_layers',
                         onPressed: () => _showMapStylePicker(context, controller),
                         backgroundColor: Colors.white,
@@ -631,6 +650,7 @@ class _TourismMapViewState extends State<TourismMapView> {
                 return const SizedBox.shrink();
               }),
               FloatingActionButton(
+                key: Get.find<UserGuideController>().pinNewPlaceKey,
                 heroTag: 'add_place',
                 onPressed: () {
                   Get.to(() => const CreatePlaceScreen());

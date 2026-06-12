@@ -12,17 +12,19 @@ class CreateTripBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(
-        left: 24,
-        right: 24,
-        top: 24,
-        bottom: 24,
-      ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Container(
+        padding: EdgeInsets.only(
+          left: 24,
+          right: 24,
+          top: 24,
+          bottom: 24 + MediaQuery.of(context).padding.bottom,
+        ),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -52,7 +54,6 @@ class CreateTripBottomSheet extends StatelessWidget {
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 counterText: "",
               ),
-              maxLines: 2,
             ),
             const SizedBox(height: 20),
 
@@ -71,6 +72,7 @@ class CreateTripBottomSheet extends StatelessWidget {
 
               return InkWell(
                 onTap: () async {
+                  FocusScope.of(context).requestFocus(FocusNode());
                   final picked = await showDateRangePicker(
                     context: context,
                     firstDate: DateTime.now().subtract(const Duration(days: 365)),
@@ -92,6 +94,7 @@ class CreateTripBottomSheet extends StatelessWidget {
                       );
                     },
                   );
+                  FocusScope.of(context).unfocus();
                   if (picked != null) {
                     controller.startDate.value = picked.start;
                     controller.endDate.value = picked.end;
@@ -136,6 +139,7 @@ class CreateTripBottomSheet extends StatelessWidget {
                     final isSelected = controller.selectedCategoryName.value == cat["name"];
                     return GestureDetector(
                       onTap: () {
+                        FocusScope.of(context).unfocus();
                         controller.selectedCategoryName.value = cat["name"];
                         controller.selectedCategoryIcon.value = cat["iconName"];
                       },
@@ -192,7 +196,11 @@ class CreateTripBottomSheet extends StatelessWidget {
                   children: [
                     if (file == null)
                       InkWell(
-                        onTap: () => controller.pickCoverImage(),
+                        onTap: () async {
+                          FocusScope.of(context).requestFocus(FocusNode());
+                          await controller.pickCoverImage();
+                          FocusScope.of(context).unfocus();
+                        },
                         borderRadius: BorderRadius.circular(12),
                         child: Center(
                           child: Column(
@@ -208,23 +216,29 @@ class CreateTripBottomSheet extends StatelessWidget {
                           ),
                         ),
                       )
-                    else
+                    else ...[
                       Positioned.fill(
                         child: Material(
                           color: Colors.transparent,
                           child: InkWell(
-                            onTap: () => controller.pickCoverImage(),
+                            onTap: () async {
+                              FocusScope.of(context).requestFocus(FocusNode());
+                              await controller.pickCoverImage();
+                              FocusScope.of(context).unfocus();
+                            },
                             borderRadius: BorderRadius.circular(12),
                             child: const SizedBox(),
                           ),
                         ),
                       ),
-                    if (file != null)
                       Positioned(
                         top: 8,
                         right: 8,
                         child: GestureDetector(
-                          onTap: () => controller.clearCoverImage(),
+                          onTap: () {
+                            FocusScope.of(context).unfocus();
+                            controller.clearCoverImage();
+                          },
                           child: Container(
                             padding: const EdgeInsets.all(4),
                             decoration: const BoxDecoration(
@@ -239,6 +253,7 @@ class CreateTripBottomSheet extends StatelessWidget {
                           ),
                         ),
                       ),
+                    ],
                   ],
                 ),
               );
@@ -260,9 +275,11 @@ class CreateTripBottomSheet extends StatelessWidget {
                     : const Text("TẠO CHUYẾN ĐI", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             )),
+            const SizedBox(height: 24),
           ],
         ),
       ),
+    ),
     );
   }
 }

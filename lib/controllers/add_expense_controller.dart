@@ -145,6 +145,9 @@ class AddExpenseController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    // Reset loading states to avoid stale state if controller is reused
+    isLoading.value = false;
+    isCategoriesLoading.value = true;
     
     amountController.addListener(_updateCalculatedVnd);
     exchangeRateController.addListener(_updateCalculatedVnd);
@@ -325,6 +328,9 @@ class AddExpenseController extends GetxController {
   }
 
   Future<void> submitExpense() async {
+    // Giải phóng focus bàn phím ngay lập tức khi nhấn lưu
+    FocusManager.instance.primaryFocus?.unfocus();
+
     if (isUploadingImage.value) {
       ToastUtil.showWarning("Đang xử lý", "Vui lòng đợi ảnh hóa đơn tải lên hoàn thành");
       return;
@@ -371,42 +377,123 @@ class AddExpenseController extends GetxController {
 
     isLoading.value = true;
     try {
-      // 3. TÍNH TOÁN TIỀN CHIA ĐỀU CHO CÁC THÀNH VIÊN ĐƯỢC CHỌN
-      int memberCount = selectedSplitMemberIds.length;
-      double splitAmount = total / memberCount;
-
-      // Đẩy danh sách userId được chọn xuống BE
-      List<SplitRequest> splits = selectedSplitMemberIds.map((id) =>
-          SplitRequest(userId: id, amount: splitAmount)
-      ).toList();
+      // Tính toán splits theo cấu hình phân chia của người dùng
+      List<SplitRequest> splits = _generateSplits(total, userExchangeRate);
+      if (splits.isEmpty) {
+        ToastUtil.showWarning("Lỗi", "Cấu hình chia tiền không hợp lệ hoặc không khớp với tổng tiền.");
+        isLoading.value = false;
+        return;
+      }
 
       bool isSuccess = false;
       String errorMessage = "";
 
       if (expenseToEdit != null) {
-        final updateRequest = UpdateExpenseRequest(
-          payerId: selectedPayerId.value,
-          totalAmount: total,
-          description: descController.text.trim(),
-          categoryId: selectedCategoryId.value,
-          expenseDate: selectedDate.value.toIso8601String().split('.')[0],
-          currency: selectedCurrency.value,
-          exchangeRate: userExchangeRate,
-          splits: splits,
-          isFromFund: isFromFund.value,
-          splitType: splitType.value,
-          receiptUrl: receiptUrl.value,
-        );
-        final result = await _repository.updateExpense(expenseToEdit!.id, updateRequest);
-        isSuccess = result.success;
-        errorMessage = result.message ?? "Lỗi";
+        double availableFund = fundBalance.value;
+        if (expenseToEdit!.isFromFund == true) {
+          double oldAmountVnd = expenseToEdit!.totalAmount * (expenseToEdit!.exchangeRate ?? 1.0);
+          availableFund += oldAmountVnd;
+        }
+
+        if (isFromFund.value && availableFund <= 0) {
+          ToastUtil.showWarning("Lỗi", "Số dư Quỹ chung khả dụng bằng 0, không thể chọn thanh toán bằng quỹ");
+          isLoading.value = false;
+          return;
+        }
+
+        if (isFromFund.value && total > availableFund) {
+          // Thực hiện tự động tách hóa đơn khi UPDATE
+          final double fundPart = availableFund;
+          final double restPart = total - availableFund;
+
+          List<SplitRequest> splitsFund = _generateSplits(fundPart, userExchangeRate);
+          List<SplitRequest> splitsRest = _generateSplits(restPart, userExchangeRate);
+
+          if (splitsFund.isEmpty || splitsRest.isEmpty) {
+            ToastUtil.showWarning("Lỗi", "Cấu hình chia tiền không hợp lệ cho phần tách hóa đơn.");
+            isLoading.value = false;
+            return;
+          }
+
+          // Cập nhật khoản chi hiện tại bằng phần trích từ quỹ
+          final updateRequest1 = UpdateExpenseRequest(
+            payerId: selectedPayerId.value,
+            totalAmount: fundPart,
+            description: "${descController.text.trim()} (Trích từ quỹ chung)",
+            categoryId: selectedCategoryId.value,
+            expenseDate: selectedDate.value.toIso8601String().split('.')[0],
+            currency: selectedCurrency.value,
+            exchangeRate: userExchangeRate,
+            splits: splitsFund,
+            isFromFund: true,
+            splitType: splitType.value,
+            receiptUrl: receiptUrl.value,
+          );
+
+          // Tạo mới khoản chi cho phần thiếu hụt từ tiền túi
+          final createRequest2 = CreateExpenseRequest(
+            tripId: trip.id,
+            payerId: selectedPayerId.value,
+            totalAmount: restPart,
+            description: "${descController.text.trim()} (Phần thiếu hụt quỹ)",
+            categoryId: selectedCategoryId.value,
+            expenseDate: selectedDate.value.toIso8601String().split('.')[0],
+            currency: selectedCurrency.value,
+            exchangeRate: userExchangeRate,
+            splits: splitsRest,
+            isFromFund: false,
+            clientUuid: _generateUuid(),
+            splitType: splitType.value,
+            receiptUrl: receiptUrl.value,
+          );
+
+          final res1 = await _repository.updateExpense(expenseToEdit!.id, updateRequest1);
+          if (res1.success) {
+            final res2 = await _repository.createExpense(createRequest2);
+            isSuccess = res2.success;
+            errorMessage = res2.message ?? "Lỗi tạo khoản thiếu hụt";
+          } else {
+            isSuccess = false;
+            errorMessage = res1.message ?? "Lỗi cập nhật khoản trích quỹ";
+          }
+        } else {
+          // Trường hợp update bình thường không cần tách
+          final updateRequest = UpdateExpenseRequest(
+            payerId: selectedPayerId.value,
+            totalAmount: total,
+            description: descController.text.trim(),
+            categoryId: selectedCategoryId.value,
+            expenseDate: selectedDate.value.toIso8601String().split('.')[0],
+            currency: selectedCurrency.value,
+            exchangeRate: userExchangeRate,
+            splits: splits,
+            isFromFund: isFromFund.value,
+            splitType: splitType.value,
+            receiptUrl: receiptUrl.value,
+          );
+          final result = await _repository.updateExpense(expenseToEdit!.id, updateRequest);
+          isSuccess = result.success;
+          errorMessage = result.message ?? "Lỗi";
+        }
       } else {
+        if (isFromFund.value && fundBalance.value <= 0) {
+          ToastUtil.showWarning("Lỗi", "Số dư Quỹ chung bằng 0, không thể chọn thanh toán bằng quỹ");
+          isLoading.value = false;
+          return;
+        }
+
         if (isFromFund.value && total > fundBalance.value) {
           final double fundPart = fundBalance.value;
           final double restPart = total - fundBalance.value;
 
           List<SplitRequest> splitsFund = _generateSplits(fundPart, userExchangeRate);
           List<SplitRequest> splitsRest = _generateSplits(restPart, userExchangeRate);
+
+          if (splitsFund.isEmpty || splitsRest.isEmpty) {
+            ToastUtil.showWarning("Lỗi", "Cấu hình chia tiền không hợp lệ cho phần tách hóa đơn.");
+            isLoading.value = false;
+            return;
+          }
 
           // Tạo khoản 1 từ quỹ
           final createRequest1 = CreateExpenseRequest(
@@ -474,8 +561,7 @@ class AddExpenseController extends GetxController {
       }
 
       if (isSuccess) {
-        // BƯỚC 1: Tắt loading và đóng bàn phím
-        isLoading.value = false;
+        // BƯỚC 1: Đóng bàn phím
         FocusManager.instance.primaryFocus?.unfocus();
 
         // BƯỚC 2: Chờ bàn phím thu lại trước
@@ -598,9 +684,18 @@ class AddExpenseController extends GetxController {
 
   @override
   void onClose() {
-    amountController.dispose();
-    descController.dispose();
-    exchangeRateController.dispose();
+    // Trì hoãn dispose TextEditingControllers cho đến sau khi animation bottom sheet
+    // kết thúc hoàn toàn (Get.delete được gọi sau 700ms, dispose sau 800ms).
+    // Điều này ngăn lỗi "TextEditingController was used after being disposed"
+    // khi các TextField widget vẫn đang rebuild trong quá trình animation đóng.
+    final ctrl1 = amountController;
+    final ctrl2 = descController;
+    final ctrl3 = exchangeRateController;
+    Future.delayed(const Duration(milliseconds: 800), () {
+      ctrl1.dispose();
+      ctrl2.dispose();
+      ctrl3.dispose();
+    });
     super.onClose();
   }
 }

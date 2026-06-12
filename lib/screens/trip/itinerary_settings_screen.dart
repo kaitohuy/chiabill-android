@@ -35,10 +35,20 @@ class _ItinerarySettingsScreenState extends State<ItinerarySettingsScreen> {
   void initState() {
     super.initState();
     _loadSettings();
+    _timeController.addListener(_onTimeChanged);
+  }
+
+  void _onTimeChanged() {
+    if (_hasSaved) {
+      setState(() {
+        _hasSaved = false;
+      });
+    }
   }
 
   @override
   void dispose() {
+    _timeController.removeListener(_onTimeChanged);
     _saveSettings(isAuto: true);
     _timeController.dispose();
     super.dispose();
@@ -88,6 +98,7 @@ class _ItinerarySettingsScreenState extends State<ItinerarySettingsScreen> {
     _storage.write('itinerary_alarm_sound_$tripId', _isSoundEnabled);
 
     if (!isAuto) {
+      FocusManager.instance.primaryFocus?.unfocus(); // Đóng bàn phím
       LoadingUtil.show();
     }
     
@@ -104,7 +115,6 @@ class _ItinerarySettingsScreenState extends State<ItinerarySettingsScreen> {
       if (!isAuto) {
         LoadingUtil.hide();
         if (res.success) {
-          Get.back();
           ToastUtil.showSuccess("Thành công", "Đã lưu cài đặt báo thức!");
         } else {
           ToastUtil.showError("Lỗi", res.message ?? "Không thể lưu cài đặt báo thức");
@@ -191,6 +201,7 @@ class _ItinerarySettingsScreenState extends State<ItinerarySettingsScreen> {
                                   }
                                   setState(() {
                                     _isNotificationEnabled = val;
+                                    _hasSaved = false;
                                   });
                                 },
                               ),
@@ -205,6 +216,7 @@ class _ItinerarySettingsScreenState extends State<ItinerarySettingsScreen> {
                                     ? (val) {
                                         setState(() {
                                           _isVibrationEnabled = val;
+                                          _hasSaved = false;
                                         });
                                       }
                                     : null,
@@ -220,6 +232,7 @@ class _ItinerarySettingsScreenState extends State<ItinerarySettingsScreen> {
                                     ? (val) {
                                         setState(() {
                                           _isSoundEnabled = val;
+                                          _hasSaved = false;
                                         });
                                       }
                                     : null,
@@ -318,6 +331,7 @@ class _ItinerarySettingsScreenState extends State<ItinerarySettingsScreen> {
                                               if (val != null) {
                                                 setState(() {
                                                   _selectedUnit = val;
+                                                  _hasSaved = false;
                                                 });
                                               }
                                             }

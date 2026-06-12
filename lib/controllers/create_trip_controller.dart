@@ -93,6 +93,7 @@ class CreateTripController extends GetxController {
       LoadingUtil.hide();
 
       if (result.success) {
+        FocusManager.instance.primaryFocus?.unfocus();
         // Xóa thông tin cũ trước
         nameController.clear();
         descController.clear();
@@ -101,17 +102,28 @@ class CreateTripController extends GetxController {
         endDate.value = null;
         selectedCoverFile.value = null;
 
+        // Chờ bàn phím và loading đóng hẳn (tránh race condition)
+        await Future.delayed(const Duration(milliseconds: 300));
+
         // Đóng form
-        Get.back();
+        if (Get.isBottomSheetOpen == true) {
+          Get.back();
+        } else {
+          Get.back(); // fallback
+        }
 
         if (result.data != null) {
-          ToastUtil.showSuccess("Thành công", "Đã tạo chuyến đi ${result.data!.name}");
+          Future.delayed(const Duration(milliseconds: 350), () {
+            ToastUtil.showSuccess("Thành công", "Đã tạo chuyến đi ${result.data!.name}");
+          });
           // Bắt đầu upload ảnh bìa bất đồng bộ (async) không chặn UI
           if (coverFile != null) {
             _uploadCoverAsync(result.data!.id, coverFile);
           }
         } else {
-          ToastUtil.showSuccess("Đã lưu ngoại tuyến", result.message ?? "Sẽ đồng bộ khi có mạng");
+          Future.delayed(const Duration(milliseconds: 350), () {
+            ToastUtil.showSuccess("Đã lưu ngoại tuyến", result.message ?? "Sẽ đồng bộ khi có mạng");
+          });
         }
 
         // Dùng postFrameCallback để chọn đợi UI settle xong mới refresh

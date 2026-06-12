@@ -2,50 +2,246 @@ import 'package:chiabill/theme/app_colors.dart';
 import 'package:chiabill/widgets/empty_state.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import '../../controllers/trip_detail_controller.dart';
 import '../../controllers/trip_history_controller.dart';
+import '../../controllers/group_fund_controller.dart';
+import '../../utils/currency_util.dart';
 import 'tabs/history_tab.dart';
 
-class HistoryScreen extends StatelessWidget {
+class HistoryScreen extends StatefulWidget {
   final TripDetailController mainController;
   const HistoryScreen({super.key, required this.mainController});
 
   @override
+  State<HistoryScreen> createState() => _HistoryScreenState();
+}
+
+class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  late TripHistoryController historyController;
+  late GroupFundController fundController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    
+    final tripIdStr = widget.mainController.tripId.toString();
+    historyController = Get.find<TripHistoryController>(tag: tripIdStr);
+    
+    // Đăng ký hoặc tìm GroupFundController
+    if (Get.isRegistered<GroupFundController>(tag: tripIdStr)) {
+      fundController = Get.find<GroupFundController>(tag: tripIdStr);
+    } else {
+      fundController = Get.put(GroupFundController(widget.mainController.tripId), tag: tripIdStr);
+    }
+
+    // Tải dữ liệu ban đầu
+    fundController.fetchContributions();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final controller = Get.find<TripHistoryController>(tag: mainController.tripId.toString());
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-          title: const Text("Lịch sử chuyến đi", style: TextStyle(fontWeight: FontWeight.bold)),
-          bottom: const TabBar(
-            indicatorColor: Colors.white,
-            indicatorWeight: 3,
-            labelColor: Colors.white,
-            unselectedLabelColor: Colors.white70,
-            labelStyle: TextStyle(fontWeight: FontWeight.bold),
-            tabs: [
-              Tab(text: "GIAO DỊCH"),
-              Tab(text: "HOẠT ĐỘNG"),
-            ],
-          ),
-        ),
-        body: TabBarView(
-          children: [
-            // Tab 1: Giao dịch (Reused logic)
-            HistoryTab(mainController: mainController),
-            
-            // Tab 2: Nhật ký hoạt động
-            _buildActivityTab(context, controller),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        title: const Text("Lịch sử chuyến đi", style: TextStyle(fontWeight: FontWeight.bold)),
+        bottom: TabBar(
+          controller: _tabController,
+          indicatorColor: Colors.white,
+          indicatorWeight: 3,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+          tabs: const [
+            Tab(text: "GIAO DỊCH"),
+            Tab(text: "ĐÓNG QUỸ"),
+            Tab(text: "HOẠT ĐỘNG"),
           ],
         ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          // Tab 1: Giao dịch
+          HistoryTab(mainController: widget.mainController),
+          
+          // Tab 2: Lịch sử Đóng quỹ
+          _buildFundContributionTab(context),
+          
+          // Tab 3: Nhật ký hoạt động
+          _buildActivityTab(context, historyController),
+        ],
       ),
     );
   }
 
+  // ==========================================
+  // TAB 2: LỊCH SỬ ĐÓNG QUỸ
+  // ==========================================
+  Widget _buildFundContributionTab(BuildContext context) {
+    return Obx(() {
+      if (fundController.isContributionsLoading.value && fundController.contributions.isEmpty) {
+        return Center(child: CircularProgressIndicator(color: AppColors.primary));
+      }
+
+      final list = fundController.contributions;
+
+      if (list.isEmpty) {
+        return RefreshIndicator(
+          onRefresh: () => fundController.fetchContributions(),
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: [
+              SizedBox(height: Get.height * 0.15),
+              const EmptyState(text: "Chưa có lịch sử đóng quỹ nào"),
+            ],
+          ),
+        );
+      }
+
+      // Sắp xếp các khoản đóng quỹ theo thời gian mới nhất lên trước
+      final sortedList = List.from(list);
+      sortedList.sort((a, b) => b.contributionDate.compareTo(a.contributionDate));
+
+      return RefreshIndicator(
+        onRefresh: () => fundController.fetchContributions(),
+        child: ListView.builder(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 16,
+            bottom: 16 + MediaQuery.of(context).padding.bottom,
+          ),
+          itemCount: sortedList.length,
+          itemBuilder: (context, index) {
+            final item = sortedList[index];
+            final isDonate = item.type == "VOLUNTARY";
+            final isConfirmed = item.isConfirmed;
+
+            return Card(
+              margin: const EdgeInsets.only(bottom: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: Colors.grey[200]!),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    // Avatar người đóng
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundImage: item.contributor.avatarUrl != null
+                          ? NetworkImage(item.contributor.avatarUrl!)
+                          : null,
+                      child: item.contributor.avatarUrl == null
+                          ? Text(item.contributor.name?.substring(0, 1).toUpperCase() ?? "U")
+                          : null,
+                    ),
+                    const SizedBox(width: 12),
+                    // Thông tin
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  item.contributor.name ?? "Thành viên",
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: isDonate ? Colors.orange[50] : Colors.blue[50],
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  isDonate ? "DONATE" : "THU QUỸ",
+                                  style: TextStyle(
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDonate ? Colors.orange[800] : Colors.blue[800],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          if (item.notes != null && item.notes!.isNotEmpty) ...[
+                            Text(
+                              item.notes!,
+                              style: TextStyle(color: Colors.grey[700], fontSize: 12),
+                            ),
+                            const SizedBox(height: 4),
+                          ],
+                          Text(
+                            DateFormat('dd/MM/yyyy HH:mm').format(item.contributionDate),
+                            style: TextStyle(color: Colors.grey[400], fontSize: 10),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    // Số tiền & Trạng thái
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          "+${CurrencyUtils.formatNumber(item.amount)} đ",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: isConfirmed ? Colors.green[700] : Colors.orange[700],
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: isConfirmed ? Colors.green[50] : Colors.orange[50],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            isConfirmed ? "Đã duyệt" : "Chờ duyệt",
+                            style: TextStyle(
+                              color: isConfirmed ? Colors.green[800] : Colors.orange[800],
+                              fontSize: 9,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    });
+  }
+
+  // ==========================================
+  // TAB 3: NHẬT KÝ HOẠT ĐỘNG
+  // ==========================================
   Widget _buildActivityTab(BuildContext context, TripHistoryController controller) {
     return Column(
       children: [
@@ -70,7 +266,7 @@ class HistoryScreen extends StatelessWidget {
                     ),
                     child: Row(
                         children: [
-                          Icon(Icons.filter_list, color: hasFilter ? Colors.white : Colors.grey.shade700, size: 10),
+                          Icon(Icons.filter_list, color: hasFilter ? Colors.white : Colors.grey.shade700, size: 16),
                           const SizedBox(width: 8),
                           Text("Lọc hoạt động", style: TextStyle(color: hasFilter ? Colors.white : Colors.grey.shade800, fontWeight: FontWeight.bold))
                         ]
@@ -92,6 +288,12 @@ class HistoryScreen extends StatelessWidget {
                 onRefresh: () => controller.fetchTripHistory(),
                 child: ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
+                  padding: EdgeInsets.only(
+                    left: 24,
+                    right: 24,
+                    top: 24,
+                    bottom: 16 + MediaQuery.of(context).padding.bottom,
+                  ),
                   children: [
                     const SizedBox(height: 100),
                     Center(
@@ -118,12 +320,17 @@ class HistoryScreen extends StatelessWidget {
                 },
                 child: ListView.builder(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.only(
+                    left: 16,
+                    right: 16,
+                    top: 16,
+                    bottom: 16 + MediaQuery.of(context).padding.bottom,
+                  ),
                   itemCount: controller.tripHistories.length + (controller.isHistoryLastPage.value ? 0 : 1),
                   itemBuilder: (context, index) {
                     if (index == controller.tripHistories.length) {
                       return Padding(
-                          padding: EdgeInsets.symmetric(vertical: 16.0),
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
                           child: Center(child: CircularProgressIndicator(color: AppColors.primary))
                       );
                     }
@@ -173,7 +380,7 @@ class HistoryScreen extends StatelessWidget {
                       margin: const EdgeInsets.only(bottom: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(color: actionColor.withValues(alpha:0.2)),
+                        side: BorderSide(color: actionColor.withValues(alpha: 0.2)),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
@@ -185,7 +392,7 @@ class HistoryScreen extends StatelessWidget {
                                 Container(
                                   padding: const EdgeInsets.all(8),
                                   decoration: BoxDecoration(
-                                    color: actionColor.withValues(alpha:0.1),
+                                    color: actionColor.withValues(alpha: 0.1),
                                     shape: BoxShape.circle,
                                   ),
                                   child: Icon(actionIcon, color: actionColor, size: 20),
@@ -197,11 +404,11 @@ class HistoryScreen extends StatelessWidget {
                                     children: [
                                       Text(
                                         log.actorName ?? "Thành viên",
-                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                                       ),
                                       Text(
                                         _formatDateTime(log.createdAt),
-                                        style: TextStyle(fontSize: 11, color: Colors.grey),
+                                        style: const TextStyle(fontSize: 11, color: Colors.grey),
                                       ),
                                     ],
                                   ),
@@ -209,7 +416,7 @@ class HistoryScreen extends StatelessWidget {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
-                                    color: actionColor.withValues(alpha:0.1),
+                                    color: actionColor.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Text(
@@ -222,7 +429,7 @@ class HistoryScreen extends StatelessWidget {
                             const Divider(height: 24),
                             Text(
                               log.content ?? "",
-                              style: TextStyle(fontSize: 13, height: 1.4),
+                              style: const TextStyle(fontSize: 13, height: 1.4),
                             ),
                           ],
                         ),
@@ -234,14 +441,13 @@ class HistoryScreen extends StatelessWidget {
             );
           }),
         )
-      ]
+      ],
     );
   }
 
   String _formatDateTime(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return "";
     try {
-      // Logic bóc tách ngày giờ đơn giản
       if (dateStr.length > 16) {
         return dateStr.substring(0, 16).replaceAll('T', ' ');
       }
@@ -270,11 +476,12 @@ class HistoryScreen extends StatelessWidget {
     Get.bottomSheet(
       StatefulBuilder(
         builder: (context, setState) {
-          return SafeArea(
-            child: Container(
-              padding: const EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 16),
-              constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.85),
-              decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+          return Container(
+            padding: EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 16 + MediaQuery.of(context).padding.bottom),
+            constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.85),
+            decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+            child: SafeArea(
+              top: false,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,

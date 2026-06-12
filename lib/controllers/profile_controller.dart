@@ -26,6 +26,7 @@ class ProfileController extends GetxController {
   // Biến quản lý UI
   var currentAvatarUrl = RxnString();
   var currentQrUrl = RxnString();
+  var phoneError = RxnString();
   var isVietQrExpanded = false.obs;
   var isStaticQrExpanded = false.obs;
   var paymentPriority = 1.obs;
@@ -37,6 +38,9 @@ class ProfileController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    phoneController.addListener(() {
+      validatePhone(phoneController.text);
+    });
     fetchProfile();
   }
 
@@ -79,7 +83,73 @@ class ProfileController extends GetxController {
     }
   }
 
+  void validatePhone(String value) {
+    final text = value.trim();
+    if (text.isEmpty) {
+      phoneError.value = null;
+      return;
+    }
+    
+    if (!text.startsWith('0')) {
+      phoneError.value = "Số điện thoại phải bắt đầu bằng số 0";
+      return;
+    }
+    
+    if (text.length > 1 && !RegExp(r'^0[235789]').hasMatch(text)) {
+      phoneError.value = "Đầu số phải là 02, 03, 05, 07, 08 hoặc 09";
+      return;
+    }
+
+    if (text.length < 10) {
+      phoneError.value = "Số điện thoại chưa đủ 10 chữ số";
+      return;
+    }
+
+    if (text.length > 10) {
+      phoneError.value = "Số điện thoại chỉ được có tối đa 10 chữ số";
+      return;
+    }
+    
+    final phoneRegex = RegExp(r'^(0[235789])[0-9]{8}$');
+    if (!phoneRegex.hasMatch(text)) {
+      phoneError.value = "Số điện thoại không đúng định dạng Việt Nam";
+    } else {
+      phoneError.value = null;
+    }
+  }
+
   Future<void> saveProfile({bool silent = false}) async {
+    final name = nameController.text.trim();
+    final phone = phoneController.text.trim();
+    final bankId = bankIdController.text.trim().toUpperCase();
+    final accountNo = accountNoController.text.trim();
+
+    if (!silent) {
+      if (name.isEmpty) {
+        ToastUtil.showWarning("Lỗi nhập liệu", "Họ và tên không được để trống");
+        return;
+      }
+      if (name.length < 2 || name.length > 50) {
+        ToastUtil.showWarning("Lỗi nhập liệu", "Họ và tên phải từ 2 đến 50 ký tự");
+        return;
+      }
+      if (phone.isNotEmpty) {
+        validatePhone(phone);
+        if (phoneError.value != null) {
+          ToastUtil.showWarning("Lỗi nhập liệu", phoneError.value!);
+          return;
+        }
+      }
+      if (bankId.isNotEmpty && accountNo.isEmpty) {
+        ToastUtil.showWarning("Lỗi nhập liệu", "Vui lòng điền số tài khoản ngân hàng");
+        return;
+      }
+      if (accountNo.isNotEmpty && bankId.isEmpty) {
+        ToastUtil.showWarning("Lỗi nhập liệu", "Vui lòng chọn hoặc nhập mã ngân hàng");
+        return;
+      }
+    }
+
     try {
       if (!silent) {
         isLoading.value = true;
@@ -87,10 +157,10 @@ class ProfileController extends GetxController {
       }
 
       final request = UpdateProfileRequest(
-        name: nameController.text.trim(),
-        phone: phoneController.text.trim(),
-        bankId: bankIdController.text.trim().toUpperCase(),
-        accountNo: accountNoController.text.trim(),
+        name: name,
+        phone: phone,
+        bankId: bankId,
+        accountNo: accountNo,
         avatarUrl: currentAvatarUrl.value ?? "",
         bankQrUrl: currentQrUrl.value ?? "",
         allowAutoAdd: allowAutoAdd.value,
@@ -202,10 +272,8 @@ class ProfileController extends GetxController {
 
   @override
   void onClose() {
-    nameController.dispose();
-    phoneController.dispose(); // Đừng quên dọn dẹp biến này để tránh rò rỉ RAM
-    bankIdController.dispose();
-    accountNoController.dispose();
+    // Không dispose các TextEditingController ở đây để tránh lỗi 'used after being disposed'
+    // khi GetX tái sử dụng instance của ProfileController.
     super.onClose();
   }
 }

@@ -126,7 +126,7 @@ class TripGalleryCard extends StatelessWidget {
                       trip.description ?? "Không có mô tả",
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: Colors.grey.shade500, fontSize: 11),
+                      style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
                     ),
                     const SizedBox(height: 8),
                     Row(
@@ -135,7 +135,7 @@ class TripGalleryCard extends StatelessWidget {
                         Expanded(
                           child: Text(
                             dateStr,
-                            style: TextStyle(fontSize: 10, color: Colors.grey.shade400),
+                            style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),

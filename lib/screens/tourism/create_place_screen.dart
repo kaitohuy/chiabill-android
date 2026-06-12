@@ -165,8 +165,9 @@ class _CreatePlaceScreenState extends State<CreatePlaceScreen> {
   }
 
   // Mở BottomSheet thiết kế đẹp mắt để chọn danh mục, tránh tràn màn hình khi có nhiều mục
-  void _showCategorySelectorBottomSheet() {
-    Get.bottomSheet(
+  void _showCategorySelectorBottomSheet() async {
+    FocusScope.of(context).requestFocus(FocusNode());
+    await Get.bottomSheet(
       Container(
         decoration: const BoxDecoration(
           color: Colors.white,
@@ -238,6 +239,7 @@ class _CreatePlaceScreenState extends State<CreatePlaceScreen> {
       ),
       isScrollControlled: true,
     );
+    FocusScope.of(context).unfocus();
   }
 
   Widget _buildMap() {
@@ -283,9 +285,11 @@ class _CreatePlaceScreenState extends State<CreatePlaceScreen> {
   @override
   Widget build(BuildContext context) {
     final selectedCategory = _categories[_selectedCategoryKey]!;
-
-    return Scaffold(
-      appBar: AppBar(
+  
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        appBar: AppBar(
         title: const Text("Thêm địa điểm mới", style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
@@ -326,9 +330,17 @@ class _CreatePlaceScreenState extends State<CreatePlaceScreen> {
                         child: TextField(
                           controller: _searchController,
                           onChanged: _onSearchChanged,
+                          textAlignVertical: TextAlignVertical.center,
                           decoration: InputDecoration(
                             hintText: "Tìm kiếm địa điểm (VD: Hồ Hoàn Kiếm)...",
-                            prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                            prefixIcon: const Padding(
+                              padding: EdgeInsets.only(left: 12, right: 8),
+                              child: Icon(Icons.search, color: Colors.grey),
+                            ),
+                            prefixIconConstraints: const BoxConstraints(
+                              minWidth: 40,
+                              minHeight: 24,
+                            ),
                             suffixIcon: _searchController.text.isNotEmpty
                                 ? IconButton(
                                     icon: const Icon(Icons.clear, color: Colors.grey),
@@ -339,7 +351,7 @@ class _CreatePlaceScreenState extends State<CreatePlaceScreen> {
                                   )
                                 : null,
                             border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 10),
                           ),
                         ),
                       ),
@@ -408,7 +420,7 @@ class _CreatePlaceScreenState extends State<CreatePlaceScreen> {
           // 2. Biểu mẫu nhập liệu rút gọn (Tên + Danh mục) sát đáy với margin cực nhỏ 24px
           Container(
             color: Colors.white,
-            padding: const EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 20),
+            padding: EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 20 + MediaQuery.of(context).padding.bottom),
             child: Form(
               key: _formKey,
               child: Column(
@@ -525,6 +537,7 @@ class _CreatePlaceScreenState extends State<CreatePlaceScreen> {
           ),
         ],
       ),
-    );
+    ),
+  );
   }
 }

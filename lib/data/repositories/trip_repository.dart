@@ -98,13 +98,23 @@ class TripRepository {
   // ==================================================
   // ĐÃ CẬP NHẬT: Thêm tham số totalBudget vào hàm Sửa chuyến đi
   // ==================================================
-  Future<ApiResponse<TripResponse>> updateTrip(int tripId, String name, String? description, double? totalBudget, String? startDate, String? endDate) async {
+  Future<ApiResponse<TripResponse>> updateTrip(
+      int tripId,
+      String name,
+      String? description,
+      double? totalBudget,
+      String? startDate,
+      String? endDate,
+      String? categoryName,
+      String? categoryIcon) async {
     try {
       Map<String, dynamic> requestData = {
         "name": name,
         "description": description ?? "",
         "startDate": startDate,
-        "endDate": endDate
+        "endDate": endDate,
+        "categoryName": categoryName,
+        "categoryIcon": categoryIcon,
       };
 
       // Nếu có sửa ngân sách thì nhét thêm vào requestData

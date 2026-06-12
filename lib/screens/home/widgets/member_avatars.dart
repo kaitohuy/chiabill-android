@@ -11,7 +11,7 @@ class MemberAvatars extends StatelessWidget {
     if (trip.members == null || (trip.members as List).isEmpty) {
       return Text(
         "${trip.memberCount ?? 0} TV",
-        style: TextStyle(fontSize: 12, color: Colors.grey.shade600, fontWeight: FontWeight.bold),
+        style: TextStyle(fontSize: 14, color: Colors.grey.shade600, fontWeight: FontWeight.bold),
       );
     }
 

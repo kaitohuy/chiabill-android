@@ -13,7 +13,7 @@ class AboutScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text("Về Chiabill", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text("Về DuliVie", style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.primaryDark,
         elevation: 0,
@@ -40,7 +40,7 @@ class AboutScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    "Chiabill",
+                    "DuliVie",
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: 0.5),
                   ),
                   const SizedBox(height: 4),
@@ -57,7 +57,7 @@ class AboutScreen extends StatelessWidget {
             _buildSectionHeader("Bảo mật & Quyền riêng tư"),
             _buildInfoCard([
               _buildBulletItem(Icons.security, "Mã hóa dữ liệu", "Mọi thông tin tài khoản, ngân hàng được bảo mật chuẩn mã hóa đường truyền SSL."),
-              _buildBulletItem(Icons.visibility_off, "Cam kết riêng tư", "Chiabill không thu thập vị trí hoặc bán dữ liệu người dùng cho bên thứ ba."),
+              _buildBulletItem(Icons.visibility_off, "Cam kết riêng tư", "DuliVie không thu thập vị trí hoặc bán dữ liệu người dùng cho bên thứ ba."),
               const Divider(height: 20, thickness: 1),
               InkWell(
                 onTap: () async {

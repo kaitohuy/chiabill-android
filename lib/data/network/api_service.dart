@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart' hide Response, MultipartFile, FormData;
 import 'package:get_storage/get_storage.dart';
@@ -35,7 +36,8 @@ class ApiService {
           if (syncService.isOffline) {
             if (options.method == 'GET') {
               // Cố gắng đọc từ Cache
-              String cacheKey = 'cache_GET_${options.path}';
+              String queryStr = options.queryParameters.isNotEmpty ? '_${jsonEncode(options.queryParameters)}' : '';
+              String cacheKey = 'cache_GET_${options.path}$queryStr';
               var cachedData = _storage.read(cacheKey);
               if (cachedData != null) {
                 return handler.resolve(Response(
@@ -67,7 +69,8 @@ class ApiService {
         if (response.requestOptions.method == 'GET' && response.data != null) {
           // Chỉ cache nếu server báo thành công
           if (response.data is Map && response.data['success'] == true) {
-             String cacheKey = 'cache_GET_${response.requestOptions.path}';
+             String queryStr = response.requestOptions.queryParameters.isNotEmpty ? '_${jsonEncode(response.requestOptions.queryParameters)}' : '';
+             String cacheKey = 'cache_GET_${response.requestOptions.path}$queryStr';
              _storage.write(cacheKey, response.data);
           }
         }

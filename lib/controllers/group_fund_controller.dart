@@ -23,6 +23,7 @@ class GroupFundController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    isActionLoading.value = false;
     fetchFundData();
   }
 

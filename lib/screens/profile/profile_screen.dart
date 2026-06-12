@@ -8,6 +8,7 @@ import 'theme_settings_screen.dart';
 import 'about_screen.dart';
 import 'support_screen.dart';
 import 'storage_settings_screen.dart';
+import 'user_guide_settings_screen.dart';
 
 class ProfileScreen extends GetView<ProfileController> {
   const ProfileScreen({super.key});
@@ -182,16 +183,17 @@ class ProfileScreen extends GetView<ProfileController> {
                   const SizedBox(height: 24),
 
                   // Ô nhập SĐT
-                  TextField(
+                  Obx(() => TextField(
                     controller: controller.phoneController,
                     keyboardType: TextInputType.phone,
                     decoration: InputDecoration(
                       labelText: "Số điện thoại",
+                      errorText: controller.phoneError.value,
                       prefixIcon: Icon(Icons.phone, color: AppColors.primary),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       filled: true, fillColor: Colors.white,
                     ),
-                  ),
+                  )),
                   const SizedBox(height: 16),
                   
                   // Ô hiển thị Email (Read-only vì liên kết Google)
@@ -219,7 +221,7 @@ class ProfileScreen extends GetView<ProfileController> {
                     color: Colors.white,
                     child: ListTile(
                       leading: Icon(Icons.color_lens, color: AppColors.primary),
-                      title: const Text("Giao diện & Màu sắc", style: TextStyle(fontWeight: FontWeight.bold)),
+                      title: const Text("Màu sắc & Cỡ chữ", style: TextStyle(fontWeight: FontWeight.bold)),
                       subtitle: const Text("Tùy chỉnh chủ đề màu sắc yêu thích", style: TextStyle(fontSize: 12)),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => Get.to(() => const ThemeSettingsScreen()),
@@ -238,6 +240,21 @@ class ProfileScreen extends GetView<ProfileController> {
                       subtitle: const Text("Dọn dẹp cache, tự động xóa tệp lưu tạm", style: TextStyle(fontSize: 12)),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => Get.to(() => const StorageSettingsScreen()),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // CARD HƯỚNG DẪN SỬ DỤNG
+                  Card(
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.grey.shade300)),
+                    color: Colors.white,
+                    child: ListTile(
+                      leading: Icon(Icons.help_outline, color: AppColors.primary),
+                      title: const Text("Hướng dẫn sử dụng", style: TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: const Text("Bật/tắt tour hướng dẫn các tính năng cốt lõi", style: TextStyle(fontSize: 12)),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => Get.to(() => const UserGuideSettingsScreen()),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -316,7 +333,7 @@ class ProfileScreen extends GetView<ProfileController> {
                         Obx(() => SwitchListTile(
                           activeThumbColor: AppColors.primary,
                           title: const Text("Tự động duyệt nhận tiền", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                          subtitle: const Text("Tự động đánh dấu Đã nhận (APPROVED) khi có người báo cáo chuyển khoản cho bạn.", style: TextStyle(fontSize: 12, color: Colors.grey)),
+                          subtitle: const Text("Tự động đánh dấu '"'Đã nhận '"' khi có người báo cáo chuyển khoản cho bạn, bạn không cần kiểm tra thông tin chuyển tiền đúng hay sai.", style: TextStyle(fontSize: 12, color: Colors.grey)),
                           value: controller.allowAutoApprovePayment.value,
                           onChanged: (val) => controller.toggleAutoApprovePayment(val),
                         )),

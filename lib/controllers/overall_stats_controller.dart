@@ -46,14 +46,28 @@ class OverallStatsController extends GetxController {
   var totalOwe = 0.0.obs; // Nợ (Global)
   var totalReceive = 0.0.obs; // Thu (Global)
 
+  DateTime? _lastFetchTime;
+
+  Future<void> fetchAll({bool force = false}) async {
+    final now = DateTime.now();
+    if (!force && _lastFetchTime != null && now.difference(_lastFetchTime!) < const Duration(seconds: 15)) {
+      return;
+    }
+    _lastFetchTime = now;
+
+    await Future.wait([
+      fetchSummary(),
+      fetchAllTimeStats(),
+      fetchOverallStats(),
+    ]);
+  }
+
   @override
   void onInit() {
     super.onInit();
     // Trì hoãn load thống kê để ưu tiên tải Chuyến đi ở màn hình chính
     Future.delayed(const Duration(milliseconds: 300), () {
-      fetchSummary();
-      fetchAllTimeStats();
-      fetchOverallStats();
+      fetchAll();
     });
   }
 

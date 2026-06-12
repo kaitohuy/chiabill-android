@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../data/models/itinerary_item_response.dart';
 import '../../controllers/itinerary_controller.dart';
+import '../../controllers/trip_detail_controller.dart';
 
 class ItineraryDetailDialog extends StatefulWidget {
   final int tripId;
@@ -20,6 +21,13 @@ class ItineraryDetailDialog extends StatefulWidget {
 class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
   late ItineraryController controller;
   bool _isSaving = false;
+
+  bool get _isCurrentUserDisabled {
+    if (Get.isRegistered<TripDetailController>(tag: widget.tripId.toString())) {
+      return Get.find<TripDetailController>(tag: widget.tripId.toString()).isCurrentUserDisabled;
+    }
+    return false;
+  }
 
   late int selectedDay;
   late TextEditingController timeCtrl;
@@ -94,7 +102,7 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
               color: Colors.white,
               borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
             ),
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            padding: EdgeInsets.fromLTRB(20, 16, 20, 24 + MediaQuery.of(context).padding.bottom),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -350,7 +358,9 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       title: Text(
-        widget.item == null ? "Thêm hoạt động mới" : "Chỉnh sửa hoạt động",
+        _isCurrentUserDisabled
+            ? "Chi tiết hoạt động"
+            : (widget.item == null ? "Thêm hoạt động mới" : "Chỉnh sửa hoạt động"),
         style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
       ),
       content: SizedBox(
@@ -402,11 +412,13 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
                             width: isSelected ? 1.5 : 1,
                           ),
                         ),
-                        onSelected: (selected) {
-                          if (selected) {
-                            setState(() => selectedDay = dayNum);
-                          }
-                        },
+                        onSelected: _isCurrentUserDisabled
+                            ? null
+                            : (selected) {
+                                if (selected) {
+                                  setState(() => selectedDay = dayNum);
+                                }
+                              },
                       ),
                     );
                   },
@@ -418,24 +430,27 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
               TextField(
                 controller: timeCtrl,
                 readOnly: true,
-                onTap: () => _selectTimeRange(context),
+                onTap: _isCurrentUserDisabled ? null : () => _selectTimeRange(context),
+                enabled: !_isCurrentUserDisabled,
                 decoration: InputDecoration(
                   labelText: "Khung giờ hoạt động",
                   hintText: "Chạm để chọn giờ",
                   prefixIcon: Icon(Icons.access_time, color: AppColors.primary),
-                  suffixIcon: timeCtrl.text.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear, color: Colors.grey),
-                          onPressed: () {
-                            setState(() {
-                              timeCtrl.clear();
-                            });
-                          },
-                        )
-                      : IconButton(
-                          icon: Icon(Icons.edit_calendar, color: AppColors.primary),
-                          onPressed: () => _selectTimeRange(context),
-                        ),
+                  suffixIcon: _isCurrentUserDisabled
+                      ? null
+                      : (timeCtrl.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear, color: Colors.grey),
+                              onPressed: () {
+                                setState(() {
+                                  timeCtrl.clear();
+                                });
+                              },
+                            )
+                          : IconButton(
+                              icon: Icon(Icons.edit_calendar, color: AppColors.primary),
+                              onPressed: () => _selectTimeRange(context),
+                            )),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
@@ -445,6 +460,7 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
               TextField(
                 controller: activityCtrl,
                 maxLength: 100,
+                enabled: !_isCurrentUserDisabled,
                 decoration: InputDecoration(
                   labelText: "Hoạt động * (VD: Ăn sáng Phở Vũ)",
                   prefixIcon: Icon(Icons.explore, color: AppColors.primary),
@@ -458,6 +474,7 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
               TextField(
                 controller: locationCtrl,
                 maxLength: 150,
+                enabled: !_isCurrentUserDisabled,
                 decoration: InputDecoration(
                   labelText: "Địa điểm (VD: 15 Trần Hưng Đạo)",
                   prefixIcon: Icon(Icons.pin_drop, color: AppColors.primary),
@@ -471,6 +488,7 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
               TextField(
                 controller: costCtrl,
                 keyboardType: TextInputType.number,
+                enabled: !_isCurrentUserDisabled,
                 inputFormatters: [
                   FilteringTextInputFormatter.digitsOnly,
                   CurrencyInputFormatter(),
@@ -488,6 +506,7 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
                 controller: noteCtrl,
                 maxLength: 200,
                 maxLines: 2,
+                enabled: !_isCurrentUserDisabled,
                 decoration: InputDecoration(
                   labelText: "Ghi chú",
                   prefixIcon: Icon(Icons.note, color: AppColors.primary),
@@ -502,26 +521,27 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
       actions: [
         TextButton(
           onPressed: _isSaving ? null : () => Get.back(),
-          child: const Text("HỦY", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+          child: Text(_isCurrentUserDisabled ? "ĐÓNG" : "HỦY", style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
         ),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        if (!_isCurrentUserDisabled)
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            onPressed: _isSaving ? null : _submit,
+            child: _isSaving
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Text("LƯU", style: TextStyle(fontWeight: FontWeight.bold)),
           ),
-          onPressed: _isSaving ? null : _submit,
-          child: _isSaving
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
-                  ),
-                )
-              : const Text("LƯU", style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
       ],
     );
   }

@@ -39,16 +39,18 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
 
   @override
   void dispose() {
-    // Xóa controller một cách an toàn tuyệt đối sau khi widget đã hoàn toàn bị gỡ khỏi widget tree
-    // Xác định tag giống hệt lúc khởi tạo ở trip_detail_screen và expense_tab
     final isEditMode = widget.expenseToEdit != null;
     final tag = isEditMode 
         ? 'edit_${widget.expenseToEdit!.id}' 
         : (widget.initialDate != null ? 'add' : 'add_bg');
     
-    if (Get.isRegistered<AddExpenseController>(tag: tag)) {
-      Get.delete<AddExpenseController>(tag: tag);
-    }
+    // Trì hoãn việc xóa controller để đảm bảo animation đóng bottom sheet (~300ms)
+    // đã kết thúc hoàn toàn và các TextField đã unmount trước khi hủy controller.
+    Future.delayed(const Duration(milliseconds: 700), () {
+      if (Get.isRegistered<AddExpenseController>(tag: tag)) {
+        Get.delete<AddExpenseController>(tag: tag);
+      }
+    });
     super.dispose();
   }
 
@@ -69,7 +71,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
           left: 24, 
           right: 24, 
           top: 24, 
-          bottom: 24,
+          bottom: 24 + MediaQuery.of(context).padding.bottom,
         ),
         child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -367,6 +369,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                       const SizedBox(height: 6),
                       InkWell(
                         onTap: () async {
+                          FocusManager.instance.primaryFocus?.unfocus();
                           final DateTime? picked = await showDatePicker(
                             context: context,
                             initialDate: controller.selectedDate.value,
@@ -419,7 +422,10 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                       const Text("Danh mục", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                       const SizedBox(height: 6),
                       InkWell(
-                        onTap: () => _showCategoryPicker(context, controller),
+                        onTap: () {
+                          FocusManager.instance.primaryFocus?.unfocus();
+                          _showCategoryPicker(context, controller);
+                        },
                         borderRadius: BorderRadius.circular(12),
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -606,7 +612,12 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
               double amt = double.tryParse(controller.amountController.text.replaceAll(',', '')) ?? 0.0;
               double rate = controller.selectedCurrency.value == "VND" ? 1.0 : (double.tryParse(controller.exchangeRateController.text.replaceAll(',', '')) ?? 1.0);
               double totalVnd = amt * rate;
-              bool isShortage = controller.isFromFund.value && totalVnd > controller.fundBalance.value;
+              double availableFund = controller.fundBalance.value;
+              if (isEditMode && controller.expenseToEdit?.isFromFund == true) {
+                double oldAmountVnd = controller.expenseToEdit!.totalAmount * (controller.expenseToEdit!.exchangeRate ?? 1.0);
+                availableFund += oldAmountVnd;
+              }
+              bool isShortage = controller.isFromFund.value && totalVnd > availableFund;
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -678,7 +689,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              "Số dư quỹ chung không đủ. Hệ thống sẽ tự động tách phần thiếu (${CurrencyUtils.formatNumber(totalVnd - controller.fundBalance.value)} đ) làm một hóa đơn riêng do mọi người cùng chia nợ, và chi trả phần còn lại từ quỹ chung.",
+                              "Số dư quỹ chung không đủ. Hệ thống sẽ tự động tách phần thiếu (${CurrencyUtils.formatNumber(totalVnd - availableFund)} đ) làm một hóa đơn riêng do mọi người cùng chia nợ, và chi trả phần còn lại từ quỹ chung.",
                               style: TextStyle(color: Colors.amber[900], fontSize: 11, height: 1.3),
                             ),
                           ),
@@ -759,6 +770,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
   // DIALOG CHỌN DANH MỤC
   // ==========================================
   void _showCategoryPicker(BuildContext context, AddExpenseController controller) {
+    FocusManager.instance.primaryFocus?.unfocus();
     Get.dialog(
         AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

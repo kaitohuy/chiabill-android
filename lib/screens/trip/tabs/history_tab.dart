@@ -153,11 +153,12 @@ class HistoryTab extends StatelessWidget {
     Get.bottomSheet(
       StatefulBuilder(
           builder: (context, setState) {
-            return SafeArea(
-              child: Container(
-                padding: const EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 16),
-                constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.85),
-                decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+            return Container(
+              padding: EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 16 + MediaQuery.of(context).padding.bottom),
+              constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.85),
+              decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+              child: SafeArea(
+                top: false,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -184,41 +185,30 @@ class HistoryTab extends StatelessWidget {
                             Wrap(
                               spacing: 8,
                               children: [
-                                FilterChip(
-                                    label: Text("Chờ duyệt", style: TextStyle(color: tempStatus == 'PENDING' ? Colors.white : Colors.orange)),
-                                    selected: tempStatus == 'PENDING',
-                                    selectedColor: Colors.orange,
-                                    checkmarkColor: Colors.white,
-                                    backgroundColor: Colors.orange.shade50,
-                                    side: BorderSide(color: Colors.orange.shade200),
-                                    onSelected: (val) => setState(() => tempStatus = val ? 'PENDING' : null)
-                                ),
-                                FilterChip(
-                                    label: Text("Thành công", style: TextStyle(color: tempStatus == 'APPROVED' ? Colors.white : AppColors.primary)),
-                                    selected: tempStatus == 'APPROVED',
-                                    selectedColor: AppColors.primary,
-                                    checkmarkColor: Colors.white,
-                                    backgroundColor: AppColors.primaryBackgroundLight,
-                                    side: BorderSide(color: AppColors.primaryLight),
-                                    onSelected: (val) => setState(() => tempStatus = val ? 'APPROVED' : null)
-                                ),
-                                FilterChip(
-                                    label: Text("Từ chối", style: TextStyle(color: tempStatus == 'REJECTED' ? Colors.white : Colors.red)),
-                                    selected: tempStatus == 'REJECTED',
-                                    selectedColor: Colors.red,
-                                    checkmarkColor: Colors.white,
-                                    backgroundColor: Colors.red.shade50,
-                                    side: BorderSide(color: Colors.red.shade200),
-                                    onSelected: (val) => setState(() => tempStatus = val ? 'REJECTED' : null)
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 24),
+                                'PENDING',
+                                'APPROVED',
+                                'REJECTED'
+                              ].map((status) {
+                                bool isSelected = tempStatus == status;
+                                String label = "Chờ duyệt";
+                                if (status == 'APPROVED') label = "Đã duyệt";
+                                if (status == 'REJECTED') label = "Từ chối";
 
-                            const Text("Người chuyển tiền:", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                                return FilterChip(
+                                    label: Text(label, style: TextStyle(fontSize: 12, color: isSelected ? Colors.white : Colors.black87)),
+                                    selected: isSelected,
+                                    selectedColor: Colors.blue,
+                                    checkmarkColor: Colors.white,
+                                    backgroundColor: Colors.grey.shade100,
+                                    onSelected: (val) => setState(() => tempStatus = val ? status : null)
+                                );
+                              }).toList(),
+                            ),
+                            const SizedBox(height: 16),
+                            const Text("Người gửi:", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
                             const SizedBox(height: 8),
                             Wrap(
-                              spacing: 8, runSpacing: 8,
+                              spacing: 8,
                               children: (mainController.trip.value?.members ?? []).map((m) {
                                 bool isSelected = tempFromId == m.user.id;
                                 return FilterChip(
@@ -231,12 +221,11 @@ class HistoryTab extends StatelessWidget {
                                 );
                               }).toList(),
                             ),
-                            const SizedBox(height: 24),
-
-                            const Text("Người nhận tiền:", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                            const SizedBox(height: 16),
+                            const Text("Người nhận:", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
                             const SizedBox(height: 8),
                             Wrap(
-                              spacing: 8, runSpacing: 8,
+                              spacing: 8,
                               children: (mainController.trip.value?.members ?? []).map((m) {
                                 bool isSelected = tempToId == m.user.id;
                                 return FilterChip(

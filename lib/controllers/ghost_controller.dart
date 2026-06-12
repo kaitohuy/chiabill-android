@@ -29,9 +29,16 @@ class GhostController extends GetxController {
 
     // Bỏ ép kiểu, chỉ check success
     if (result.success) {
+      FocusManager.instance.primaryFocus?.unfocus();
       namesController.clear(); // 🌟 XÓA TRẮNG ĐỂ LẦN SAU MỞ RA KHÔNG BỊ DÍNH TÊN CŨ
+
+      // Chờ bàn phím ẩn
+      await Future.delayed(const Duration(milliseconds: 150));
       Get.back(); // Đóng popup
-      ToastUtil.showSuccess("Thành công", "Đã thêm ${names.length} người. Nhớ cập nhật khoản chi cũ nếu muốn họ gánh chung nhé!");
+
+      Future.delayed(const Duration(milliseconds: 300), () {
+        ToastUtil.showSuccess("Thành công", "Đã thêm ${names.length} người. Nhớ cập nhật khoản chi cũ nếu muốn họ gánh chung nhé!");
+      });
 
       // Load lại TOÀN BỘ dữ liệu Trip Detail (Members, Expenses, Settlements)
       if (Get.isRegistered<TripDetailController>(tag: tripId.toString())) {

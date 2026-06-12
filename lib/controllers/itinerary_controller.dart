@@ -25,6 +25,8 @@ class ItineraryController extends GetxController {
   var localTrip = Rxn<TripResponse>();
   var hasLoadedOnce = false.obs;
 
+  Worker? _alarmWorker;
+
   @override
   void onInit() {
     super.onInit();
@@ -34,14 +36,20 @@ class ItineraryController extends GetxController {
     }
 
     if (_tripDetailController != null) {
-      ever(_tripDetailController!.trip, (_) {
+      _alarmWorker = ever(_tripDetailController!.trip, (_) {
         _rescheduleTripAlarms();
       });
     } else {
-      ever(localTrip, (_) {
+      _alarmWorker = ever(localTrip, (_) {
         _rescheduleTripAlarms();
       });
     }
+  }
+
+  @override
+  void onClose() {
+    _alarmWorker?.dispose();
+    super.onClose();
   }
 
   Future<void> fetchTripDetail() async {

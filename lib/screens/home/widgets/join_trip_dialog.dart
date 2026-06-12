@@ -27,7 +27,7 @@ class JoinTripDialog {
                 const SizedBox(height: 16),
                 const Text("Tham gia nhóm", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
-                const Text("Nhập mã mời hoặc quét mã QR do bạn bè chia sẻ để tham gia.", textAlign: TextAlign.center, style: TextStyle(color: Colors.grey, fontSize: 13)),
+                const Text("Nhập mã mời hoặc quét mã QR do bạn bè chia sẻ để tham gia.", textAlign: TextAlign.center, style: TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 24),
 
                 TextField(

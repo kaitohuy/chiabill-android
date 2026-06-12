@@ -44,20 +44,22 @@ class _AdvancedSplitBottomSheetState extends State<AdvancedSplitBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      height: Get.height * (_isFullScreen ? 0.95 : 0.7),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      padding: EdgeInsets.only(
-        bottom: 16,
-        left: 16,
-        right: 16,
-        top: 16,
-      ),
-      child: Column(
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        height: Get.height * (_isFullScreen ? 0.95 : 0.7),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: EdgeInsets.only(
+          bottom: 16 + MediaQuery.of(context).padding.bottom + MediaQuery.of(context).viewInsets.bottom,
+          left: 16,
+          right: 16,
+          top: 16,
+        ),
+        child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
             _buildHeader(),
@@ -72,6 +74,7 @@ class _AdvancedSplitBottomSheetState extends State<AdvancedSplitBottomSheet> {
                   const Text("Thành viên tham gia", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                   TextButton(
                     onPressed: () {
+                      FocusScope.of(context).unfocus();
                       setState(() {
                         if (_selectedMemberIds.length == widget.controller.activeMembers.length) {
                           _selectedMemberIds.clear();
@@ -111,7 +114,8 @@ class _AdvancedSplitBottomSheetState extends State<AdvancedSplitBottomSheet> {
             ),
           ),
           const SizedBox(height: 16),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -226,6 +230,7 @@ class _AdvancedSplitBottomSheetState extends State<AdvancedSplitBottomSheet> {
     bool isSelected = _splitType == type;
     return GestureDetector(
       onTap: () {
+        FocusScope.of(context).unfocus();
         if (_splitType == type) return;
         setState(() {
           _splitType = type;
@@ -356,6 +361,7 @@ class _AdvancedSplitBottomSheetState extends State<AdvancedSplitBottomSheet> {
                     textAlign: TextAlign.right,
                     decoration: InputDecoration(
                       hintText: '0',
+                      hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
                       suffixText: _getSuffix(),
                       isDense: true,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),

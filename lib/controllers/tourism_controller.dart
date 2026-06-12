@@ -9,6 +9,8 @@ import 'package:get_storage/get_storage.dart';
 import 'package:latlong2/latlong.dart';
 import '../utils/toast_util.dart';
 
+enum MapMarkerStyle { dot, label, image }
+
 /// Controller thuần tuý: chỉ quản lý state + logic nghiệp vụ.
 /// Mọi UI (Dialog, BottomSheet, v.v.) phải nằm ở tầng Screen.
 class TourismController extends GetxController {
@@ -59,6 +61,7 @@ class TourismController extends GetxController {
   final LatLng defaultCenter = const LatLng(16.047079, 108.206230);
   final Rx<LatLng> currentCenter = const LatLng(16.047079, 108.206230).obs;
   final RxDouble  currentZoom   = 6.0.obs;
+  final Rx<MapMarkerStyle> markerStyle = MapMarkerStyle.dot.obs;
 
   late final RxString currentMapStyle;
 
@@ -73,6 +76,21 @@ class TourismController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+
+    // Theo dõi độ phóng thu để cập nhật kiểu marker tương ứng
+    ever(currentZoom, (double zoom) {
+      MapMarkerStyle newStyle;
+      if (zoom < 8.0) {
+        newStyle = MapMarkerStyle.dot;
+      } else if (zoom < 9.0) {
+        newStyle = MapMarkerStyle.label;
+      } else {
+        newStyle = MapMarkerStyle.image;
+      }
+      if (markerStyle.value != newStyle) {
+        markerStyle.value = newStyle;
+      }
+    });
 
     // Khôi phục style đã lưu
     final savedStyle = _storage.read<String>(_kMapStyle) ?? 'basic-v2';

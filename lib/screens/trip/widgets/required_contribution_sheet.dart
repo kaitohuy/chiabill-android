@@ -32,13 +32,11 @@ class _RequiredContributionSheetState extends State<RequiredContributionSheet> {
   @override
   void initState() {
     super.initState();
-    // Mặc định chọn tất cả mọi người trừ thủ quỹ. Nếu trip chỉ có 1 người (chính là thủ quỹ) thì chọn luôn thủ quỹ.
-    selectedUserIds = widget.members.length <= 1
-        ? widget.members.map((m) => m.user.id).toList()
-        : widget.members
-            .where((m) => m.user.id != widget.fundData.treasurer.id)
-            .map((m) => m.user.id)
-            .toList();
+    // Reset loading state
+    widget.fundController.isActionLoading.value = false;
+    
+    // Mặc định chọn tất cả mọi người bao gồm cả thủ quỹ.
+    selectedUserIds = widget.members.map((m) => m.user.id).toList();
 
     amountController = TextEditingController();
     notesController = TextEditingController(text: "Nộp quỹ");
@@ -53,18 +51,20 @@ class _RequiredContributionSheetState extends State<RequiredContributionSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Padding(
-        padding: EdgeInsets.only(
-          top: 24,
-          left: 24,
-          right: 24,
-          bottom: 24,
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
+        child: Padding(
+          padding: EdgeInsets.only(
+            top: 24,
+            left: 24,
+            right: 24,
+            bottom: 24 + MediaQuery.of(context).padding.bottom,
+          ),
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -87,6 +87,7 @@ class _RequiredContributionSheetState extends State<RequiredContributionSheet> {
                 ],
                 decoration: InputDecoration(
                   hintText: "VD: 100,000",
+                  hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
                   suffixText: "đ",
                   filled: true,
                   fillColor: Colors.grey[50],
@@ -104,6 +105,7 @@ class _RequiredContributionSheetState extends State<RequiredContributionSheet> {
                 controller: notesController,
                 decoration: InputDecoration(
                   hintText: "VD: Đợt thu đầu chuyến đi",
+                  hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
                   filled: true,
                   fillColor: Colors.grey[50],
                   border: OutlineInputBorder(
@@ -120,21 +122,17 @@ class _RequiredContributionSheetState extends State<RequiredContributionSheet> {
                   const Text("Ai phải đóng quỹ:", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
                   TextButton(
                     onPressed: () {
+                      FocusScope.of(context).unfocus();
                       setState(() {
-                        final nonTreasurerIds = widget.members
-                            .where((m) => m.user.id != widget.fundData.treasurer.id)
-                            .map((m) => m.user.id)
-                            .toList();
-
-                        if (selectedUserIds.length == nonTreasurerIds.length) {
+                        if (selectedUserIds.length == widget.members.length) {
                           selectedUserIds.clear();
                         } else {
                           selectedUserIds.clear();
-                          selectedUserIds.addAll(nonTreasurerIds);
+                          selectedUserIds.addAll(widget.members.map((m) => m.user.id));
                         }
                       });
                     },
-                    child: Text(selectedUserIds.length == widget.members.where((m) => m.user.id != widget.fundData.treasurer.id).length
+                    child: Text(selectedUserIds.length == widget.members.length
                         ? "Bỏ chọn tất cả"
                         : "Chọn tất cả"),
                   ),
@@ -156,41 +154,6 @@ class _RequiredContributionSheetState extends State<RequiredContributionSheet> {
                     final isChecked = selectedUserIds.contains(member.user.id);
                     final isTreasurer = member.user.id == widget.fundData.treasurer.id;
 
-                    if (isTreasurer) {
-                      return ListTile(
-                        leading: CircleAvatar(
-                          radius: 12,
-                          backgroundImage: member.user.avatarUrl != null
-                              ? NetworkImage(member.user.avatarUrl!)
-                              : null,
-                          child: member.user.avatarUrl == null
-                              ? Text(member.user.name?.substring(0, 1).toUpperCase() ?? "U", style: const TextStyle(fontSize: 10))
-                              : null,
-                        ),
-                        title: Row(
-                          children: [
-                            Expanded(child: Text(member.user.name ?? "Không tên")),
-                            Container(
-                              margin: const EdgeInsets.only(left: 8),
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: Colors.blue[50],
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text("Thủ quỹ", style: TextStyle(fontSize: 8, color: Colors.blue[800], fontWeight: FontWeight.bold)),
-                            ),
-                          ],
-                        ),
-                        trailing: const Padding(
-                          padding: EdgeInsets.only(right: 16),
-                          child: Text(
-                            "Tự động tham gia",
-                            style: TextStyle(color: Colors.green, fontSize: 12, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      );
-                    }
-
                     return CheckboxListTile(
                       activeColor: AppColors.primary,
                       title: Row(
@@ -206,10 +169,21 @@ class _RequiredContributionSheetState extends State<RequiredContributionSheet> {
                           ),
                           const SizedBox(width: 8),
                           Expanded(child: Text(member.user.name ?? "Không tên")),
+                          if (isTreasurer)
+                            Container(
+                              margin: const EdgeInsets.only(left: 8),
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.blue[50],
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text("Thủ quỹ", style: TextStyle(fontSize: 8, color: Colors.blue[800], fontWeight: FontWeight.bold)),
+                            ),
                         ],
                       ),
                       value: isChecked,
                       onChanged: (val) {
+                        FocusScope.of(context).unfocus();
                         setState(() {
                           if (val == true) {
                             if (!selectedUserIds.contains(member.user.id)) {
@@ -222,22 +196,6 @@ class _RequiredContributionSheetState extends State<RequiredContributionSheet> {
                       },
                     );
                   },
-                ),
-              ),
-              const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Row(
-                  children: [
-                    Icon(Icons.info_outline, size: 14, color: Colors.grey[600]),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        "Thủ quỹ (${widget.fundData.treasurer.name}) tự động tham gia đóng góp nên không cần tích chọn.",
-                        style: TextStyle(fontSize: 11, color: Colors.grey[600], fontStyle: FontStyle.italic),
-                      ),
-                    ),
-                  ],
                 ),
               ),
               const SizedBox(height: 24),
@@ -274,7 +232,7 @@ class _RequiredContributionSheetState extends State<RequiredContributionSheet> {
                             contributorIds: selectedUserIds,
                           );
                           if (ok) {
-                            Navigator.of(context).pop();
+                            Get.back();
                           }
                         },
                   child: widget.fundController.isActionLoading.value
@@ -285,7 +243,9 @@ class _RequiredContributionSheetState extends State<RequiredContributionSheet> {
                         ),
                 )),
               ),
-            ],
+                const SizedBox(height: 24),
+              ],
+            ),
           ),
         ),
       ),

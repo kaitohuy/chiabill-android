@@ -11,6 +11,7 @@ class UserResponse {
   final String? phone;         // THÊM MỚI
   final bool allowAutoAdd;
   final bool allowAutoApprovePayment;
+  final String? language;
 
   UserResponse({
     required this.id,
@@ -24,7 +25,8 @@ class UserResponse {
     this.phone,
     this.allowAutoAdd = true,
     this.allowAutoApprovePayment = true,
-    required this.paymentPriority
+    required this.paymentPriority,
+    this.language,
   });
 
   factory UserResponse.fromJson(Map<String, dynamic> json) {
@@ -41,6 +43,7 @@ class UserResponse {
       allowAutoAdd: json['allowAutoAdd'] as bool? ?? true,
       allowAutoApprovePayment: json['allowAutoApprovePayment'] as bool? ?? true,
       paymentPriority: json['paymentPriority'] as int? ?? 1,
+      language: json['language'] as String?,
     );
   }
 }

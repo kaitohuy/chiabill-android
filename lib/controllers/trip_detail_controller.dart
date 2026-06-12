@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:chiabill/utils/toast_util.dart';
 import 'package:chiabill/utils/export_helper.dart';
 import 'package:chiabill/controllers/profile_controller.dart';
@@ -14,6 +15,7 @@ import 'home_controller.dart';
 import 'trip_expense_controller.dart';
 import 'trip_settlement_controller.dart';
 import 'trip_history_controller.dart';
+import 'itinerary_controller.dart';
 import '../services/offline_sync_service.dart';
 
 class TripDetailController extends GetxController {
@@ -30,6 +32,8 @@ class TripDetailController extends GetxController {
   var activeInviteCode = "".obs;
   var isSharingInvite = false.obs;
 
+  Worker? _syncWorker;
+
   @override
   void onInit() {
     super.onInit();
@@ -37,9 +41,10 @@ class TripDetailController extends GetxController {
     Get.put(TripExpenseController(tripId), tag: tripId.toString());
     Get.put(TripSettlementController(tripId), tag: tripId.toString());
     Get.put(TripHistoryController(tripId), tag: tripId.toString());
+    Get.put(ItineraryController(tripId), tag: tripId.toString());
 
     if (Get.isRegistered<OfflineSyncService>()) {
-      ever(Get.find<OfflineSyncService>().syncTrigger, (_) {
+      _syncWorker = ever(Get.find<OfflineSyncService>().syncTrigger, (_) {
         if (!isClosed) fetchData(isSilent: true);
       });
     }
@@ -61,6 +66,9 @@ class TripDetailController extends GetxController {
     final res = await _tripService.activateMember(tripId, memberId);
     if (res.success) {
       await fetchTripDetail();
+      ToastUtil.showSuccess("Thành công", "Đã kích hoạt lại thành viên");
+    } else {
+      ToastUtil.showError("Lỗi", res.message ?? "Không thể kích hoạt lại thành viên");
     }
     isLoading.value = false;
   }
@@ -70,6 +78,9 @@ class TripDetailController extends GetxController {
     final res = await _tripService.disableMember(tripId, memberId);
     if (res.success) {
       await fetchTripDetail();
+      ToastUtil.showSuccess("Thành công", "Đã tạm ngưng thành viên");
+    } else {
+      ToastUtil.showError("Lỗi", res.message ?? "Không thể tạm ngưng thành viên");
     }
     isLoading.value = false;
   }
@@ -79,6 +90,9 @@ class TripDetailController extends GetxController {
     final res = await _tripService.kickMember(tripId, memberId, forgive);
     if (res.success) {
       await fetchTripDetail();
+      ToastUtil.showSuccess("Thành công", "Đã mời thành viên ra khỏi nhóm");
+    } else {
+      ToastUtil.showError("Lỗi", res.message ?? "Không thể xóa thành viên khỏi nhóm");
     }
     isLoading.value = false;
   }
@@ -87,9 +101,11 @@ class TripDetailController extends GetxController {
 
   @override
   void onClose() {
+    _syncWorker?.dispose();
     Get.delete<TripExpenseController>(tag: tripId.toString());
     Get.delete<TripSettlementController>(tag: tripId.toString());
     Get.delete<TripHistoryController>(tag: tripId.toString());
+    Get.delete<ItineraryController>(tag: tripId.toString());
     super.onClose();
   }
 
@@ -156,7 +172,7 @@ class TripDetailController extends GetxController {
     isSharingInvite.value = true;
     final String codeToShare = activeInviteCode.value;
     final String baseUrl = dotenv.env['BASE_URL'] ?? "";
-    final String shareText = 'Mời bạn tham gia nhóm trên ChiaBill:\n$baseUrl/join/$codeToShare';
+    final String shareText = 'Mời bạn tham gia nhóm trên DuliVie:\n$baseUrl/join/$codeToShare';
 
     try {
       await SharePlus.instance.share(ShareParams(text: shareText));
@@ -191,8 +207,15 @@ class TripDetailController extends GetxController {
     isAddingMember.value = false;
 
     if (result.success) {
+      FocusManager.instance.primaryFocus?.unfocus();
+
+      // Chờ bàn phím ẩn
+      await Future.delayed(const Duration(milliseconds: 150));
       Get.back();
-      ToastUtil.showSuccess("Thành công", "Đã thêm thành viên. Nhớ cập nhật khoản chi cũ nếu muốn họ gánh chung nhé!");
+
+      Future.delayed(const Duration(milliseconds: 300), () {
+        ToastUtil.showSuccess("Thành công", "Đã thêm thành viên. Nhớ cập nhật khoản chi cũ nếu muốn họ gánh chung nhé!");
+      });
       fetchData(isSilent: true);
     } else {
       ToastUtil.showError("Thất bại", result.message ?? "Không thể thêm");
@@ -207,6 +230,14 @@ class TripDetailController extends GetxController {
   }
 
   bool get isOwner => trip.value?.ownerId != null && trip.value?.ownerId == currentUserId;
+
+  bool get isCurrentUserDisabled {
+    if (trip.value == null) return false;
+    final uId = currentUserId;
+    if (uId == null) return false;
+    final member = trip.value!.members?.firstWhereOrNull((m) => m.id == uId);
+    return member?.status == 'DISABLED';
+  }
 
   Future<void> leaveTrip() async {
     if (Get.isDialogOpen == true) Get.back();

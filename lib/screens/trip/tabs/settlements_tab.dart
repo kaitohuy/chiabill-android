@@ -49,10 +49,18 @@ class _SettlementsTabState extends State<SettlementsTab> with AutomaticKeepAlive
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: TextField(
               onChanged: (val) => controller.searchQuery.value = val,
+              textAlignVertical: TextAlignVertical.center,
               decoration: InputDecoration(
                 hintText: "Tìm theo tên thành viên...",
-                prefixIcon: const Icon(Icons.search, size: 20),
-                contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                prefixIcon: const Padding(
+                  padding: EdgeInsets.only(left: 12, right: 8),
+                  child: Icon(Icons.search, size: 20),
+                ),
+                prefixIconConstraints: const BoxConstraints(
+                  minWidth: 40,
+                  minHeight: 24,
+                ),
+                contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide(color: Colors.grey.shade300)),
                 enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide(color: Colors.grey.shade200)),
                 focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide(color: AppColors.primary)),
@@ -173,6 +181,7 @@ class _SettlementsTabState extends State<SettlementsTab> with AutomaticKeepAlive
                           child: InkWell(
                             borderRadius: BorderRadius.circular(12),
                             onTap: () {
+                              if (Get.isBottomSheetOpen == true) return;
                               Get.bottomSheet(
                                 BalanceDetailBottomSheet(
                                   tripId: widget.mainController.tripId,
@@ -299,6 +308,7 @@ class _SettlementsTabState extends State<SettlementsTab> with AutomaticKeepAlive
           ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
               onPressed: () {
+                if (Get.isBottomSheetOpen == true) return;
                 Get.bottomSheet(
                     CreatePaymentBottomSheet(tripId: controller.tripId, settlement: settle),
                     isScrollControlled: true

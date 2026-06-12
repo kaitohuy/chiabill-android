@@ -71,7 +71,7 @@ class _DebtBannerState extends State<DebtBanner> {
                           ),
                           child: Icon(
                             Icons.account_balance_wallet_rounded,
-                            size: 16,
+                            size: 18,
                             color: AppColors.primary,
                           ),
                         ),
@@ -79,7 +79,7 @@ class _DebtBannerState extends State<DebtBanner> {
                         Text(
                           "Tổng quan số dư nợ",
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: 15,
                             fontWeight: FontWeight.bold,
                             color: Colors.grey.shade800,
                           ),
@@ -92,7 +92,7 @@ class _DebtBannerState extends State<DebtBanner> {
                           Text(
                             "Nợ: -${CurrencyUtils.formatNumber(owe)}đ | Thu: +${CurrencyUtils.formatNumber(receive)}đ",
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: 12,
                               fontWeight: FontWeight.bold,
                               color: Colors.grey.shade700,
                             ),
@@ -146,8 +146,8 @@ class _DebtBannerState extends State<DebtBanner> {
                                 Text(
                                   "Bạn nợ",
                                   style: TextStyle(
-                                    fontSize: 11,
-                                    color: Colors.grey.shade500,
+                                    fontSize: 14,
+                                    color: Colors.grey.shade600,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -173,7 +173,7 @@ class _DebtBannerState extends State<DebtBanner> {
                     Container(
                       height: 28,
                       width: 1,
-                      color: Colors.grey.shade200,
+                      color: Colors.grey.shade400,
                       margin: const EdgeInsets.symmetric(horizontal: 12),
                     ),
 
@@ -201,8 +201,8 @@ class _DebtBannerState extends State<DebtBanner> {
                                 Text(
                                   "Bạn được trả",
                                   style: TextStyle(
-                                    fontSize: 11,
-                                    color: Colors.grey.shade500,
+                                    fontSize: 14,
+                                    color: Colors.grey.shade600,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),

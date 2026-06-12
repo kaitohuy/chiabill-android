@@ -67,9 +67,8 @@ class _StatsTabState extends State<StatsTab> {
                       "${CurrencyUtils.formatNumber(totalSpent)} đ",
                       style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: progressColor == Colors.red ? Colors.red : Colors.black87)
                   ),
-                  const SizedBox(height: 20),
-
                   if (budget != null && budget > 0) ...[
+                    const SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -98,8 +97,6 @@ class _StatsTabState extends State<StatsTab> {
                         padding: const EdgeInsets.only(top: 8.0),
                         child: Text("⚠️ Bạn đã chi tiêu lố ngân sách ${CurrencyUtils.formatNumber(totalSpent - budget)} đ", style: const TextStyle(color: Colors.red, fontSize: 12, fontStyle: FontStyle.italic)),
                       )
-                  ] else ...[
-                    Text("💡 Thêm ngân sách trong phần Sửa chuyến đi để theo dõi tốt hơn.", style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontStyle: FontStyle.italic)),
                   ]
                 ],
               ),

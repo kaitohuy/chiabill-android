@@ -11,16 +11,21 @@ class QuoteMarquee extends StatefulWidget {
 
 class _QuoteMarqueeState extends State<QuoteMarquee> {
   final List<String> _quotes = [
-    "Chia bill đều, sẽ có chill travel!",
-    "Tiền bạc phân minh, nghĩa tình bền vững!",
-    "Tình bạn đẹp nhất là không phải đòi tiền nhiều lần",
-    "Tiền không tự sinh ra cũng không tự mất đi, nó chỉ chuyển từ ví người này sang ví người khác!",
-    "Hạnh phúc là khi đi chơi xa và tất cả các hóa đơn đều được chia đều tự động!",
-    "Chia sẻ niềm vui, san sẻ gánh nặng",
-    "Less math, more memories",
-    "Không cần đại gia, chỉ cần bạn bè chịu chuyển khoản",
-    "Chúng ta còn trẻ, còn khỏe và còn nợ nhau vài bữa",
-    "Lịch sử sẽ ghi nhớ chúng ta, còn ví tiền sẽ ghi nhớ bao nhiêu",
+    "Đi cùng nhau, nhớ cùng nhau.",
+    "Mỗi chuyến đi là một câu chuyện để kể lại.",
+    "DuliVie - lưu giữ hành trình, tiền bạc phân minh.",
+    "Bạn bè tốt làm chuyến đi vui hơn.",
+    "Less bills, more memories.",
+    "Đi xa cùng nhau, gần nhau hơn.",
+    "Mọi hành trình tuyệt vời đều bắt đầu từ một kế hoạch.",
+    "Khám phá thế giới, chia sẻ khoảnh khắc.",
+    "Đi để trải nghiệm, không phải để tính toán.",
+    "Những bức ảnh rồi sẽ cũ, kỷ niệm thì không.",
+    "Cuộc sống là những chuyến đi chưa bắt đầu.",
+    "Mỗi địa điểm đều có một câu chuyện riêng.",
+    "Hành lý có thể nặng, nhưng kỷ niệm luôn đáng mang theo.",
+    "Đi một mình để khám phá, đi cùng nhau để tận hưởng.",
+    "Không phải điểm đến, mà là những người đồng hành.",
   ];
 
   final TextStyle _textStyle = TextStyle(

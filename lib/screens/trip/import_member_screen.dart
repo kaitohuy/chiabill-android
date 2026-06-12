@@ -165,7 +165,7 @@ class ImportMemberScreen extends StatelessWidget {
         if (controller.selectedTripId.value == null || controller.availableMembers.isEmpty) return const SizedBox.shrink();
         
         return Container(
-          padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 16),
+          padding: EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 16 + MediaQuery.of(context).padding.bottom),
           decoration: BoxDecoration(
             color: Colors.white,
             boxShadow: [BoxShadow(color: Colors.black.withValues(alpha:0.05), blurRadius: 10, offset: const Offset(0, -5))]
@@ -193,7 +193,7 @@ class ImportMemberScreen extends StatelessWidget {
   void _showTripSelectionBottomSheet(BuildContext context, ImportMemberController controller) {
     Get.bottomSheet(
       Container(
-        padding: const EdgeInsets.only(top: 24, bottom: 24),
+        padding: EdgeInsets.only(top: 24, bottom: 24 + MediaQuery.of(context).padding.bottom),
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),

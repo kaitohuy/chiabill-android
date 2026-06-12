@@ -12,6 +12,7 @@ import 'widgets/debt_banner.dart';
 import 'widgets/join_trip_dialog.dart';
 import 'widgets/trip_card.dart';
 import 'widgets/trip_gallery_card.dart';
+import '../../controllers/user_guide_controller.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -140,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                     Text(
                       "Chào $shortName",
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 16,
                         color: AppColors.primaryDark,
                         fontWeight: FontWeight.bold,
                       ),
@@ -158,6 +159,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
         elevation: 0,
         actions: [
           IconButton(
+            key: Get.find<UserGuideController>().joinTripKey,
             onPressed: () => JoinTripDialog.show(context),
             icon: Image.asset(
               'assets/images/join_trip.gif',
@@ -167,6 +169,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
             ),
           ),
           IconButton(
+            key: Get.find<UserGuideController>().calculatorKey,
             onPressed: () => Get.toNamed(Routes.CALCULATOR),
             icon: Image.asset(
               'assets/images/calculator.png',
@@ -176,6 +179,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
             ),
           ),
           IconButton(
+            key: Get.find<UserGuideController>().bellKey,
             icon: Obx(() => Badge(
               isLabelVisible: notifController.unreadCount.value > 0,
               label: Text(notifController.unreadCount.value.toString()),
@@ -279,12 +283,20 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
               ),
               child: TextField(
                 controller: searchController,
+                textAlignVertical: TextAlignVertical.center,
                 decoration: InputDecoration(
                   hintText: "Tìm chuyến đi...",
                   hintStyle: TextStyle(color: Colors.grey[500], fontSize: 14),
-                  prefixIcon: Icon(Icons.search, color: Colors.grey[600], size: 20),
+                  prefixIcon: const Padding(
+                    padding: EdgeInsets.only(left: 12, right: 8),
+                    child: Icon(Icons.search, color: Colors.grey, size: 20),
+                  ),
+                  prefixIconConstraints: const BoxConstraints(
+                    minWidth: 40,
+                    minHeight: 24,
+                  ),
                   border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 10),
                 ),
                 onChanged: (val) {
                    if (val.isNotEmpty && controller.filterMode.value != 'Tất cả') {

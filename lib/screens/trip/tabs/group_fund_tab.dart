@@ -83,8 +83,8 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
       }
 
       if (!fundController.isFundActivated.value) {
-        // Giao diện Quỹ chưa được kích hoạt
-        return _buildUnactivatedView();
+        // Nếu chưa kích hoạt Quỹ chung, hiển thị màn hình Thống kê kèm banner kích hoạt quỹ chung
+        return _buildStatsTab(showActivateBanner: true);
       }
 
       final fundData = fundController.fund.value;
@@ -128,68 +128,13 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
     });
   }
 
-  // ==========================================
-  // UNACTIVATED VIEW (KÍCH HOẠT QUỸ CHUNG)
-  // ==========================================
-  Widget _buildUnactivatedView() {
-    final members = widget.mainController.trip.value?.members ?? [];
-    UserResponse? selectedTreasurer;
-    if (Get.isRegistered<ProfileController>()) {
-      selectedTreasurer = Get.find<ProfileController>().user.value;
-    }
-    final alertController = TextEditingController(text: "200000");
-
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.wallet, size: 80, color: AppColors.primary),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              "Quỹ chung chưa kích hoạt",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              "Quỹ chung giúp cả nhóm thu tiền bắt buộc định kỳ hoặc nhận đóng góp tự nguyện của mọi người để thanh toán các khoản chi tiêu chung nhanh chóng.",
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey, fontSize: 14, height: 1.4),
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                elevation: 2,
-              ),
-              icon: const Icon(Icons.flash_on),
-              label: const Text("KÍCH HOẠT NGAY", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white)),
-              onPressed: () {
-                _showActivateBottomSheet(members, selectedTreasurer, alertController);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   void _showActivateBottomSheet(
     List<TripMemberResponse> members,
     UserResponse? selectedTreasurer,
     TextEditingController alertController,
   ) {
+    if (Get.isBottomSheetOpen == true || Get.isDialogOpen == true) return;
     Get.bottomSheet(
       FundSettingsSheet(
         members: members,
@@ -283,7 +228,28 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text("Yêu cầu nộp quỹ đang chờ", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                Text("${groupedPending.length} người", style: const TextStyle(fontSize: 13, color: Colors.grey)),
+                Row(
+                  children: [
+                    Text("${groupedPending.length} người", style: const TextStyle(fontSize: 13, color: Colors.grey)),
+                    if (showAdminActions && groupedPending.isNotEmpty) ...[
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: () => _showConfirmAllContributionsDialog(groupedPending),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Text(
+                            "Xác nhận tất cả",
+                            style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -425,7 +391,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
 
   Widget _buildBalanceCard(FundResponse fundData) {
     final alertThreshold = fundData.alertThreshold ?? 0.0;
-    final isLowBalance = fundData.balance <= alertThreshold;
+    final isLowBalance = alertThreshold > 0 && fundData.balance < alertThreshold;
 
     return Container(
       width: double.infinity,
@@ -564,6 +530,8 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
   }
 
   void _showChangeTreasurerSheet(FundResponse fundData) {
+    if (Get.isBottomSheetOpen == true || Get.isDialogOpen == true) return;
+    fundController.isActionLoading.value = false;
     final members = widget.mainController.trip.value?.members ?? [];
     int selectedNewTreasurerId = fundData.treasurer.id;
 
@@ -574,7 +542,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
             top: 24,
             left: 24,
             right: 24,
-            bottom: 24,
+            bottom: 24 + MediaQuery.of(context).padding.bottom,
           ),
           decoration: const BoxDecoration(
             color: Colors.white,
@@ -676,6 +644,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
   }
 
   void _showCreateRequiredContributionSheet(FundResponse fundData) {
+    if (Get.isBottomSheetOpen == true || Get.isDialogOpen == true) return;
     final members = widget.mainController.trip.value?.members ?? [];
     Get.bottomSheet(
       RequiredContributionSheet(
@@ -688,6 +657,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
   }
 
   void _showConfirmMultipleContributionsDialog(GroupedContribution item) {
+    if (Get.isBottomSheetOpen == true || Get.isDialogOpen == true) return;
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -721,6 +691,50 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
             child: fundController.isActionLoading.value
                 ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                 : const Text("XÁC NHẬN"),
+          )),
+        ],
+      ),
+    );
+  }
+
+  void _showConfirmAllContributionsDialog(List<GroupedContribution> allPending) {
+    if (Get.isBottomSheetOpen == true || Get.isDialogOpen == true) return;
+    final int totalPeople = allPending.length;
+    final double totalAmount = allPending.fold(0.0, (sum, g) => sum + g.totalAmount);
+    final List<int> allIds = allPending.expand((g) => g.contributionIds).toList();
+
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text("Xác nhận tất cả", style: TextStyle(fontWeight: FontWeight.bold)),
+        content: Text(
+          "Xác nhận tất cả $totalPeople thành viên đã nộp quỹ?\n\nTổng số tiền: ${CurrencyUtils.formatNumber(totalAmount)} đ\n\nSau khi xác nhận, số dư quỹ sẽ được cộng và công nợ của các thành viên sẽ được xoá bỏ.",
+          style: const TextStyle(fontSize: 14, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("HỦY", style: TextStyle(color: Colors.grey)),
+          ),
+          Obx(() => ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            onPressed: fundController.isActionLoading.value
+                ? null
+                : () async {
+                    if (fundController.isActionLoading.value) return;
+                    FocusScope.of(context).unfocus();
+                    final ok = await fundController.confirmMultipleContributions(allIds);
+                    if (ok) {
+                      Navigator.of(context).pop();
+                    }
+                  },
+            child: fundController.isActionLoading.value
+                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                : const Text("XÁC NHẬN TẤT CẢ"),
           )),
         ],
       ),
@@ -965,6 +979,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
   }
 
   void _showCreateVoluntaryContributionSheet() {
+    if (Get.isBottomSheetOpen == true || Get.isDialogOpen == true) return;
     Get.bottomSheet(
       VoluntaryContributionSheet(
         fundController: fundController,
@@ -976,7 +991,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
   // ==========================================
   // TAB 3: THỐNG KÊ (STATS TAB TÁI SỬ DỤNG)
   // ==========================================
-  Widget _buildStatsTab() {
+  Widget _buildStatsTab({bool showActivateBanner = false}) {
     final String tag = widget.mainController.tripId.toString();
     
     // Tìm TripExpenseController. Nếu chưa có, chúng ta khởi tạo nó.
@@ -988,15 +1003,94 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
     }
 
     return Obx(() {
-      if (expenseController.categoryStats.isEmpty && expenseController.expenses.isEmpty) {
-        return const Center(
-          child: Padding(
-            padding: EdgeInsets.all(24.0),
-            child: Text(
-              "Chưa có dữ liệu chi tiêu để thống kê.\nHãy thêm chi phí trước nhé!",
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey, height: 1.4),
+      final hasNoData = expenseController.categoryStats.isEmpty && expenseController.expenses.isEmpty;
+
+      // Banner kích hoạt quỹ chung (được vẽ nếu showActivateBanner là true)
+      Widget? activateBanner;
+      if (showActivateBanner) {
+        final members = widget.mainController.trip.value?.members ?? [];
+        UserResponse? selectedTreasurer;
+        if (Get.isRegistered<ProfileController>()) {
+          selectedTreasurer = Get.find<ProfileController>().user.value;
+        }
+        final alertController = TextEditingController(text: "200000");
+
+        activateBanner = Container(
+          width: double.infinity,
+          margin: const EdgeInsets.only(bottom: 20),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [AppColors.primary.withValues(alpha: 0.08), AppColors.primary.withValues(alpha: 0.02)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.wallet, size: 20, color: AppColors.primary),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    "Tính năng Quỹ chung",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "Đóng quỹ bắt buộc định kỳ và quyên góp tự nguyện giúp cả nhóm chi tiêu chung tiện lợi hơn.",
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 12, height: 1.4),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    elevation: 0,
+                  ),
+                  icon: const Icon(Icons.flash_on, size: 16, color: Colors.white),
+                  label: const Text("KÍCH HOẠT QUỸ CHUNG", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white)),
+                  onPressed: () {
+                    _showActivateBottomSheet(members, selectedTreasurer, alertController);
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+
+      if (hasNoData) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              if (activateBanner != null) activateBanner,
+              const SizedBox(height: 40),
+              const Center(
+                child: Text(
+                  "Chưa có dữ liệu chi tiêu để thống kê.\nHãy thêm chi phí trước nhé!",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey, height: 1.4),
+                ),
+              ),
+            ],
           ),
         );
       }
@@ -1021,6 +1115,8 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (activateBanner != null) activateBanner,
+
             // Card Tổng chi tiêu
             Container(
               width: double.infinity,
@@ -1040,9 +1136,9 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                     "${CurrencyUtils.formatNumber(totalSpent)} đ",
                     style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: progressColor == Colors.red ? Colors.red : Colors.black87)
                   ),
-                  const SizedBox(height: 16),
 
                   if (budget != null && budget > 0) ...[
+                    const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -1071,8 +1167,6 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                         padding: const EdgeInsets.only(top: 8.0),
                         child: Text("⚠️ Bạn đã chi tiêu lố ngân sách ${CurrencyUtils.formatNumber(totalSpent - budget)} đ", style: const TextStyle(color: Colors.red, fontSize: 12, fontStyle: FontStyle.italic)),
                       )
-                  ] else ...[
-                    Text("💡 Thêm ngân sách trong phần Sửa chuyến đi để theo dõi tốt hơn.", style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontStyle: FontStyle.italic)),
                   ]
                 ],
               ),

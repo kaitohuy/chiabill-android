@@ -47,7 +47,7 @@ class WelcomeScreen extends StatelessWidget {
                 // 2. TÊN APP (Xuất hiện trễ hơn Logo một chút)
                 // ==========================================
                 Text(
-                  "Chill Travel",
+                  "DuliVie",
                   style: TextStyle(
                     fontSize: 42,
                     fontWeight: FontWeight.w900,
@@ -65,7 +65,7 @@ class WelcomeScreen extends StatelessWidget {
                 // 3. SLOGAN (Xuất hiện nối tiếp Tên App)
                 // ==========================================
                 const Text(
-                  "Chia bill đều,\n sẽ có chill travel!",
+                  "Du lịch trọng nghĩa trọng tình,\n Lưu giữ hành trình, tiền bạc phân minh!",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 18,

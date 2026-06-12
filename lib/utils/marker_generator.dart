@@ -222,11 +222,28 @@ class MarkerGenerator {
 
   static final Map<String, ui.Image> _imageCache = {};
 
+  static void clearCache() {
+    for (var img in _imageCache.values) {
+      try {
+        img.dispose();
+      } catch (_) {}
+    }
+    _imageCache.clear();
+  }
+
   static Future<ui.Image?> _loadNetworkImage(String path) async {
     if (_imageCache.containsKey(path)) {
       return _imageCache[path];
     }
     try {
+      if (_imageCache.length >= 50) {
+        final firstKey = _imageCache.keys.first;
+        final oldImg = _imageCache.remove(firstKey);
+        try {
+          oldImg?.dispose();
+        } catch (_) {}
+      }
+
       final HttpClient httpClient = HttpClient();
       final Uri uri = Uri.base.resolve(path);
       final HttpClientRequest request = await httpClient.getUrl(uri);

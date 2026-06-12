@@ -97,7 +97,7 @@ class _ColumnMatchingSheetState extends State<ColumnMatchingSheet> {
         left: 20,
         right: 20,
         top: 24,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+        bottom: 24 + MediaQuery.of(context).padding.bottom + MediaQuery.of(context).viewInsets.bottom,
       ),
       decoration: const BoxDecoration(
         color: Colors.white,

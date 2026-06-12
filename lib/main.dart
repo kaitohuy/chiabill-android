@@ -11,6 +11,7 @@ import 'utils/app_links_util.dart';
 import 'services/offline_sync_service.dart';
 import 'services/alarm_service.dart';
 import 'utils/storage_util.dart';
+import 'controllers/user_guide_controller.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -37,21 +38,21 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Cấu hình thanh điều hướng và thanh trạng thái
+  // Đảm bảo app vẽ tràn màn hình (Edge-to-Edge) trước
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
+  // Cấu hình thanh điều hướng và thanh trạng thái sau
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
-      systemNavigationBarColor: Colors.transparent, // Nền thanh 3 nút trong suốt
+      systemNavigationBarColor: Colors.white, // Đặt màu trắng để hệ thống kích hoạt nút màu tối (xám/đen)
       systemNavigationBarDividerColor: Colors.transparent,
-      systemNavigationBarIconBrightness: Brightness.dark, // Màu của 3 nút (đen/xám)
-      systemNavigationBarContrastEnforced: false, // Tắt ép buộc độ tương phản (để trong suốt hoàn toàn)
-      statusBarColor: Colors.transparent, // Thanh trạng thái pin/sóng cũng trong suốt luôn
+      systemNavigationBarIconBrightness: Brightness.dark, // Màu của 3 nút tối màu (đen/xám)
+      systemNavigationBarContrastEnforced: false, // Tắt ép buộc độ tương phản
+      statusBarColor: Colors.transparent, // Thanh trạng thái trong suốt
       statusBarIconBrightness: Brightness.dark,
       systemStatusBarContrastEnforced: false,
     ),
   );
-
-  // Đảm bảo app vẽ tràn màn hình (Edge-to-Edge)
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   // Khởi chạy song song (đồng thời) các tác vụ bất đồng bộ nặng lúc khởi động để tối đa hóa hiệu năng luồng
   await Future.wait([
@@ -78,6 +79,7 @@ void main() async {
   Get.put(AppLinksService(), permanent: true);
   final themeController = Get.put(ThemeController(), permanent: true);
   Get.put(OfflineSyncService(), permanent: true);
+  Get.put(UserGuideController(), permanent: true);
   
   runApp(MyApp(themeController: themeController));
 }
@@ -94,19 +96,26 @@ class MyApp extends StatelessWidget {
     final hasToken = token != null && token.toString().isNotEmpty;
 
     return GetMaterialApp(
-      title: 'Chia Bill',
+      title: 'DuliVie',
       debugShowCheckedModeBanner: false,
       theme: themeController.getThemeData(),
       initialRoute: hasToken ? Routes.MAIN : Routes.WELCOME,
       getPages: AppPages.routes,
       builder: (context, child) {
-        return GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () {
-            FocusManager.instance.primaryFocus?.unfocus();
-          },
-          child: child,
-        );
+        return Obx(() {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: TextScaler.linear(themeController.textScale.value),
+            ),
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: () {
+                FocusManager.instance.primaryFocus?.unfocus();
+              },
+              child: child,
+            ),
+          );
+        });
       },
     );
   }

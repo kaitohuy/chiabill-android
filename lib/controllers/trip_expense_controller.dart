@@ -7,6 +7,7 @@ import '../data/models/category_stat_response.dart';
 import '../services/expense_service.dart';
 import '../services/offline_sync_service.dart';
 import 'trip_detail_controller.dart'; // Để trigger reload nếu cần
+import 'trip_settlement_controller.dart';
 
 class TripExpenseController extends GetxController {
   final int tripId;
@@ -156,6 +157,11 @@ class TripExpenseController extends GetxController {
       // Update Main Trip Detail
       if (Get.isRegistered<TripDetailController>(tag: tripId.toString())) {
         Get.find<TripDetailController>(tag: tripId.toString()).fetchTripDetail();
+      }
+      
+      // Reload Settlements (Nợ nần)
+      if (Get.isRegistered<TripSettlementController>(tag: tripId.toString())) {
+        Get.find<TripSettlementController>(tag: tripId.toString()).fetchSettlements();
       }
     } else {
       ToastUtil.showError("Lỗi", result.message ?? "Không thể xóa");

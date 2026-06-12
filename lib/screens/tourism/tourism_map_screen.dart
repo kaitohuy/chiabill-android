@@ -6,6 +6,8 @@ import 'widgets/tourism_map_view.dart';
 import 'widgets/tourism_gallery_view.dart';
 import 'create_place_screen.dart';
 import 'dart:async';
+import '../../controllers/user_guide_controller.dart';
+import '../../widgets/user_guide_overlay.dart';
 
 class TourismMapScreen extends StatefulWidget {
   const TourismMapScreen({super.key});
@@ -27,14 +29,9 @@ class _TourismMapScreenState extends State<TourismMapScreen> with AutomaticKeepA
   void initState() {
     super.initState();
     
-    // Kiểm tra ngay khi khởi tạo xem có cần hiện thông báo không
+    // Kiểm tra ngay khi khởi tạo xem có cần hiện hướng dẫn không
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (controller.shouldShowMaptilerNotice.value) {
-        _showMaptilerNoticeDialog();
-      }
-      if (controller.shouldShowGoogleMapsNotice.value) {
-        _showGoogleMapsNoticeDialog();
-      }
+      _checkAndShowTourismGuide();
     });
 
     // Lắng nghe thay đổi flag từ Controller cho các lần toggle sau
@@ -53,6 +50,82 @@ class _TourismMapScreenState extends State<TourismMapScreen> with AutomaticKeepA
         });
       }
     });
+  }
+
+  void _checkAndShowTourismGuide() {
+    final userGuideController = Get.find<UserGuideController>();
+    if (userGuideController.guideTourismEnabled.value) {
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        if (!mounted) return;
+        _startTourismGuide(userGuideController);
+      });
+    } else {
+      _checkAndShowMapNotices();
+    }
+  }
+
+  void _checkAndShowMapNotices() {
+    if (controller.shouldShowMaptilerNotice.value) {
+      _showMaptilerNoticeDialog();
+    } else if (controller.shouldShowGoogleMapsNotice.value) {
+      _showGoogleMapsNoticeDialog();
+    }
+  }
+
+  void _startTourismGuide(UserGuideController userGuideController) {
+    if (!mounted) return;
+
+    final targets = [
+      GuideTarget(
+        key: userGuideController.searchPlaceKey,
+        title: "Tìm kiếm địa điểm",
+        description: "Nhập tên địa danh, thành phố hoặc danh thắng du lịch bạn muốn khám phá.",
+        isCircle: false,
+      ),
+      GuideTarget(
+        key: userGuideController.filterCategoryKey,
+        title: "Lọc theo danh mục",
+        description: "Lọc nhanh các địa điểm xung quanh theo thể loại như: bãi biển, núi non, quán cafe, cắm trại,...",
+        isCircle: true,
+      ),
+      GuideTarget(
+        key: userGuideController.toggleMapKey,
+        title: "Đổi chế độ xem",
+        description: "Chuyển đổi linh hoạt giữa giao diện Bản đồ trực quan và Bộ sưu tập ảnh lưới địa điểm.",
+        isCircle: false,
+      ),
+      GuideTarget(
+        key: userGuideController.mapProviderToggleKey,
+        title: "Đổi nhà cung cấp Bản đồ",
+        description: "Chuyển đổi nhanh giữa bản đồ vector mặc định (Flutter Map) và bản đồ vệ tinh độ nét cao (Google Maps).",
+        isCircle: true,
+      ),
+      GuideTarget(
+        key: userGuideController.mapLayersKey,
+        title: "Lớp giao diện Bản đồ",
+        description: "Chọn các kiểu hiển thị bản đồ khác nhau như: Ngoài trời, Địa hình topo, Phong cách vẽ màu nước, Tối giản...",
+        isCircle: true,
+      ),
+      GuideTarget(
+        key: userGuideController.pinNewPlaceKey,
+        title: "Ghim địa điểm mới",
+        description: "Đóng góp và ghim thêm một địa điểm du lịch, vui chơi mới chưa có trên hệ thống của Chiabill.",
+        isCircle: true,
+      ),
+    ];
+
+    UserGuideOverlay.show(
+      context,
+      targets: targets,
+      onCompleted: () {
+        userGuideController.setGuideEnabled('tourism', false);
+        _checkAndShowMapNotices();
+      },
+      onDismissed: () {
+        userGuideController.setGuideEnabled('tourism', false);
+        _checkAndShowMapNotices();
+      },
+    );
   }
 
   @override
@@ -332,6 +405,7 @@ class _TourismMapScreenState extends State<TourismMapScreen> with AutomaticKeepA
                       children: [
                         Expanded(
                           child: Container(
+                            key: Get.find<UserGuideController>().searchPlaceKey,
                             height: 44,
                             decoration: BoxDecoration(
                               color: Colors.white,
@@ -343,10 +417,18 @@ class _TourismMapScreenState extends State<TourismMapScreen> with AutomaticKeepA
                             child: TextField(
                               controller: controller.searchController,
                               onChanged: _onSearchChanged,
+                              textAlignVertical: TextAlignVertical.center,
                               decoration: InputDecoration(
                                 hintText: "Tìm kiếm địa điểm du lịch...",
                                 hintStyle: TextStyle(color: Colors.grey[500], fontSize: 14),
-                                prefixIcon: const Icon(Icons.search, color: Colors.grey, size: 20),
+                                prefixIcon: const Padding(
+                                  padding: EdgeInsets.only(left: 12, right: 8),
+                                  child: Icon(Icons.search, color: Colors.grey, size: 20),
+                                ),
+                                prefixIconConstraints: const BoxConstraints(
+                                  minWidth: 40,
+                                  minHeight: 24,
+                                ),
                                 suffixIcon: ValueListenableBuilder<TextEditingValue>(
                                   valueListenable: controller.searchController,
                                   builder: (context, value, child) {
@@ -363,13 +445,14 @@ class _TourismMapScreenState extends State<TourismMapScreen> with AutomaticKeepA
                                   },
                                 ),
                                 border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
+                                contentPadding: const EdgeInsets.symmetric(vertical: 10),
                               ),
                             ),
                           ),
                         ),
                         const SizedBox(width: 12),
                         GestureDetector(
+                          key: Get.find<UserGuideController>().filterCategoryKey,
                           onTap: _showCategoryFilterBottomSheet,
                           child: Obx(() {
                             final bool isFiltering = controller.selectedCategory.value != 'Tất cả';
@@ -394,6 +477,7 @@ class _TourismMapScreenState extends State<TourismMapScreen> with AutomaticKeepA
                         const SizedBox(width: 12),
                         // Toggle Map / Gallery Capsule
                         Obx(() => GestureDetector(
+                          key: Get.find<UserGuideController>().toggleMapKey,
                           onTap: () => controller.isMapView.value = !controller.isMapView.value,
                           child: Container(
                             width: 64,

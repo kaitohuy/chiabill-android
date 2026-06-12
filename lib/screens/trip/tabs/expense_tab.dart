@@ -42,10 +42,18 @@ class _ExpensesTabState extends State<ExpensesTab> with AutomaticKeepAliveClient
               Expanded(
                 child: TextField(
                   onChanged: (value) => controller.applyExpenseFilter(keyword: value),
+                  textAlignVertical: TextAlignVertical.center,
                   decoration: InputDecoration(
                       hintText: "Tìm chi phí...",
-                      prefixIcon: Icon(Icons.search, color: Colors.grey, size: 20),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                      prefixIcon: const Padding(
+                        padding: EdgeInsets.only(left: 12, right: 8),
+                        child: Icon(Icons.search, color: Colors.grey, size: 20),
+                      ),
+                      prefixIconConstraints: const BoxConstraints(
+                        minWidth: 40,
+                        minHeight: 24,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 10),
                       filled: true,
                       fillColor: Colors.grey.shade100,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none)
@@ -108,6 +116,16 @@ class _ExpensesTabState extends State<ExpensesTab> with AutomaticKeepAliveClient
           child: GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTap: () => UIUtil.smartTap(context, () {
+              if (widget.mainController.isCurrentUserDisabled) {
+                Get.snackbar(
+                  "Thông báo",
+                  "Bạn đã bị tạm ngưng hoạt động trong chuyến đi này, không thể thực hiện thao tác này.",
+                  backgroundColor: Colors.redAccent,
+                  colorText: Colors.white,
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+                return;
+              }
               if (widget.mainController.trip.value != null && controller.expenses.isEmpty) {
                 const tag = 'add_bg';
                 final addController = Get.put(
@@ -180,6 +198,17 @@ class _ExpensesTabState extends State<ExpensesTab> with AutomaticKeepAliveClient
                           child: InkWell(
                             borderRadius: BorderRadius.circular(16),
                             onTap: () {
+                              if (Get.isBottomSheetOpen == true || Get.isDialogOpen == true) return;
+                              if (widget.mainController.isCurrentUserDisabled) {
+                                Get.snackbar(
+                                  "Thông báo",
+                                  "Bạn đã bị tạm ngưng hoạt động trong chuyến đi này, không thể thực hiện thao tác này.",
+                                  backgroundColor: Colors.redAccent,
+                                  colorText: Colors.white,
+                                  snackPosition: SnackPosition.BOTTOM,
+                                );
+                                return;
+                              }
                               final tag = 'edit_${expense.id}';
                               // Khởi tạo controller đềEđây thay vì bên trong build của BottomSheet
                               final addController = Get.put(
@@ -196,7 +225,19 @@ class _ExpensesTabState extends State<ExpensesTab> with AutomaticKeepAliveClient
                                   isScrollControlled: true
                               );
                             },
-                            onLongPress: () => _showDeleteConfirmDialog(context, controller, expense.id),
+                            onLongPress: () {
+                              if (widget.mainController.isCurrentUserDisabled) {
+                                Get.snackbar(
+                                  "Thông báo",
+                                  "Bạn đã bị tạm ngưng hoạt động trong chuyến đi này, không thể thực hiện thao tác này.",
+                                  backgroundColor: Colors.redAccent,
+                                  colorText: Colors.white,
+                                  snackPosition: SnackPosition.BOTTOM,
+                                );
+                                return;
+                              }
+                              _showDeleteConfirmDialog(context, controller, expense.id);
+                            },
                             child: Padding(
                               padding: const EdgeInsets.all(16.0),
                               child: Row(
@@ -573,7 +614,7 @@ class _ExpensesTabState extends State<ExpensesTab> with AutomaticKeepAliveClient
                 : controller.categories.take(6).toList();
 
             return Container(
-              padding: const EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 20),
+              padding: EdgeInsets.only(left: 24, right: 24, top: 24, bottom: 20 + MediaQuery.of(context).padding.bottom),
               decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
               child: SingleChildScrollView(
                 child: Column(
@@ -669,23 +710,165 @@ class _ExpensesTabState extends State<ExpensesTab> with AutomaticKeepAliveClient
   }
 
   void _showDeleteConfirmDialog(BuildContext context, TripExpenseController controller, int expenseId) {
-    Get.defaultDialog(
-      title: "Xác nhận xóa?",
-      middleText: "Khoản chi này sẽ bềExóa vĩnh viềE và sềEtiền sẽ được tính toán lại.",
-      textConfirm: "XÓA",
-      textCancel: "HỦY",
-      confirmTextColor: Colors.white,
-      buttonColor: Colors.red,
-      onConfirm: () {
-        Get.back();
-        controller.deleteExpense(expenseId);
-      },
+    // Tìm expense cần xóa để kiểm tra có phải đợt thu quỹ chung không
+    final expense = controller.expenses.firstWhereOrNull((e) => e.id == expenseId);
+    final isFundCollectionExpense = expense != null &&
+        (expense.isFromFund ||
+         expense.description.startsWith("Yêu cầu đóng quỹ") ||
+         expense.categoryName?.contains("Quỹ") == true);
+
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        elevation: 10,
+        backgroundColor: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Icon header nổi bật
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  isFundCollectionExpense ? Icons.account_balance_wallet_outlined : Icons.delete_sweep_outlined,
+                  color: Colors.red.shade700,
+                  size: 36,
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Title
+              Text(
+                isFundCollectionExpense ? "Hủy đợt thu quỹ chung?" : "Xác nhận xóa chi phí?",
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              // Description
+              Text(
+                isFundCollectionExpense
+                    ? "Đợt thu này sẽ bị hủy bỏ hoàn toàn. Hệ thống sẽ tự động thực hiện các thao tác sau:"
+                    : "Khoản chi này sẽ bị xóa vĩnh viễn và số tiền sẽ được tính toán lại trong chuyến đi.",
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey.shade600,
+                  height: 1.4,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              if (isFundCollectionExpense) ...[
+                const SizedBox(height: 16),
+                // Cascade items container
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50.withAlpha(76),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.red.shade100.withAlpha(127)),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildCascadeItem(Icons.remove_circle_outline_rounded, "Hủy yêu cầu đóng góp của các thành viên"),
+                      const Divider(height: 12, thickness: 0.5),
+                      _buildCascadeItem(Icons.account_balance_outlined, "Hoàn lại tiền vào số dư Quỹ chung"),
+                      const Divider(height: 12, thickness: 0.5),
+                      _buildCascadeItem(Icons.receipt_long_outlined, "Xóa toàn bộ thanh toán nộp quỹ liên quan"),
+                      const Divider(height: 12, thickness: 0.5),
+                      _buildCascadeItem(Icons.balance_rounded, "Tự động cập nhật công nợ quyết toán"),
+                    ],
+                  ),
+                ),
+              ],
+              const SizedBox(height: 24),
+              // Buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        side: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      onPressed: () => Get.back(),
+                      child: Text(
+                        "HỦY",
+                        style: TextStyle(
+                          color: Colors.grey.shade700,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red.shade600,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () {
+                        Get.back();
+                        controller.deleteExpense(expenseId);
+                      },
+                      child: Text(
+                        isFundCollectionExpense ? "XÓA & HỦY" : "XÓA",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
+  Widget _buildCascadeItem(IconData icon, String text) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 18, color: Colors.red.shade700),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey.shade800,
+              fontWeight: FontWeight.w500,
+              height: 1.3,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+
   Widget _buildQuickItineraryBanner() {
-    final itineraryCtrl = Get.put(
-      ItineraryController(widget.mainController.tripId),
+    final itineraryCtrl = Get.find<ItineraryController>(
       tag: widget.mainController.tripId.toString(),
     );
 

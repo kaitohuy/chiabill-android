@@ -7,6 +7,7 @@ import '../../trip/edit_trip_dialog.dart';
 
 class TripActionsHelper {
   static void showTripOptions(BuildContext context, dynamic trip) {
+    if (Get.isBottomSheetOpen == true) return;
     Get.bottomSheet(
       Container(
         padding: EdgeInsets.only(top: 16, left: 0, right: 0, bottom: 16 + MediaQuery.of(context).padding.bottom),
@@ -21,7 +22,7 @@ class TripActionsHelper {
               title: const Text("Sửa thông tin"),
               onTap: () {
                 Get.back();
-                Get.dialog(EditTripDialog(trip: trip, isFromHome: true));
+                Get.bottomSheet(EditTripDialog(trip: trip, isFromHome: true), isScrollControlled: true);
               },
             ),
             ListTile(
@@ -39,6 +40,7 @@ class TripActionsHelper {
   }
 
   static void confirmDeleteTrip(dynamic trip) {
+    if (Get.isDialogOpen == true) return;
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),

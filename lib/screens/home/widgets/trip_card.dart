@@ -51,7 +51,7 @@ class TripCard extends StatelessWidget {
             SlidableAction(
               onPressed: (context) {
                 if (trip.id == -1) return;
-                Get.dialog(EditTripDialog(trip: trip, isFromHome: true));
+                Get.bottomSheet(EditTripDialog(trip: trip, isFromHome: true), isScrollControlled: true);
               },
               backgroundColor: Colors.blue.shade50,
               foregroundColor: Colors.blue.shade700,
@@ -131,7 +131,7 @@ class TripCard extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 4),
-                        Text(trip.description ?? "Không có mô tả", maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.grey.shade500, fontSize: 13)),
+                        Text(trip.description ?? "Không có mô tả", maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.grey.shade600, fontSize: 14)),
                       ],
                     ),
                   ),
@@ -141,7 +141,7 @@ class TripCard extends StatelessWidget {
                     children: [
                       MemberAvatars(trip: trip),
                       const SizedBox(height: 8),
-                      Text(dateStr, style: TextStyle(fontSize: 11, color: Colors.grey.shade400)),
+                      Text(dateStr, style: TextStyle(fontSize: 14, color: Colors.grey.shade600)),
                     ],
                   )
                 ],
