@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "939309138457",
+    "project_id": "chiabill",
+    "storage_bucket": "chiabill.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:939309138457:android:29a4f35eb04593d30de088",
+        "android_client_info": {
+          "package_name": "com.kaitohuy.chiabill"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "939309138457-cs2v2gjin0td8maiqcuudq78kcr64p9p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAkeQ6zpYJOBDxDZMVnFr0xjHUL2QrCsT8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "939309138457-cs2v2gjin0td8maiqcuudq78kcr64p9p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
