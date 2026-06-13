@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:chiabill/theme/app_colors.dart';
 import 'package:chiabill/utils/toast_util.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../../data/network/api_service.dart';
 
 class AboutScreen extends StatelessWidget {
@@ -44,9 +45,17 @@ class AboutScreen extends StatelessWidget {
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: 0.5),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    "Phiên bản 1.0.0 (Production Ready)",
-                    style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                  FutureBuilder<PackageInfo>(
+                    future: PackageInfo.fromPlatform(),
+                    builder: (context, snapshot) {
+                      final version = snapshot.hasData
+                          ? "${snapshot.data!.version} (Build ${snapshot.data!.buildNumber})"
+                          : "1.0.0";
+                      return Text(
+                        "Phiên bản $version (Production Ready)",
+                        style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                      );
+                    },
                   ),
                   const SizedBox(height: 24),
                 ],

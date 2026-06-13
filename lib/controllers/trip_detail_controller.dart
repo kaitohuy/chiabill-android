@@ -16,6 +16,7 @@ import 'trip_expense_controller.dart';
 import 'trip_settlement_controller.dart';
 import 'trip_history_controller.dart';
 import 'itinerary_controller.dart';
+import 'group_fund_controller.dart';
 import '../services/offline_sync_service.dart';
 
 class TripDetailController extends GetxController {
@@ -33,6 +34,7 @@ class TripDetailController extends GetxController {
   var isSharingInvite = false.obs;
 
   Worker? _syncWorker;
+  Worker? _tabWorker;
 
   @override
   void onInit() {
@@ -40,7 +42,6 @@ class TripDetailController extends GetxController {
     // Khởi tạo các controller con dùng chung tripId
     Get.put(TripExpenseController(tripId), tag: tripId.toString());
     Get.put(TripSettlementController(tripId), tag: tripId.toString());
-    Get.put(TripHistoryController(tripId), tag: tripId.toString());
     Get.put(ItineraryController(tripId), tag: tripId.toString());
 
     if (Get.isRegistered<OfflineSyncService>()) {
@@ -49,7 +50,34 @@ class TripDetailController extends GetxController {
       });
     }
 
+    _tabWorker = ever(currentTab, (_) {
+      triggerActiveTabFetch();
+    });
+
     fetchData();
+  }
+
+  void triggerActiveTabFetch() {
+    final String tagStr = tripId.toString();
+    final int index = currentTab.value;
+    
+    if (index == 0) {
+      if (Get.isRegistered<TripExpenseController>(tag: tagStr)) {
+        final ctrl = Get.find<TripExpenseController>(tag: tagStr);
+        ctrl.fetchCategories();
+        ctrl.fetchExpenses(isRefresh: true, isSilent: true);
+        ctrl.fetchStats();
+      }
+    } else if (index == 1) {
+      final fundCtrl = Get.isRegistered<GroupFundController>(tag: tagStr)
+          ? Get.find<GroupFundController>(tag: tagStr)
+          : Get.put(GroupFundController(tripId), tag: tagStr);
+      fundCtrl.fetchFundData();
+    } else if (index == 2) {
+      if (Get.isRegistered<TripSettlementController>(tag: tagStr)) {
+        Get.find<TripSettlementController>(tag: tagStr).fetchSettlements();
+      }
+    }
   }
 
   Future<void> transferOwner(int newOwnerId) async {
@@ -98,13 +126,15 @@ class TripDetailController extends GetxController {
   }
 
 
-
   @override
   void onClose() {
     _syncWorker?.dispose();
+    _tabWorker?.dispose();
     Get.delete<TripExpenseController>(tag: tripId.toString());
     Get.delete<TripSettlementController>(tag: tripId.toString());
-    Get.delete<TripHistoryController>(tag: tripId.toString());
+    if (Get.isRegistered<TripHistoryController>(tag: tripId.toString())) {
+      Get.delete<TripHistoryController>(tag: tripId.toString());
+    }
     Get.delete<ItineraryController>(tag: tripId.toString());
     super.onClose();
   }
@@ -112,23 +142,21 @@ class TripDetailController extends GetxController {
   Future<void> fetchData({bool isSilent = false}) async {
     if (!isSilent) isLoading.value = true;
     
-    await Future.wait([
-      fetchTripDetail(),
-      fetchActiveInvite(),
-    ]);
+    final detailResult = await _tripService.getTripDetail(tripId);
+    if (!detailResult.success) {
+      if (!isSilent) isLoading.value = false;
+      Future.delayed(Duration.zero, () {
+        ToastUtil.showError("Không thể truy cập", detailResult.message ?? "Lỗi tải thông tin chuyến đi");
+        Get.back();
+      });
+      return;
+    }
 
-    // Các Controller con tự load data theo onInit() của chúng, nhưng nếu gọi fetchData() thủ công thì có thể trigger reload
-    if (Get.isRegistered<TripExpenseController>(tag: tripId.toString())) {
-      Get.find<TripExpenseController>(tag: tripId.toString()).fetchExpenses(isSilent: true);
-      Get.find<TripExpenseController>(tag: tripId.toString()).fetchStats();
-    }
-    if (Get.isRegistered<TripSettlementController>(tag: tripId.toString())) {
-      Get.find<TripSettlementController>(tag: tripId.toString()).fetchSettlements();
-    }
-    if (Get.isRegistered<TripHistoryController>(tag: tripId.toString())) {
-      Get.find<TripHistoryController>(tag: tripId.toString()).fetchTripHistory(isSilent: true);
-      Get.find<TripHistoryController>(tag: tripId.toString()).fetchPayments(isSilent: true);
-    }
+    trip.value = detailResult.data;
+    await fetchActiveInvite();
+
+    // Trigger lazy loading cho tab đang hoạt động
+    triggerActiveTabFetch();
 
     if (!isSilent) isLoading.value = false;
   }

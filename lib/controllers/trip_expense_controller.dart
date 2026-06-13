@@ -35,13 +35,7 @@ class TripExpenseController extends GetxController {
   var isStatsLoading = false.obs;
   bool _isFirstLoad = true;
 
-  @override
-  void onInit() {
-    super.onInit();
-    fetchCategories();
-    fetchExpenses(isRefresh: true);
-    fetchStats();
-  }
+
 
   @override
   void onClose() {

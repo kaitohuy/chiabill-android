@@ -56,11 +56,7 @@ class TripSettlementController extends GetxController {
     return result;
   }
 
-  @override
-  void onInit() {
-    super.onInit();
-    fetchSettlements();
-  }
+
 
   Future<void> fetchSettlements() async {
     if (_isFirstLoad) isLoading.value = true;

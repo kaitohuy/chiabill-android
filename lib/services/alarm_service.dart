@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'dart:ui' as ui;
+import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -14,6 +16,7 @@ import '../data/models/itinerary_item_response.dart';
 class AlarmService {
   static final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin();
   static bool _isInitialized = false;
+  static final Map<String, Future<Uint8List?>> _activeImageDownloads = {};
 
   /// Khởi tạo dịch vụ thông báo cục bộ
   static Future<void> init() async {
@@ -140,11 +143,39 @@ class AlarmService {
     AndroidBitmap<Object>? largeIconBitmap;
     if (coverUrl != null && coverUrl.trim().isNotEmpty) {
       try {
-        final bytes = await _downloadImageBytes(coverUrl);
-        if (bytes != null) {
-          final cropped = await _getCircleCroppedImageBytes(bytes, 120);
-          largeIconBitmap = ByteArrayAndroidBitmap(cropped);
-          debugPrint('[AlarmService] Prepared circle-cropped cover image for trip $tripId');
+        final cacheKey = 'cached_cropped_image_${coverUrl.hashCode}';
+        final cachedBase64 = storage.read<String>(cacheKey);
+        if (cachedBase64 == 'FAILED') {
+          debugPrint('[AlarmService] Cover image previously failed to load. Skipping to avoid retries for trip $tripId');
+        } else if (cachedBase64 != null) {
+          final croppedBytes = base64Decode(cachedBase64);
+          largeIconBitmap = ByteArrayAndroidBitmap(croppedBytes);
+          debugPrint('[AlarmService] Loaded cropped cover image from cache for trip $tripId');
+        } else {
+          // Sử dụng Map để chia sẻ Future download + crop giữa các luồng đồng thời
+          final imageFuture = _activeImageDownloads.putIfAbsent(coverUrl, () async {
+            try {
+              final bytes = await _downloadImageBytes(coverUrl);
+              if (bytes != null) {
+                final cropped = await _getCircleCroppedImageBytes(bytes, 120);
+                storage.write(cacheKey, base64Encode(cropped));
+                debugPrint('[AlarmService] Prepared circle-cropped cover image and cached it for trip $tripId');
+                return cropped;
+              } else {
+                storage.write(cacheKey, 'FAILED');
+              }
+            } catch (e) {
+              debugPrint('[AlarmService] Error inside active download/crop: $e');
+            } finally {
+              _activeImageDownloads.remove(coverUrl);
+            }
+            return null;
+          });
+
+          final cropped = await imageFuture;
+          if (cropped != null) {
+            largeIconBitmap = ByteArrayAndroidBitmap(cropped);
+          }
         }
       } catch (e) {
         debugPrint('[AlarmService] Error preparing cover image bitmap: $e');
@@ -303,10 +334,37 @@ class AlarmService {
     AndroidBitmap<Object>? largeIconBitmap;
     if (imageUrl != null && imageUrl.trim().isNotEmpty) {
       try {
-        final bytes = await _downloadImageBytes(imageUrl);
-        if (bytes != null) {
-          final cropped = await _getCircleCroppedImageBytes(bytes, 120);
-          largeIconBitmap = ByteArrayAndroidBitmap(cropped);
+        final storage = GetStorage();
+        final cacheKey = 'cached_cropped_image_${imageUrl.hashCode}';
+        final cachedBase64 = storage.read<String>(cacheKey);
+        if (cachedBase64 == 'FAILED') {
+          debugPrint('[AlarmService] Instant notification image previously failed to load. Skipping.');
+        } else if (cachedBase64 != null) {
+          final croppedBytes = base64Decode(cachedBase64);
+          largeIconBitmap = ByteArrayAndroidBitmap(croppedBytes);
+        } else {
+          final imageFuture = _activeImageDownloads.putIfAbsent(imageUrl, () async {
+            try {
+              final bytes = await _downloadImageBytes(imageUrl);
+              if (bytes != null) {
+                final cropped = await _getCircleCroppedImageBytes(bytes, 120);
+                storage.write(cacheKey, base64Encode(cropped));
+                return cropped;
+              } else {
+                storage.write(cacheKey, 'FAILED');
+              }
+            } catch (e) {
+              debugPrint('[AlarmService] Error inside active instant notification download/crop: $e');
+            } finally {
+              _activeImageDownloads.remove(imageUrl);
+            }
+            return null;
+          });
+
+          final cropped = await imageFuture;
+          if (cropped != null) {
+            largeIconBitmap = ByteArrayAndroidBitmap(cropped);
+          }
         }
       } catch (e) {
         debugPrint('[AlarmService] Error preparing instant notification image: $e');
@@ -334,22 +392,34 @@ class AlarmService {
 
   static Future<Uint8List?> _downloadImageBytes(String url) async {
     try {
-      final response = await Dio().get<List<int>>(
-        url,
-        options: Options(responseType: ResponseType.bytes),
-      );
-      if (response.data != null) {
-        return Uint8List.fromList(response.data!);
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        final response = await Dio().get<List<int>>(
+          url,
+          options: Options(responseType: ResponseType.bytes),
+        );
+        if (response.data != null) {
+          return Uint8List.fromList(response.data!);
+        }
+      } else {
+        // Hỗ trợ đường dẫn tệp cục bộ
+        final file = File(url.replaceFirst('file://', ''));
+        if (await file.exists()) {
+          return await file.readAsBytes();
+        }
       }
     } catch (e) {
-      debugPrint('[AlarmService] Failed to download image from $url: $e');
+      debugPrint('[AlarmService] Failed to load image bytes from $url: $e');
     }
     return null;
   }
 
   static Future<Uint8List> _getCircleCroppedImageBytes(Uint8List imageBytes, int size) async {
-    // Giải mã ảnh ở kích thước và tỷ lệ gốc để tránh bị bóp méo từ đầu
-    final ui.Codec codec = await ui.instantiateImageCodec(imageBytes);
+    // Giải mã trực tiếp ra kích thước mục tiêu (size x size) để tối ưu hóa bộ nhớ và tốc độ
+    final ui.Codec codec = await ui.instantiateImageCodec(
+      imageBytes,
+      targetWidth: size,
+      targetHeight: size,
+    );
     final ui.FrameInfo fi = await codec.getNextFrame();
     final ui.Image image = fi.image;
 
@@ -361,23 +431,15 @@ class AlarmService {
       ..addOval(ui.Rect.fromCircle(center: ui.Offset(radius, radius), radius: radius));
     canvas.clipPath(path);
 
-    final double srcWidth = image.width.toDouble();
-    final double srcHeight = image.height.toDouble();
-    final double srcSize = srcWidth < srcHeight ? srcWidth : srcHeight;
-    
-    final double srcX = (srcWidth - srcSize) / 2.0;
-    final double srcY = (srcHeight - srcSize) / 2.0;
-    
-    canvas.drawImageRect(
-      image,
-      ui.Rect.fromLTWH(srcX, srcY, srcSize, srcSize),
-      ui.Rect.fromLTWH(0, 0, size.toDouble(), size.toDouble()),
-      ui.Paint()..isAntiAlias = true,
-    );
+    canvas.drawImage(image, ui.Offset.zero, ui.Paint()..isAntiAlias = true);
 
     final ui.Picture picture = recorder.endRecording();
     final ui.Image croppedImage = await picture.toImage(size, size);
     final ByteData? byteData = await croppedImage.toByteData(format: ui.ImageByteFormat.png);
+    
+    // Giải phóng bộ nhớ native image ngay lập tức
+    image.dispose();
+    croppedImage.dispose();
     
     return byteData!.buffer.asUint8List();
   }

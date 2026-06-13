@@ -24,7 +24,6 @@ class GroupFundController extends GetxController {
   void onInit() {
     super.onInit();
     isActionLoading.value = false;
-    fetchFundData();
   }
 
   Future<void> fetchFundData() async {

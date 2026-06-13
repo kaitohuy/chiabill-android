@@ -4,6 +4,9 @@ import 'package:get/get.dart' hide Response, MultipartFile, FormData;
 import 'package:get_storage/get_storage.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../services/offline_sync_service.dart';
+import '../../controllers/auth_controller.dart';
+import '../../routes/app_pages.dart';
+import '../../utils/toast_util.dart';
 
 class ApiService {
   static final ApiService _instance = ApiService._internal();
@@ -14,6 +17,31 @@ class ApiService {
 
   late final Dio _dio;
   final _storage = GetStorage();
+  static bool _isHandling401 = false;
+
+  static void _handleUnauthorized() {
+    if (_isHandling401) return;
+    _isHandling401 = true;
+    
+    GetStorage().remove('token');
+    
+    Future.delayed(Duration.zero, () async {
+      ToastUtil.showError("Phiên đăng nhập hết hạn", "Vui lòng đăng nhập lại.");
+      try {
+        if (Get.isRegistered<AuthController>()) {
+          await Get.find<AuthController>().logout();
+        } else {
+          Get.deleteAll();
+          Get.offAllNamed(Routes.WELCOME);
+        }
+      } catch (err) {
+        Get.deleteAll();
+        Get.offAllNamed(Routes.WELCOME);
+      } finally {
+        _isHandling401 = false;
+      }
+    });
+  }
 
   ApiService._internal() {
     _dio = Dio();
@@ -75,6 +103,12 @@ class ApiService {
           }
         }
         return handler.next(response);
+      },
+      onError: (DioException e, handler) {
+        if (e.response?.statusCode == 401) {
+          _handleUnauthorized();
+        }
+        return handler.next(e);
       },
     ));
   }

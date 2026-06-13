@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:chiabill/utils/toast_util.dart';
 import 'package:chiabill/utils/loading_util.dart';
 import 'package:get/get.dart';
@@ -26,28 +27,35 @@ class ItineraryController extends GetxController {
   var hasLoadedOnce = false.obs;
 
   Worker? _alarmWorker;
+  Timer? _debounceTimer;
 
   @override
   void onInit() {
     super.onInit();
-    fetchItinerary();
-    if (_tripDetailController == null) {
-      fetchTripDetail();
-    }
+    
+    Future.microtask(() {
+      if (isClosed) return;
+      fetchItinerary();
+      
+      if (_tripDetailController == null) {
+        fetchTripDetail();
+      }
 
-    if (_tripDetailController != null) {
-      _alarmWorker = ever(_tripDetailController!.trip, (_) {
-        _rescheduleTripAlarms();
-      });
-    } else {
-      _alarmWorker = ever(localTrip, (_) {
-        _rescheduleTripAlarms();
-      });
-    }
+      if (_tripDetailController != null) {
+        _alarmWorker = ever(_tripDetailController!.trip, (_) {
+          _rescheduleTripAlarms();
+        });
+      } else {
+        _alarmWorker = ever(localTrip, (_) {
+          _rescheduleTripAlarms();
+        });
+      }
+    });
   }
 
   @override
   void onClose() {
+    _debounceTimer?.cancel();
     _alarmWorker?.dispose();
     super.onClose();
   }
@@ -241,16 +249,19 @@ class ItineraryController extends GetxController {
 
   /// Tự động cập nhật lịch báo thức cục bộ của chuyến đi
   void _rescheduleTripAlarms() {
-    try {
-      AlarmService.scheduleAlarmsForTrip(
-        tripId: tripId,
-        tripName: tripName,
-        startDateStr: startDate,
-        items: itineraryList,
-        coverUrl: _tripDetailController?.trip.value?.coverUrl ?? localTrip.value?.coverUrl,
-      );
-    } catch (e) {
-      debugPrint('[ItineraryController] Failed to reschedule alarms: $e');
-    }
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+      try {
+        AlarmService.scheduleAlarmsForTrip(
+          tripId: tripId,
+          tripName: tripName,
+          startDateStr: startDate,
+          items: itineraryList,
+          coverUrl: _tripDetailController?.trip.value?.coverUrl ?? localTrip.value?.coverUrl,
+        );
+      } catch (e) {
+        debugPrint('[ItineraryController] Failed to reschedule alarms: $e');
+      }
+    });
   }
 }

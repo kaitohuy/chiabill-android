@@ -28,7 +28,11 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
     _tabController = TabController(length: 3, vsync: this);
     
     final tripIdStr = widget.mainController.tripId.toString();
-    historyController = Get.find<TripHistoryController>(tag: tripIdStr);
+    if (Get.isRegistered<TripHistoryController>(tag: tripIdStr)) {
+      historyController = Get.find<TripHistoryController>(tag: tripIdStr);
+    } else {
+      historyController = Get.put(TripHistoryController(widget.mainController.tripId), tag: tripIdStr);
+    }
     
     // Đăng ký hoặc tìm GroupFundController
     if (Get.isRegistered<GroupFundController>(tag: tripIdStr)) {
@@ -44,6 +48,10 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
   @override
   void dispose() {
     _tabController.dispose();
+    final tripIdStr = widget.mainController.tripId.toString();
+    if (Get.isRegistered<TripHistoryController>(tag: tripIdStr)) {
+      Get.delete<TripHistoryController>(tag: tripIdStr);
+    }
     super.dispose();
   }
 
