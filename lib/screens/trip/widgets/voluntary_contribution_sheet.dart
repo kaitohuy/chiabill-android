@@ -130,7 +130,7 @@ class _VoluntaryContributionSheetState extends State<VoluntaryContributionSheet>
                             );
                              if (ok) {
                                widget.fundController.isActionLoading.value = true;
-                               Navigator.of(context).pop();
+                               Get.back();
                              }
                           },
                     child: widget.fundController.isActionLoading.value

@@ -854,6 +854,7 @@ class ItineraryScreen extends StatelessWidget {
       }
 
       if (Get.isBottomSheetOpen == true) return;
+      if (!context.mounted) return;
       Get.bottomSheet(
         Container(
           decoration: const BoxDecoration(

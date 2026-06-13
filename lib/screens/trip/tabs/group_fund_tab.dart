@@ -624,7 +624,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                           fundController.isActionLoading.value = true;
                           final ok = await fundController.updateTreasurer(selectedNewTreasurerId);
                           if (ok) {
-                            Navigator.of(context).pop();
+                            Get.back();
                           }
                         },
                   child: fundController.isActionLoading.value
@@ -685,7 +685,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                     FocusScope.of(context).unfocus();
                     final ok = await fundController.confirmMultipleContributions(item.contributionIds);
                     if (ok) {
-                      Navigator.of(context).pop();
+                      Get.back();
                     }
                   },
             child: fundController.isActionLoading.value
@@ -729,7 +729,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                     FocusScope.of(context).unfocus();
                     final ok = await fundController.confirmMultipleContributions(allIds);
                     if (ok) {
-                      Navigator.of(context).pop();
+                      Get.back();
                     }
                   },
             child: fundController.isActionLoading.value

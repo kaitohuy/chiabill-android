@@ -162,7 +162,7 @@ class _FundSettingsSheetState extends State<FundSettingsSheet> {
                             );
                             if (ok) {
                               widget.fundController.isActionLoading.value = true;
-                              Navigator.of(context).pop();
+                              Get.back();
                             }
                           },
                     child: widget.fundController.isActionLoading.value

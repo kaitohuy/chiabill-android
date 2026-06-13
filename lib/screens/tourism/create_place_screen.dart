@@ -239,6 +239,7 @@ class _CreatePlaceScreenState extends State<CreatePlaceScreen> {
       ),
       isScrollControlled: true,
     );
+    if (!mounted) return;
     FocusScope.of(context).unfocus();
   }
 

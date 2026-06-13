@@ -94,6 +94,7 @@ class CreateTripBottomSheet extends StatelessWidget {
                       );
                     },
                   );
+                  if (!context.mounted) return;
                   FocusScope.of(context).unfocus();
                   if (picked != null) {
                     controller.startDate.value = picked.start;
@@ -199,6 +200,7 @@ class CreateTripBottomSheet extends StatelessWidget {
                         onTap: () async {
                           FocusScope.of(context).requestFocus(FocusNode());
                           await controller.pickCoverImage();
+                          if (!context.mounted) return;
                           FocusScope.of(context).unfocus();
                         },
                         borderRadius: BorderRadius.circular(12),
@@ -224,6 +226,7 @@ class CreateTripBottomSheet extends StatelessWidget {
                             onTap: () async {
                               FocusScope.of(context).requestFocus(FocusNode());
                               await controller.pickCoverImage();
+                              if (!context.mounted) return;
                               FocusScope.of(context).unfocus();
                             },
                             borderRadius: BorderRadius.circular(12),

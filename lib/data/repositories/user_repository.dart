@@ -50,7 +50,7 @@ class UserRepository {
   Future<ApiResponse<void>> deleteAccount() async {
     try {
       final response = await _apiService.dio.delete("/api/users/me");
-      return ApiResponse<void>.fromJson(response.data, (data) => null);
+      return ApiResponse<void>.fromJson(response.data, (data) {});
     } catch (e) {
       return ApiResponse(success: false, message: "Lỗi xóa tài khoản: $e");
     }
