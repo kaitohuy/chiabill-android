@@ -473,43 +473,43 @@ class _TourismMapViewState extends State<TourismMapView> {
   void _showMapStylePicker(BuildContext context, TourismController controller) {
     final styleGroups = [
       {
-        'label': 'Simple',
+        'label': 'Đơn giản',
         'icon': Icons.crop_square,
         'styles': <String, String>{
-          'backdrop': 'Backdrop',
-          'basic-v2': 'Base',
-          'dataviz': 'Dataviz',
-          'landscape': 'Landscape',
-          'toner-v2': 'Toner',
+          'backdrop': 'Tối giản',
+          'basic-v2': 'Bản đồ nền',
+          'dataviz': 'Trực quan dữ liệu',
+          'landscape': 'Phong cảnh',
+          'toner-v2': 'Đen trắng',
         }
       },
       {
-        'label': 'Navigation',
+        'label': 'Điều hướng',
         'icon': Icons.navigation,
         'styles': <String, String>{
-          'hybrid': 'Satellite Hybrid',
-          'openstreetmap': 'OpenStreetMap',
-          'satellite': 'Satellite Plain',
-          'streets-v2': 'Streets',
+          'hybrid': 'Vệ tinh kết hợp',
+          'openstreetmap': 'Bản đồ mở',
+          'satellite': 'Ảnh vệ tinh',
+          'streets-v2': 'Đường phố',
         }
       },
       {
-        'label': 'Terrain',
+        'label': 'Địa hình',
         'icon': Icons.terrain,
         'styles': <String, String>{
-          'ocean': 'Ocean',
-          'outdoor-v2': 'Outdoor',
-          'topo-v2': 'Topo',
-          'winter-v2': 'Winter',
+          'ocean': 'Đại dương',
+          'outdoor-v2': 'Ngoài trời',
+          'topo-v2': 'Bản đồ địa hình',
+          'winter-v2': 'Mùa đông',
         }
       },
       {
-        'label': 'Others',
+        'label': 'Khác',
         'icon': Icons.more_horiz,
         'styles': <String, String>{
-          'aquarelle': 'Aquarelle',
-          'dataviz-light': 'Dataviz Light',
-          'dataviz-dark': 'Dataviz Dark',
+          'aquarelle': 'Tranh màu nước (Aquarelle)',
+          'dataviz-light': 'Trực quan (Sáng)',
+          'dataviz-dark': 'Trực quan (Tối)',
         }
       },
     ];
@@ -757,8 +757,43 @@ class _MapStyleGroupState extends State<_MapStyleGroup> {
                             ),
                           ),
                           const Spacer(),
-                          if (isSelected)
+                          if (entry.key == 'basic-v2') ...[
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[300],
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const Text(
+                                'Mặc định',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                          ],
+                          if (isSelected) ...[
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                'Đang sử dụng',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
                             Icon(Icons.check_circle, color: AppColors.primary, size: 18),
+                          ],
                         ],
                       ),
                     ),

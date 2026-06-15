@@ -392,6 +392,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
     int itemCount = maxYear - 1950 + 1;
 
     return Container(
+      key: const ValueKey('year_header'),
       height: 45,
       margin: const EdgeInsets.only(bottom: 10),
       child: ListView.builder(
@@ -433,6 +434,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
 
   Widget _buildMonthHeader() {
     return Container(
+      key: const ValueKey('month_header'),
       height: 45,
       margin: const EdgeInsets.only(bottom: 10),
       child: ListView.builder(
