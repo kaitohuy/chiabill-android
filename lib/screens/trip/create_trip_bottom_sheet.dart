@@ -75,12 +75,21 @@ class CreateTripBottomSheet extends StatelessWidget {
                   FocusScope.of(context).requestFocus(FocusNode());
                   final picked = await showDateRangePicker(
                     context: context,
+                    locale: const Locale('vi', 'VN'),
                     firstDate: DateTime.now().subtract(const Duration(days: 365)),
                     lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
                     initialDateRange: DateTimeRange(
                       start: start,
-                      end: end ?? start.add(const Duration(days: 1)),
+                      end: end ?? start,
                     ),
+                    helpText: "Chọn thời gian chuyến đi",
+                    cancelText: "Hủy",
+                    confirmText: "Lưu",
+                    saveText: "Lưu",
+                    fieldStartLabelText: "Ngày bắt đầu",
+                    fieldEndLabelText: "Chọn ngày kết thúc",
+                    fieldStartHintText: "Ngày bắt đầu",
+                    fieldEndHintText: "Chọn ngày kết thúc",
                     builder: (context, child) {
                       return Theme(
                         data: Theme.of(context).copyWith(

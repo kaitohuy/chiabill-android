@@ -318,12 +318,21 @@ class _EditTripDialogState extends State<EditTripDialog> {
         FocusScope.of(context).unfocus();
         final picked = await showDateRangePicker(
           context: context,
+          locale: const Locale('vi', 'VN'),
           firstDate: DateTime.now().subtract(const Duration(days: 365)),
           lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
           initialDateRange: DateTimeRange(
             start: selectedStartDate ?? DateTime.now(),
-            end: selectedEndDate ?? (selectedStartDate ?? DateTime.now()).add(const Duration(days: 1)),
+            end: selectedEndDate ?? (selectedStartDate ?? DateTime.now()),
           ),
+          helpText: "Chọn thời gian chuyến đi",
+          cancelText: "Hủy",
+          confirmText: "Lưu",
+          saveText: "Lưu",
+          fieldStartLabelText: "Ngày bắt đầu",
+          fieldEndLabelText: "Chọn ngày kết thúc",
+          fieldStartHintText: "Ngày bắt đầu",
+          fieldEndHintText: "Chọn ngày kết thúc",
           builder: (context, child) => Theme(
             data: Theme.of(context).copyWith(
               colorScheme: ColorScheme.light(

@@ -542,6 +542,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                             onTap: () async {
                               final DateTimeRange? picked = await showDateRangePicker(
                                 context: context,
+                                locale: const Locale('vi', 'VN'),
                                 firstDate: DateTime(2000),
                                 lastDate: DateTime.now().add(const Duration(days: 365)),
                                 initialDateRange: tempStartDate != null && tempEndDate != null
@@ -550,6 +551,10 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                                         end: DateTime.parse(tempEndDate!),
                                       )
                                     : null,
+                                helpText: "Chọn khoảng thời gian",
+                                cancelText: "Hủy",
+                                confirmText: "Lưu",
+                                saveText: "Lưu",
                                 builder: (context, child) {
                                   return Theme(
                                     data: Theme.of(context).copyWith(
