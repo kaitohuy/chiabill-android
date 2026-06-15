@@ -4,6 +4,7 @@ class ScanReceiptResponse {
   final int? categoryId;
   final String? categoryName;
   final String? categoryIcon;
+  final String? expenseDate;
 
   ScanReceiptResponse({
     required this.totalAmount,
@@ -11,6 +12,7 @@ class ScanReceiptResponse {
     this.categoryId,
     this.categoryName,
     this.categoryIcon,
+    this.expenseDate,
   });
 
   factory ScanReceiptResponse.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class ScanReceiptResponse {
       categoryId: json['categoryId'] as int?,
       categoryName: json['categoryName'] as String?,
       categoryIcon: json['categoryIcon'] as String?,
+      expenseDate: json['expenseDate'] as String?,
     );
   }
 }

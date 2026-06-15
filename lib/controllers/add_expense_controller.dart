@@ -82,8 +82,14 @@ class AddExpenseController extends GetxController {
             selectedCategoryId.value = data.categoryId;
           }
         }
+
+        if (data.expenseDate != null && data.expenseDate!.isNotEmpty) {
+          try {
+            selectedDate.value = DateTime.parse(data.expenseDate!);
+          } catch (_) {}
+        }
         
-        ToastUtil.showSuccess("Đã quét hóa đơn", "Tự động điền số tiền và nội dung bằng AI thành công!");
+        ToastUtil.showSuccess("Đã quét hóa đơn", "Tự động điền số tiền, nội dung và ngày bằng AI thành công!");
       } else {
         ToastUtil.showWarning("AI bận", ocrResult.message ?? "Không thể tự động quét hóa đơn. Vui lòng tự điền thông tin.");
       }
