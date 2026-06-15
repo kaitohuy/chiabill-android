@@ -34,7 +34,7 @@ class _AddGhostDialogState extends State<AddGhostDialog> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text("Nhập tên những người không dùng app (cách nhau bằng dấu phẩy).", style: TextStyle(fontSize: 13, color: Colors.grey)),
+          const Text("Nhập tên những người không dùng app (cách nhau bằng dấu phẩy).", style: TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w600)),
           const SizedBox(height: 20),
           TextField(
             controller: ghostController.namesController,

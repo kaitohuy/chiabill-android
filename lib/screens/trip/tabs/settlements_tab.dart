@@ -103,7 +103,13 @@ class _SettlementsTabState extends State<SettlementsTab> with AutomaticKeepAlive
                       Icon(Icons.sort, size: 16, color: AppColors.primary),
                       const SizedBox(width: 4),
                       Text(
-                        controller.sortOrder.value == "highest" ? "Nợ nhiều nhất" : "Nợ thấp nhất",
+                        controller.sortOrder.value == "highest"
+                            ? "Nợ nhiều nhất"
+                            : controller.sortOrder.value == "lowest"
+                                ? "Nợ thấp nhất"
+                                : controller.sortOrder.value == "az"
+                                    ? "Người nợ A-Z"
+                                    : "Người nợ Z-A",
                         style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 11),
                       ),
                     ],
@@ -112,6 +118,8 @@ class _SettlementsTabState extends State<SettlementsTab> with AutomaticKeepAlive
                   itemBuilder: (context) => [
                     const PopupMenuItem(value: "highest", child: Text("Nợ nhiều nhất")),
                     const PopupMenuItem(value: "lowest", child: Text("Nợ thấp nhất")),
+                    const PopupMenuItem(value: "az", child: Text("Người nợ A-Z")),
+                    const PopupMenuItem(value: "za", child: Text("Người nợ Z-A")),
                   ],
                 ),
               ],

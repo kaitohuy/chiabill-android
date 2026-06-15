@@ -232,7 +232,7 @@ class _RequiredContributionSheetState extends State<RequiredContributionSheet> {
                             contributorIds: selectedUserIds,
                           );
                           if (ok) {
-                            Get.back();
+                            Navigator.pop(context);
                           }
                         },
                   child: widget.fundController.isActionLoading.value

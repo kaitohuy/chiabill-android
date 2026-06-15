@@ -5,10 +5,12 @@ import 'dart:async';
 class LoadingUtil {
   static bool _isShowing = false;
   static Timer? _timeoutTimer;
+  static Completer<void>? _dismissCompleter;
 
   static void show({int timeoutSeconds = 10}) {
     if (_isShowing) return;
     _isShowing = true;
+    _dismissCompleter = Completer<void>();
 
     // Tự động đóng sau X giây nếu quên gọi hide()
     _timeoutTimer?.cancel();
@@ -22,6 +24,9 @@ class LoadingUtil {
         onPopInvokedWithResult: (didPop, result) {
            // Đồng bộ state nếu user bấm nút Back vật lý trên Android
            _isShowing = false; 
+           if (_dismissCompleter != null && !_dismissCompleter!.isCompleted) {
+             _dismissCompleter!.complete();
+           }
         },
         child: Center(
           child: Container(
@@ -40,10 +45,13 @@ class LoadingUtil {
       useSafeArea: true,
     ).then((_) {
       _isShowing = false;
+      if (_dismissCompleter != null && !_dismissCompleter!.isCompleted) {
+        _dismissCompleter!.complete();
+      }
     });
   }
 
-  static void hide() {
+  static Future<void> hide() async {
     _timeoutTimer?.cancel();
     if (!_isShowing) return;
     _isShowing = false;
@@ -61,5 +69,9 @@ class LoadingUtil {
         });
       }
     });
+
+    if (_dismissCompleter != null) {
+      await _dismissCompleter!.future;
+    }
   }
 }

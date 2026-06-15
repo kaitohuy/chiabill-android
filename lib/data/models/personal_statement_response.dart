@@ -1,4 +1,5 @@
 import 'expense_response.dart';
+import 'payment_response.dart';
 
 class PersonalStatementResponse {
   final int userId;
@@ -7,6 +8,7 @@ class PersonalStatementResponse {
   final double totalSpent;
   final double netBalance;
   final List<ExpenseResponse> involvedExpenses;
+  final List<PaymentResponse> involvedPayments;
 
   PersonalStatementResponse({
     required this.userId,
@@ -15,6 +17,7 @@ class PersonalStatementResponse {
     required this.totalSpent,
     required this.netBalance,
     required this.involvedExpenses,
+    required this.involvedPayments,
   });
 
   factory PersonalStatementResponse.fromJson(Map<String, dynamic> json) {
@@ -26,6 +29,9 @@ class PersonalStatementResponse {
       netBalance: (json['netBalance'] as num).toDouble(),
       involvedExpenses: json['involvedExpenses'] != null
           ? (json['involvedExpenses'] as List).map((i) => ExpenseResponse.fromJson(i)).toList()
+          : [],
+      involvedPayments: json['involvedPayments'] != null
+          ? (json['involvedPayments'] as List).map((i) => PaymentResponse.fromJson(i)).toList()
           : [],
     );
   }

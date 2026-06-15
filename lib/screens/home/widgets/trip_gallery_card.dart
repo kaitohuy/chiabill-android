@@ -13,11 +13,42 @@ class TripGalleryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String dateStr = trip.createdAt ?? "";
-    if (dateStr.length >= 10) {
-      final parts = dateStr.substring(0, 10).split('-');
-      if (parts.length == 3) {
-        dateStr = "${parts[2]}/${parts[1]}/${parts[0]}";
+    String dateStr = "";
+    if (trip.startDate != null && (trip.startDate as String).isNotEmpty) {
+      String startDayMonth = "";
+      String startYear = "";
+      final startParts = (trip.startDate as String).substring(0, 10).split('-');
+      if (startParts.length == 3) {
+        startDayMonth = "${startParts[2]}/${startParts[1]}";
+        startYear = startParts[0];
+      }
+
+      String endDayMonth = "";
+      String endYear = "";
+      if (trip.endDate != null && (trip.endDate as String).isNotEmpty) {
+        final endParts = (trip.endDate as String).substring(0, 10).split('-');
+        if (endParts.length == 3) {
+          endDayMonth = "${endParts[2]}/${endParts[1]}";
+          endYear = endParts[0];
+        }
+      }
+
+      if (endDayMonth.isNotEmpty && endDayMonth != startDayMonth) {
+        if (startYear == endYear) {
+          dateStr = "$startDayMonth - $endDayMonth/$endYear";
+        } else {
+          dateStr = "$startDayMonth/$startYear - $endDayMonth/$endYear";
+        }
+      } else {
+        dateStr = "$startDayMonth/$startYear";
+      }
+    } else {
+      dateStr = trip.createdAt ?? "";
+      if (dateStr.length >= 10) {
+        final parts = dateStr.substring(0, 10).split('-');
+        if (parts.length == 3) {
+          dateStr = "${parts[2]}/${parts[1]}/${parts[0]}";
+        }
       }
     }
 

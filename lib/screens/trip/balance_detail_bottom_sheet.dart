@@ -99,20 +99,46 @@ class BalanceDetailBottomSheet extends StatelessWidget {
                             ),
                             child: Column(
                               children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    const Text("Tiền bạn đã trả hộ:", style: TextStyle(color: Colors.grey)),
-                                    Text("+ ${CurrencyUtils.formatNumber(data.totalPaid)} đ", style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
-                                  ],
+                                InkWell(
+                                  onTap: () => _showPaidDetail(context, data),
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Row(
+                                          children: [
+                                            Text("Tiền bạn đã trả hộ:", style: TextStyle(color: Colors.grey)),
+                                            SizedBox(width: 4),
+                                            Icon(Icons.info_outline, size: 14, color: Colors.grey),
+                                          ],
+                                        ),
+                                        Text("+ ${CurrencyUtils.formatNumber(data.totalPaid)} đ", style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                                 const SizedBox(height: 8),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    const Text("Chi phí thực tế của bạn:", style: TextStyle(color: Colors.grey)),
-                                    Text("- ${CurrencyUtils.formatNumber(data.totalSpent)} đ", style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-                                  ],
+                                InkWell(
+                                  onTap: () => _showActualCostDetail(context, data),
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Row(
+                                          children: [
+                                            Text("Chi phí thực tế của bạn:", style: TextStyle(color: Colors.grey)),
+                                            SizedBox(width: 4),
+                                            Icon(Icons.info_outline, size: 14, color: Colors.grey),
+                                          ],
+                                        ),
+                                        Text("- ${CurrencyUtils.formatNumber(data.totalSpent)} đ", style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                                 const Padding(
                                   padding: EdgeInsets.symmetric(vertical: 8),
@@ -188,4 +214,297 @@ class BalanceDetailBottomSheet extends StatelessWidget {
       ),
     );
   }
+
+  void _showActualCostDetail(BuildContext context, PersonalStatementResponse data) {
+    final List<SpentItem> spentItems = [];
+
+    // Lọc các khoản chi tiêu mà thành viên tham gia
+    for (final expense in data.involvedExpenses) {
+      final userSplit = expense.splits?.firstWhereOrNull((s) => s.userId == data.userId);
+      if (userSplit != null && userSplit.amount > 0) {
+        spentItems.add(SpentItem(
+          date: expense.expenseDate ?? "",
+          title: expense.description.isNotEmpty ? expense.description : (expense.categoryName ?? "Chi phí"),
+          subtitle: "Chia chi phí",
+          icon: expense.categoryIcon ?? "📦",
+          amount: userSplit.amount,
+        ));
+      }
+    }
+
+    // Các giao dịch nhận tiền (làm tăng totalSpent trong công thức quyết toán)
+    for (final payment in data.involvedPayments) {
+      if (payment.toUserId == data.userId) {
+        spentItems.add(SpentItem(
+          date: payment.createdAt,
+          title: "Nhận tiền từ ${payment.fromUserName}",
+          subtitle: "Nhận thanh toán nợ",
+          icon: "💰",
+          amount: payment.amount,
+        ));
+      }
+    }
+
+    spentItems.sort((a, b) => b.date.compareTo(a.date));
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "Chi tiết chi phí thực tế",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                const Divider(),
+                if (spentItems.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 30),
+                    child: Center(
+                      child: Text(
+                        "Không có chi phí nào",
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                  )
+                else
+                  Flexible(
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: spentItems.length,
+                      itemBuilder: (context, index) {
+                        final item = spentItems[index];
+                        return ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.red[50],
+                              shape: BoxShape.circle,
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              item.icon,
+                              style: const TextStyle(fontSize: 20),
+                            ),
+                          ),
+                          title: Text(
+                            item.title,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Text(
+                            "${item.date.split('T').first} • ${item.subtitle}",
+                            style: const TextStyle(color: Colors.grey, fontSize: 12),
+                          ),
+                          trailing: Text(
+                            "- ${CurrencyUtils.formatNumber(item.amount)} đ",
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                const Divider(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text("Tổng cộng chi phí thực tế:", style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text(
+                      "- ${CurrencyUtils.formatNumber(data.totalSpent)} đ",
+                      style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showPaidDetail(BuildContext context, PersonalStatementResponse data) {
+    final List<PaidItem> paidItems = [];
+
+    // Lọc các khoản chi do thành viên đứng ra trả
+    for (final expense in data.involvedExpenses) {
+      if (expense.payer?.id == data.userId) {
+        paidItems.add(PaidItem(
+          date: expense.expenseDate ?? "",
+          title: expense.description.isNotEmpty ? expense.description : (expense.categoryName ?? "Chi phí"),
+          subtitle: "Thanh toán hóa đơn",
+          icon: expense.categoryIcon ?? "📦",
+          amount: expense.totalAmount,
+        ));
+      }
+    }
+
+    // Các khoản chuyển tiền trả nợ hoặc nộp quỹ do thành viên thực hiện
+    for (final payment in data.involvedPayments) {
+      if (payment.fromUserId == data.userId) {
+        paidItems.add(PaidItem(
+          date: payment.createdAt,
+          title: "Chuyển tiền cho ${payment.toUserName}",
+          subtitle: payment.status == "APPROVED" ? "Đã xác nhận" : "Đang chờ duyệt",
+          icon: "💸",
+          amount: payment.amount,
+        ));
+      }
+    }
+
+    paidItems.sort((a, b) => b.date.compareTo(a.date));
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "Chi tiết tiền bạn đã trả hộ",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                const Divider(),
+                if (paidItems.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 30),
+                    child: Center(
+                      child: Text(
+                        "Chưa thanh toán khoản nào",
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                  )
+                else
+                  Flexible(
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: paidItems.length,
+                      itemBuilder: (context, index) {
+                        final item = paidItems[index];
+                        return ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.green[50],
+                              shape: BoxShape.circle,
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              item.icon,
+                              style: const TextStyle(fontSize: 20),
+                            ),
+                          ),
+                          title: Text(
+                            item.title,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Text(
+                            "${item.date.split('T').first} • ${item.subtitle}",
+                            style: const TextStyle(color: Colors.grey, fontSize: 12),
+                          ),
+                          trailing: Text(
+                            "+ ${CurrencyUtils.formatNumber(item.amount)} đ",
+                            style: const TextStyle(
+                              color: Colors.green,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                const Divider(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text("Tổng cộng tiền đã trả hộ:", style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text(
+                      "+ ${CurrencyUtils.formatNumber(data.totalPaid)} đ",
+                      style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class SpentItem {
+  final String date;
+  final String title;
+  final String subtitle;
+  final String icon;
+  final double amount;
+
+  SpentItem({
+    required this.date,
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.amount,
+  });
+}
+
+class PaidItem {
+  final String date;
+  final String title;
+  final String subtitle;
+  final String icon;
+  final double amount;
+
+  PaidItem({
+    required this.date,
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.amount,
+  });
 }

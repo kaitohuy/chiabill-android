@@ -466,6 +466,12 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
             // HÀNG 2: NGƯỜI TRẢ TIỀN & NGƯỜI CHIA
             // =====================================
             Obx(() {
+              final selectedCat = controller.categories.firstWhereOrNull((c) => c.id == controller.selectedCategoryId.value);
+              final isFundCat = selectedCat != null && selectedCat.name.toLowerCase().contains("quỹ");
+              if (isFundCat) {
+                return const SizedBox.shrink();
+              }
+
               double amt = double.tryParse(
                   controller.amountController.text.replaceAll(',', '')) ?? 0.0;
               double rate = controller.selectedCurrency.value == "VND"
@@ -608,6 +614,18 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
             // =====================================
             Obx(() {
               if (!controller.isFundActivated.value) return const SizedBox.shrink();
+
+              // Ẩn nút "Thanh toán bằng Quỹ chung" nếu danh mục là "Quỹ chung"
+              final selectedCat = controller.categories.firstWhereOrNull((c) => c.id == controller.selectedCategoryId.value);
+              final isFundCat = selectedCat != null && selectedCat.name.toLowerCase().contains("quỹ");
+              if (isFundCat) {
+                if (controller.isFromFund.value) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    controller.isFromFund.value = false;
+                  });
+                }
+                return const SizedBox.shrink();
+              }
 
               double amt = double.tryParse(controller.amountController.text.replaceAll(',', '')) ?? 0.0;
               double rate = controller.selectedCurrency.value == "VND" ? 1.0 : (double.tryParse(controller.exchangeRateController.text.replaceAll(',', '')) ?? 1.0);

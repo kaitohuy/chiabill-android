@@ -32,6 +32,7 @@ class _FundSettingsSheetState extends State<FundSettingsSheet> {
     super.initState();
     selectedTreasurer = widget.initialTreasurer;
     alertController = TextEditingController(text: "200,000");
+    widget.fundController.isActionLoading.value = false;
   }
 
   @override
@@ -161,8 +162,7 @@ class _FundSettingsSheetState extends State<FundSettingsSheet> {
                               selectedTreasurer?.id,
                             );
                             if (ok) {
-                              widget.fundController.isActionLoading.value = true;
-                              Get.back();
+                              Navigator.pop(context);
                             }
                           },
                     child: widget.fundController.isActionLoading.value

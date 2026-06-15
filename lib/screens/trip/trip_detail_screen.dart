@@ -394,7 +394,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     _buildBottomTab(0, Icons.list_alt_outlined, Icons.list_alt, "Chi tiêu"),
-                    _buildBottomTab(1, Icons.pie_chart_outline, Icons.pie_chart, "Thống kê"),
+                    _buildBottomTab(1, Icons.analytics_outlined, Icons.analytics, "Thống kê"),
                     const SizedBox(width: 48), // Khoảng trống cho FAB
                     _buildBottomTab(2, Icons.account_balance_wallet_outlined, Icons.account_balance_wallet, "Nợ nần"),
                     _buildBottomTab(3, Icons.people_outline, Icons.people, "Thành viên"),

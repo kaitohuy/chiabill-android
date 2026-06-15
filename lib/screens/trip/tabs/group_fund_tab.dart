@@ -109,9 +109,9 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
               indicatorWeight: 3,
               labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
               tabs: const [
+                Tab(text: "Thống kê"),
                 Tab(text: "Quỹ"),
                 Tab(text: "Donate"),
-                Tab(text: "Thống kê"),
               ],
             ),
           ),
@@ -119,9 +119,9 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
         body: TabBarView(
           controller: _tabController,
           children: [
+            _buildStatsTab(),
             _buildFundTab(fundData, showAdminActions, currentUserId),
             _buildDonateTab(fundData),
-            _buildStatsTab(),
           ],
         ),
       );
@@ -624,7 +624,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                           fundController.isActionLoading.value = true;
                           final ok = await fundController.updateTreasurer(selectedNewTreasurerId);
                           if (ok) {
-                            Get.back();
+                            Navigator.pop(context);
                           }
                         },
                   child: fundController.isActionLoading.value
@@ -685,7 +685,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                     FocusScope.of(context).unfocus();
                     final ok = await fundController.confirmMultipleContributions(item.contributionIds);
                     if (ok) {
-                      Get.back();
+                      Navigator.pop(context);
                     }
                   },
             child: fundController.isActionLoading.value
@@ -729,7 +729,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                     FocusScope.of(context).unfocus();
                     final ok = await fundController.confirmMultipleContributions(allIds);
                     if (ok) {
-                      Get.back();
+                      Navigator.pop(context);
                     }
                   },
             child: fundController.isActionLoading.value

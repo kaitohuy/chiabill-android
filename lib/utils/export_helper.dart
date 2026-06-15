@@ -196,7 +196,7 @@ class ExportHelper {
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 4),
               child: Text(
-                "* Lưu ý: File .xlsx không thể mở trực tiếp từ khung chat Messenger Android (do chính sách bảo mật/lỗi ứng dụng của Facebook). Bạn hãy chọn \"Lưu vào điện thoại\" để mở tệp một cách ổn định nhất nhé!",
+                "* Lưu ý: File .xlsx không thể mở trực tiếp từ khung chat Messenger Android (do chính sách bảo mật/lỗi ứng dụng của Facebook). Bạn hãy chọn \"Lưu vào điện thoại\" hoặc chia sẻ qua các nền tảng khác như zalo để mở tệp một cách ổn định nhất nhé! (nếu vẫn muốn chia sẻ qua mesage, bạn chỉ có thể mở file đó trên laptop)",
                 style: TextStyle(
                   fontSize: 11,
                   color: Colors.redAccent,

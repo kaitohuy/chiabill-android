@@ -624,7 +624,7 @@ class _ExpensesTabState extends State<ExpensesTab> with AutomaticKeepAliveClient
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text("BềElọc nâng cao", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        const Text("Bộ lọc nâng cao", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                         IconButton(onPressed: () => Get.back(), icon: Icon(Icons.close))
                       ],
                     ),

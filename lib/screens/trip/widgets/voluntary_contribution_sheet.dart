@@ -27,6 +27,7 @@ class _VoluntaryContributionSheetState extends State<VoluntaryContributionSheet>
     super.initState();
     amountController = TextEditingController();
     notesController = TextEditingController(text: "Donate quỹ chung");
+    widget.fundController.isActionLoading.value = false;
   }
 
   @override
@@ -129,8 +130,7 @@ class _VoluntaryContributionSheetState extends State<VoluntaryContributionSheet>
                               notes: notesController.text,
                             );
                              if (ok) {
-                               widget.fundController.isActionLoading.value = true;
-                               Get.back();
+                               Navigator.pop(context);
                              }
                           },
                     child: widget.fundController.isActionLoading.value

@@ -46,11 +46,15 @@ class TripSettlementController extends GetxController {
       }
     }
 
-    // 3. Sắp xếp theo số tiền
+    // 3. Sắp xếp theo số tiền hoặc tên
     if (sortOrder.value == "highest") {
       result.sort((a, b) => b.amount.compareTo(a.amount));
     } else if (sortOrder.value == "lowest") {
       result.sort((a, b) => a.amount.compareTo(b.amount));
+    } else if (sortOrder.value == "az") {
+      result.sort((a, b) => (a.fromUserName ?? "").toLowerCase().compareTo((b.fromUserName ?? "").toLowerCase()));
+    } else if (sortOrder.value == "za") {
+      result.sort((a, b) => (b.fromUserName ?? "").toLowerCase().compareTo((a.fromUserName ?? "").toLowerCase()));
     }
 
     return result;

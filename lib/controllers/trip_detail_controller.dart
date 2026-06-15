@@ -297,7 +297,7 @@ class TripDetailController extends GetxController {
         includeDetails: includeDetails,
         includeSettlement: includeSettlement,
       );
-      LoadingUtil.hide();
+      await LoadingUtil.hide();
 
       if (result.success && result.data != null) {
         final List<int> bytes = List<int>.from(result.data!);
@@ -322,7 +322,7 @@ class TripDetailController extends GetxController {
         ToastUtil.showError("Lỗi xuất file", result.message ?? "Không thể tải báo cáo");
       }
     } catch (e) {
-      LoadingUtil.hide();
+      await LoadingUtil.hide();
       ToastUtil.showError("Lỗi hệ thống", "Đã xảy ra lỗi khi xử lý tệp: $e");
     }
   }
