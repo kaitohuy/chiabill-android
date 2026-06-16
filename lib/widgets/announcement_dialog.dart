@@ -84,27 +84,25 @@ class _AnnouncementDialogContent extends StatelessWidget {
     );
   }
 
-  // ===== HEADER với gradient phù hợp từng loại =====
+  // ===== HEADER với màu nền nhạt phù hợp từng loại =====
   Widget _buildHeader(_AnnouncementTypeConfig config) {
     return Container(
       width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: config.gradient,
-      ),
+      color: config.backgroundColor,
       padding: const EdgeInsets.fromLTRB(20, 20, 12, 20),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: config.primaryColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: config.primaryColor.withValues(alpha: 0.15),
                 width: 1,
               ),
             ),
-            child: Icon(config.icon, color: Colors.white, size: 24),
+            child: Icon(config.icon, color: config.primaryColor, size: 24),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -115,13 +113,13 @@ class _AnnouncementDialogContent extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.25),
+                    color: config.primaryColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     config.label,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: config.primaryColor,
                       fontSize: 9,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.0,
@@ -132,7 +130,7 @@ class _AnnouncementDialogContent extends StatelessWidget {
                 Text(
                   announcement.title,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: Color(0xFF1F2937),
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
                     height: 1.25,
@@ -144,7 +142,7 @@ class _AnnouncementDialogContent extends StatelessWidget {
           if (announcement.isDismissible)
             IconButton(
               onPressed: () => Get.back(),
-              icon: const Icon(Icons.close_rounded, color: Colors.white70, size: 22),
+              icon: const Icon(Icons.close_rounded, color: Colors.black54, size: 22),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
               splashRadius: 20,
@@ -492,36 +490,24 @@ class _AnnouncementDialogContent extends StatelessWidget {
           ],
           Expanded(
             flex: hasAction ? 2 : 1,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: config.gradient,
-                borderRadius: BorderRadius.circular(14),
-                boxShadow: [
-                  BoxShadow(
-                    color: config.primaryColor.withValues(alpha: 0.35),
-                    blurRadius: 12,
-                    offset: const Offset(0, 5),
-                  ),
-                ],
-              ),
-              child: ElevatedButton(
-                onPressed: () => controller.handleAction(announcement),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  shadowColor: Colors.transparent,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
+            child: ElevatedButton(
+              onPressed: () => controller.handleAction(announcement),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: config.primaryColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                elevation: 0,
+                shadowColor: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                child: Text(
-                  announcement.actionLabel ?? _defaultActionLabel(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14.5,
-                  ),
+              ),
+              child: Text(
+                announcement.actionLabel ?? _defaultActionLabel(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14.5,
                 ),
               ),
             ),

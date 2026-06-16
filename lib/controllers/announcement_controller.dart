@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../data/models/announcement_response.dart';
 import '../data/repositories/announcement_repository.dart';
 import '../widgets/announcement_dialog.dart';
@@ -21,9 +22,19 @@ class AnnouncementController extends GetxController {
 
     if (!result.success || result.data == null || result.data!.isEmpty) return;
 
-    // Lọc theo displayMode
-    final toShow =
-        result.data!.where((a) => _repository.shouldShow(a)).toList();
+    // Lấy thông tin phiên bản hiện tại của app
+    final packageInfo = await PackageInfo.fromPlatform();
+    final currentBuild = int.tryParse(packageInfo.buildNumber) ?? 0;
+
+    // Lọc theo displayMode và version code (đối với thông báo UPDATE)
+    final toShow = result.data!.where((a) {
+      if (a.isUpdate && a.latestVersion != null) {
+        if (currentBuild >= a.latestVersion!) {
+          return false; // Đã cài đặt bản mới nhất hoặc cao hơn → không hiển thị cập nhật nữa
+        }
+      }
+      return _repository.shouldShow(a);
+    }).toList();
     if (toShow.isEmpty) return;
 
     for (final announcement in toShow) {
