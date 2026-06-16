@@ -8,6 +8,7 @@ import '../../controllers/home_controller.dart';
 import '../../controllers/notification_controller.dart';
 import '../../controllers/profile_controller.dart';
 import '../../controllers/overall_stats_controller.dart';
+import '../../controllers/announcement_controller.dart';
 import 'widgets/debt_banner.dart';
 import 'widgets/join_trip_dialog.dart';
 import 'widgets/trip_card.dart';
@@ -44,9 +45,12 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
     _monthScrollController = ScrollController();
     _yearScrollController = ScrollController();
     
-    // Cuộn sau khi build xong nếu đang ở mode đó
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToCurrent(jump: true);
+
+      // Fetch & show thông báo từ admin sau khi màn hình render xong
+      final announcementController = Get.put(AnnouncementController());
+      announcementController.fetchAndShowAnnouncements(context);
     });
   }
 
