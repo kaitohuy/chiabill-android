@@ -78,7 +78,7 @@ class TripSettlementController extends GetxController {
     isLoading.value = true;
     final result = await _paymentRepo.approvePayment(paymentId);
     if (result.success) {
-      ToastUtil.showSuccess("Thành công", "Đã xác nhận nhận tiền!");
+      ToastUtil.showSuccess("success".tr, "payment_confirmed".tr);
       await fetchSettlements(); // Cập nhật lại nợ
       
       // Update Main Trip Detail nếu cần
@@ -86,7 +86,7 @@ class TripSettlementController extends GetxController {
         Get.find<TripDetailController>(tag: tripId.toString()).fetchTripDetail();
       }
     } else {
-      ToastUtil.showError("Lỗi", result.message ?? "Không thể duyệt");
+      ToastUtil.showError("error".tr, result.message ?? "failed_approve_payment".tr);
     }
     isLoading.value = false;
   }
@@ -95,10 +95,10 @@ class TripSettlementController extends GetxController {
     isLoading.value = true;
     final result = await _paymentRepo.rejectPayment(paymentId);
     if (result.success) {
-      ToastUtil.showSuccess("Thành công", "Đã từ chối khoản thanh toán");
+      ToastUtil.showSuccess("success".tr, "payment_rejected".tr);
       await fetchSettlements();
     } else {
-      ToastUtil.showError("Lỗi", result.message ?? "Không thể từ chối");
+      ToastUtil.showError("error".tr, result.message ?? "failed_reject_payment".tr);
     }
     isLoading.value = false;
   }
@@ -106,9 +106,9 @@ class TripSettlementController extends GetxController {
   Future<void> remindDebt(int debtorId, double amount) async {
     final result = await _notificationRepo.remindDebt(debtorId, tripId, amount);
     if (result.success) {
-      ToastUtil.showSuccess("Thành công", "Đã gửi thông báo nhắc nợ!");
+      ToastUtil.showSuccess("success".tr, "debt_reminder_sent".tr);
     } else {
-      ToastUtil.showError("Lỗi", result.message ?? "Không thể gửi thông báo");
+      ToastUtil.showError("error".tr, result.message ?? "failed_send_reminder".tr);
     }
   }
 }

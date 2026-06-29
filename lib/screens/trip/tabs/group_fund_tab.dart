@@ -1,4 +1,4 @@
-import 'package:chiabill/theme/app_colors.dart';
+﻿import 'package:chiabill/theme/app_colors.dart';
 import 'package:chiabill/utils/currency_util.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -89,7 +89,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
 
       final fundData = fundController.fund.value;
       if (fundData == null) {
-        return const Center(child: Text("Đã xảy ra lỗi khi tải Quỹ chung."));
+        return Center(child: Text("failed_load_group_fund".tr));
       }
 
       final isTreasurer = fundData.treasurer.id == currentUserId;
@@ -108,10 +108,10 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
               indicatorColor: AppColors.primary,
               indicatorWeight: 3,
               labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-              tabs: const [
-                Tab(text: "Thống kê"),
-                Tab(text: "Quỹ"),
-                Tab(text: "Donate"),
+              tabs: [
+                Tab(text: "nav_stats".tr),
+                Tab(text: "fund".tr),
+                Tab(text: "donate_caps".tr),
               ],
             ),
           ),
@@ -165,7 +165,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
       final contributor = list.first.contributor;
       final totalAmount = list.fold<double>(0.0, (sum, c) => sum + c.amount);
       final contributionIds = list.map((c) => c.id).toList();
-      final allNotes = list.map((c) => c.notes ?? "Nộp quỹ").toSet().toList();
+      final allNotes = list.map((c) => c.notes ?? "fund_contribution".tr).toSet().toList();
       
       DateTime latest = list.first.contributionDate;
       for (final c in list) {
@@ -214,7 +214,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       icon: const Icon(Icons.add_alert),
-                      label: const Text("Yêu cầu đóng quỹ", style: TextStyle(fontWeight: FontWeight.bold)),
+                      label: Text("request_contribution".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
                       onPressed: () => _showCreateRequiredContributionSheet(fundData),
                     ),
                   ),
@@ -227,10 +227,10 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text("Yêu cầu nộp quỹ đang chờ", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                Text("pending_contributions".tr, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 Row(
                   children: [
-                    Text("${groupedPending.length} người", style: const TextStyle(fontSize: 13, color: Colors.grey)),
+                    Text("count_people".trParams({'count': groupedPending.length.toString()}), style: const TextStyle(fontSize: 13, color: Colors.grey)),
                     if (showAdminActions && groupedPending.isNotEmpty) ...[
                       const SizedBox(width: 8),
                       GestureDetector(
@@ -241,9 +241,9 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                             color: AppColors.primary,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Text(
-                            "Xác nhận tất cả",
-                            style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                          child: Text(
+                            "confirm_all".tr,
+                            style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
                           ),
                         ),
                       ),
@@ -267,10 +267,10 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                   children: [
                     Icon(Icons.check_circle_outline, size: 40, color: AppColors.primary.withValues(alpha: 0.5)),
                     const SizedBox(height: 8),
-                    const Text(
-                      "Tuyệt vời! Không có đợt thu quỹ nào đang chờ đóng.",
+                    Text(
+                      "no_pending_contributions".tr,
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey, fontSize: 13),
+                      style: const TextStyle(color: Colors.grey, fontSize: 13),
                     ),
                   ],
                 ),
@@ -319,7 +319,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                isMyContribution ? "Bạn cần đóng" : (item.contributor.name ?? "Thành viên"),
+                                isMyContribution ? "you_need_to_pay".tr : (item.contributor.name ?? "member".tr),
                                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                               ),
                               const SizedBox(height: 4),
@@ -358,7 +358,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                 ),
                                 onPressed: () => _showConfirmMultipleContributionsDialog(item),
-                                child: const Text("Xác nhận đã nộp", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                                child: Text("confirm_paid".tr, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
                               )
                             else
                               Container(
@@ -368,7 +368,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
-                                  "Chưa đóng",
+                                  "unpaid".tr,
                                   style: TextStyle(
                                     fontSize: 10,
                                     color: Colors.orange[800],
@@ -420,7 +420,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "SỐ DƯ QUỸ CHUNG",
+                "group_fund_balance_caps".tr,
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.8),
                   fontSize: 12,
@@ -448,7 +448,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    "Số dư quỹ đang dưới mức cảnh báo (${CurrencyUtils.formatNumber(alertThreshold)} đ). Hãy kêu gọi mọi người đóng quỹ!",
+                    "fund_below_alert_threshold".trParams({'threshold': CurrencyUtils.formatNumber(alertThreshold)}),
                     style: const TextStyle(color: Colors.yellow, fontSize: 11, fontWeight: FontWeight.bold, height: 1.3),
                   ),
                 ),
@@ -456,7 +456,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
             )
           else
             Text(
-              "Mức cảnh báo tối thiểu: ${CurrencyUtils.formatNumber(alertThreshold)} đ",
+              "min_warning_threshold".trParams({'threshold': CurrencyUtils.formatNumber(alertThreshold)}),
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.7),
                 fontSize: 11,
@@ -491,8 +491,8 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  "THỦ QUỸ",
+                Text(
+                  "treasurer_caps".tr,
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -502,7 +502,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  fundData.treasurer.name ?? "Không tên",
+                  fundData.treasurer.name ?? "unnamed".tr,
                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 const SizedBox(height: 4),
@@ -513,7 +513,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                   )
                 else
                   Text(
-                    "Chưa cập nhật tài khoản ngân hàng",
+                    "no_bank_account".tr,
                     style: TextStyle(color: Colors.grey[400], fontSize: 12, fontStyle: FontStyle.italic),
                   ),
               ],
@@ -552,19 +552,19 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                "Thay đổi Thủ quỹ",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Text(
+                "change_treasurer".tr,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              const Text(
-                "Lưu ý: Chỉ chủ nhóm mới được thay đổi thủ quỹ của chuyến đi.",
-                style: TextStyle(fontSize: 12, color: Colors.grey),
+              Text(
+                "change_treasurer_note".tr,
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
               ),
               const SizedBox(height: 20),
               
               // Chọn thủ quỹ mới
-              const Text("Chọn Thủ quỹ mới:", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+              Text("select_new_treasurer".tr, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
               const SizedBox(height: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -592,7 +592,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                                   : null,
                             ),
                             const SizedBox(width: 10),
-                            Text(member.user.name ?? "Không tên"),
+                            Text(member.user.name ?? "unnamed".tr),
                           ],
                         ),
                       );
@@ -629,9 +629,9 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                         },
                   child: fundController.isActionLoading.value
                       ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          "XÁC NHẬN THAY ĐỔI",
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.white),
+                       : Text(
+                          "confirm_change_caps".tr,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.white),
                         ),
                 )),
               ),
@@ -661,15 +661,19 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text("Xác nhận nộp quỹ", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text("confirm_fund_contribution".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
         content: Text(
-          "Bạn có chắc chắn muốn xác nhận thành viên ${item.contributor.name} đã đóng số tiền ${CurrencyUtils.formatNumber(item.totalAmount)} đ hay chưa (bao gồm ${item.contributionIds.length} đợt nộp quỹ)?\nKhi xác nhận, số dư quỹ sẽ được cộng và công nợ nộp quỹ sẽ được xoá bỏ.",
+          "confirm_contribution_dialog_msg".trParams({
+            'name': item.contributor.name ?? "unnamed".tr,
+            'amount': CurrencyUtils.formatNumber(item.totalAmount),
+            'count': item.contributionIds.length.toString(),
+          }),
           style: const TextStyle(fontSize: 14, height: 1.4),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text("HỦY", style: TextStyle(color: Colors.grey)),
+            child: Text("cancel".tr.toUpperCase(), style: const TextStyle(color: Colors.grey)),
           ),
           Obx(() => ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -690,7 +694,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                   },
             child: fundController.isActionLoading.value
                 ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                : const Text("XÁC NHẬN"),
+                : Text("confirm_caps".tr),
           )),
         ],
       ),
@@ -706,15 +710,18 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text("Xác nhận tất cả", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text("confirm_all_title".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
         content: Text(
-          "Xác nhận tất cả $totalPeople thành viên đã nộp quỹ?\n\nTổng số tiền: ${CurrencyUtils.formatNumber(totalAmount)} đ\n\nSau khi xác nhận, số dư quỹ sẽ được cộng và công nợ của các thành viên sẽ được xoá bỏ.",
+          "confirm_all_contributions_dialog_msg".trParams({
+            'count': totalPeople.toString(),
+            'amount': CurrencyUtils.formatNumber(totalAmount),
+          }),
           style: const TextStyle(fontSize: 14, height: 1.4),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text("HỦY", style: TextStyle(color: Colors.grey)),
+            child: Text("cancel".tr.toUpperCase(), style: const TextStyle(color: Colors.grey)),
           ),
           Obx(() => ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -734,7 +741,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                   },
             child: fundController.isActionLoading.value
                 ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                : const Text("XÁC NHẬN TẤT CẢ"),
+                : Text("confirm_all_caps".tr),
           )),
         ],
       ),
@@ -778,13 +785,13 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          "Thông điệp ý nghĩa",
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87),
+                        Text(
+                          "meaningful_message".tr,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87),
                         ),
                         const SizedBox(height: 6),
-                        const Text(
-                          "* 1 Việt Nam Đồng hơn không đồng nào",
+                        Text(
+                          "donate_slogan".tr,
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.black87,
@@ -800,12 +807,12 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
             ),
             const SizedBox(height: 24),
 
-            const Text("Lịch sử đóng góp quỹ", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text("contribution_history".tr, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
 
             if (list.isEmpty)
-              const EmptyState(
-                text: "Chưa có lịch sử đóng góp quỹ nào.",
+              EmptyState(
+                text: "no_contribution_history".tr,
                 imageHeight: 120.0,
               )
             else
@@ -855,7 +862,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                                 children: [
                                   Expanded(
                                     child: Text(
-                                      item.contributor.name ?? "Không tên",
+                                      item.contributor.name ?? "unnamed".tr,
                                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                                     ),
                                   ),
@@ -866,7 +873,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                                       borderRadius: BorderRadius.circular(6),
                                     ),
                                     child: Text(
-                                      isDonate ? "DONATE" : "THU QUỸ",
+                                      isDonate ? "donate_caps".tr : "collect_fund_caps".tr,
                                       style: TextStyle(
                                         fontSize: 8,
                                         fontWeight: FontWeight.bold,
@@ -910,7 +917,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
-                                isConfirmed ? "Đã xác nhận" : "Chờ duyệt",
+                                isConfirmed ? "confirmed".tr : "pending_approval".tr,
                                 style: TextStyle(
                                   fontSize: 8,
                                   fontWeight: FontWeight.bold,
@@ -952,13 +959,13 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            "Đóng góp tự nguyện (Donate)",
-            style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+          Text(
+            "voluntary_contribution".tr,
+            style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 6),
           Text(
-            "Bạn muốn tài trợ, tặng thêm hoặc đóng góp thêm cho quỹ chung của cả nhóm? Mọi đóng góp tự nguyện sẽ trực tiếp tăng số dư quỹ mà không tạo nợ cho ai khác.",
+            "voluntary_contribution_desc".tr,
             style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 12, height: 1.3),
           ),
           const SizedBox(height: 16),
@@ -970,7 +977,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             icon: const Icon(Icons.volunteer_activism),
-            label: const Text("Gửi Đóng Góp", style: TextStyle(fontWeight: FontWeight.bold)),
+            label: Text("send_contribution".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
             onPressed: _showCreateVoluntaryContributionSheet,
           ),
         ],
@@ -1042,15 +1049,15 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                     child: Icon(Icons.wallet, size: 20, color: AppColors.primary),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
-                    "Tính năng Quỹ chung",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  Text(
+                    "group_fund_feature".tr,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
               Text(
-                "Đóng quỹ bắt buộc định kỳ và quyên góp tự nguyện giúp cả nhóm chi tiêu chung tiện lợi hơn.",
+                "group_fund_feature_desc".tr,
                 style: TextStyle(color: Colors.grey.shade600, fontSize: 12, height: 1.4),
               ),
               const SizedBox(height: 12),
@@ -1065,7 +1072,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                     elevation: 0,
                   ),
                   icon: const Icon(Icons.flash_on, size: 16, color: Colors.white),
-                  label: const Text("KÍCH HOẠT QUỸ CHUNG", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white)),
+                  label: Text("activate_group_fund_caps".tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.white)),
                   onPressed: () {
                     _showActivateBottomSheet(members, selectedTreasurer, alertController);
                   },
@@ -1083,11 +1090,11 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
             children: [
               if (activateBanner != null) activateBanner,
               const SizedBox(height: 40),
-              const Center(
+              Center(
                 child: Text(
-                  "Chưa có dữ liệu chi tiêu để thống kê.\nHãy thêm chi phí trước nhé!",
+                  "no_stats_data".tr,
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey, height: 1.4),
+                  style: const TextStyle(color: Colors.grey, height: 1.4),
                 ),
               ),
             ],
@@ -1130,7 +1137,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("TỔNG CHI TIÊU CHUYẾN ĐI", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey.shade600, letterSpacing: 0.8)),
+                  Text("total_trip_spent_caps".tr, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey.shade600, letterSpacing: 0.8)),
                   const SizedBox(height: 8),
                   Text(
                     "${CurrencyUtils.formatNumber(totalSpent)} đ",
@@ -1143,11 +1150,11 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "${(percent * 100).toStringAsFixed(1)}% ngân sách",
+                          "percent_budget".trParams({'percent': (percent * 100).toStringAsFixed(1)}),
                           style: TextStyle(color: progressColor, fontWeight: FontWeight.bold, fontSize: 13)
                         ),
                         Text(
-                          "Giới hạn: ${CurrencyUtils.formatNumber(budget)} đ",
+                          "budget_limit".trParams({'limit': CurrencyUtils.formatNumber(budget)}),
                           style: TextStyle(color: Colors.grey.shade500, fontSize: 13, fontWeight: FontWeight.w500)
                         ),
                       ],
@@ -1165,7 +1172,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                     if (percent > 1.0)
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),
-                        child: Text("⚠️ Bạn đã chi tiêu lố ngân sách ${CurrencyUtils.formatNumber(totalSpent - budget)} đ", style: const TextStyle(color: Colors.red, fontSize: 12, fontStyle: FontStyle.italic)),
+                        child: Text("spent_over_budget".trParams({'over': CurrencyUtils.formatNumber(totalSpent - budget)}), style: const TextStyle(color: Colors.red, fontSize: 12, fontStyle: FontStyle.italic)),
                       )
                   ]
                 ],
@@ -1173,7 +1180,7 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
             ),
 
             const SizedBox(height: 24),
-            const Text("Phân bổ chi tiêu", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text("expense_allocation".tr, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
 
             if (expenseController.categoryStats.isNotEmpty) ...[
@@ -1221,10 +1228,10 @@ class _GroupFundTabState extends State<GroupFundTab> with SingleTickerProviderSt
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text("TỔNG CỘNG", style: TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold)),
+                        Text("total_caps".tr, style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 4),
                         Text(CurrencyUtils.formatNumber(totalSpent), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
-                        const Text("VNĐ", style: TextStyle(fontSize: 10, color: Colors.grey)),
+                        Text("vnd_caps".tr, style: const TextStyle(fontSize: 10, color: Colors.grey)),
                       ],
                     ),
                   ],

@@ -57,15 +57,15 @@ class GroupFundController extends GetxController {
       if (result.success && result.data != null) {
         fund.value = result.data;
         isFundActivated.value = true;
-        ToastUtil.showSuccess("Thành công", "Đã kích hoạt Quỹ chung!");
+        ToastUtil.showSuccess("success".tr, "group_fund_activated".tr);
         fetchContributions();
         return true;
       } else {
-        ToastUtil.showError("Lỗi", result.message ?? "Không thể kích hoạt Quỹ chung");
+        ToastUtil.showError("error".tr, result.message ?? "failed_activate_group_fund".tr);
         return false;
       }
     } catch (e) {
-      ToastUtil.showError("Lỗi", "Đã xảy ra lỗi kết nối");
+      ToastUtil.showError("error".tr, "connection_error".tr);
       return false;
     } finally {
       isActionLoading.value = false;
@@ -78,14 +78,14 @@ class GroupFundController extends GetxController {
       final result = await _fundService.updateTreasurer(tripId, treasurerId);
       if (result.success && result.data != null) {
         fund.value = result.data;
-        ToastUtil.showSuccess("Thành công", "Đã thay đổi thủ quỹ mới!");
+        ToastUtil.showSuccess("success".tr, "treasurer_changed".tr);
         return true;
       } else {
-        ToastUtil.showError("Lỗi", result.message ?? "Không thể đổi thủ quỹ");
+        ToastUtil.showError("error".tr, result.message ?? "failed_change_treasurer".tr);
         return false;
       }
     } catch (e) {
-      ToastUtil.showError("Lỗi", "Đã xảy ra lỗi kết nối");
+      ToastUtil.showError("error".tr, "connection_error".tr);
       return false;
     } finally {
       isActionLoading.value = false;
@@ -106,18 +106,18 @@ class GroupFundController extends GetxController {
         contributorIds: contributorIds,
       );
       if (result.success) {
-        ToastUtil.showSuccess("Thành công", "Đã tạo đợt nộp quỹ bắt buộc!");
+        ToastUtil.showSuccess("success".tr, "mandatory_contribution_created".tr);
         await fetchContributions();
         
         // Reload nợ nần
         _triggerReloads();
         return true;
       } else {
-        ToastUtil.showError("Lỗi", result.message ?? "Không thể tạo đợt nộp quỹ");
+        ToastUtil.showError("error".tr, result.message ?? "failed_create_contribution".tr);
         return false;
       }
     } catch (e) {
-      ToastUtil.showError("Lỗi", "Đã xảy ra lỗi kết nối");
+      ToastUtil.showError("error".tr, "connection_error".tr);
       return false;
     } finally {
       isActionLoading.value = false;
@@ -136,7 +136,7 @@ class GroupFundController extends GetxController {
         notes: notes,
       );
       if (result.success && result.data != null) {
-        ToastUtil.showSuccess("Cảm ơn!", "Đóng góp tự nguyện của bạn đã được ghi nhận!");
+        ToastUtil.showSuccess("thank_you".tr, "voluntary_contribution_recorded".tr);
         // Cập nhật số dư local trước
         if (fund.value != null) {
           fund.value = FundResponse(
@@ -156,11 +156,11 @@ class GroupFundController extends GetxController {
         }
         return true;
       } else {
-        ToastUtil.showError("Lỗi", result.message ?? "Không thể thực hiện đóng góp");
+        ToastUtil.showError("error".tr, result.message ?? "failed_submit_contribution".tr);
         return false;
       }
     } catch (e) {
-      ToastUtil.showError("Lỗi", "Đã xảy ra lỗi kết nối");
+      ToastUtil.showError("error".tr, "connection_error".tr);
       return false;
     } finally {
       isActionLoading.value = false;
@@ -172,7 +172,7 @@ class GroupFundController extends GetxController {
     try {
       final result = await _fundService.confirmContribution(tripId, contributionId);
       if (result.success && result.data != null) {
-        ToastUtil.showSuccess("Thành công", "Đã xác nhận đóng quỹ!");
+        ToastUtil.showSuccess("success".tr, "contribution_confirmed".tr);
         
         // Cập nhật cục bộ đóng góp
         final idx = contributions.indexWhere((c) => c.id == contributionId);
@@ -190,11 +190,11 @@ class GroupFundController extends GetxController {
         _triggerReloads();
         return true;
       } else {
-        ToastUtil.showError("Lỗi", result.message ?? "Không thể xác nhận đóng quỹ");
+        ToastUtil.showError("error".tr, result.message ?? "failed_confirm_contribution".tr);
         return false;
       }
     } catch (e) {
-      ToastUtil.showError("Lỗi", "Đã xảy ra lỗi kết nối");
+      ToastUtil.showError("error".tr, "connection_error".tr);
       return false;
     } finally {
       isActionLoading.value = false;
@@ -221,7 +221,7 @@ class GroupFundController extends GetxController {
       }
 
       if (allSuccess) {
-        ToastUtil.showSuccess("Thành công", "Đã xác nhận toàn bộ đóng quỹ cho thành viên!");
+        ToastUtil.showSuccess("success".tr, "all_contributions_confirmed".tr);
         
         // Reload thông tin quỹ để cập nhật số dư mới
         final fundResult = await _fundService.getFund(tripId);
@@ -233,7 +233,7 @@ class GroupFundController extends GetxController {
         _triggerReloads();
         return true;
       } else {
-        ToastUtil.showError("Thông báo", errorMsg ?? "Không thể xác nhận một số đợt đóng quỹ");
+        ToastUtil.showError("notification".tr, errorMsg ?? "failed_confirm_some_contributions".tr);
         
         // Vẫn reload lại để đồng bộ trạng thái mới nhất
         final fundResult = await _fundService.getFund(tripId);
@@ -244,7 +244,7 @@ class GroupFundController extends GetxController {
         return false;
       }
     } catch (e) {
-      ToastUtil.showError("Lỗi", "Đã xảy ra lỗi kết nối");
+      ToastUtil.showError("error".tr, "connection_error".tr);
       return false;
     } finally {
       isActionLoading.value = false;

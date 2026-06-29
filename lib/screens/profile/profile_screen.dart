@@ -9,6 +9,7 @@ import 'about_screen.dart';
 import 'support_screen.dart';
 import 'storage_settings_screen.dart';
 import 'user_guide_settings_screen.dart';
+import 'package:get_storage/get_storage.dart';
 
 class ProfileScreen extends GetView<ProfileController> {
   const ProfileScreen({super.key});
@@ -49,38 +50,108 @@ class ProfileScreen extends GetView<ProfileController> {
   // Hàm hiển thị dialog xác nhận xóa tài khoản nguy hiểm
   void _showDeleteAccountDialog(BuildContext context) {
     Get.dialog(
-      AlertDialog(
+      Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: const [
-            Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
-            SizedBox(width: 8),
-            Text("Xác nhận xóa tài khoản", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
+                  const SizedBox(width: 8),
+                  Text("confirm_delete_account".tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                "confirm_delete_account_msg".tr,
+                style: const TextStyle(fontSize: 14, height: 1.4),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Get.back(),
+                    child: Text("cancel_alt".tr, style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
+                    ),
+                    onPressed: () {
+                      Get.back();
+                      controller.deleteAccount();
+                    },
+                    child: Text("delete_account_caps".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Chuyển đổi ngôn ngữ trực tiếp không cần dialog
+  void _toggleLanguage(String lang) {
+    if (Get.locale?.languageCode == lang) return;
+    if (lang == 'vi') {
+      Get.updateLocale(const Locale('vi', 'VN'));
+      GetStorage().write('language', 'vi');
+    } else {
+      Get.updateLocale(const Locale('en', 'US'));
+      GetStorage().write('language', 'en');
+    }
+    controller.saveProfile(silent: true);
+  }
+
+  // Widget toggle pill VI | EN
+  Widget _buildLanguageToggle() {
+    return Obx(() {
+      final isEn = Get.locale?.languageCode == 'en';
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.grey.shade300),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildPillOption(label: 'VI', selected: !isEn, onTap: () => _toggleLanguage('vi')),
+            _buildPillOption(label: 'EN', selected: isEn, onTap: () => _toggleLanguage('en')),
           ],
         ),
-        content: const Text(
-          "Bạn có chắc chắn muốn xóa tài khoản? Toàn bộ thông tin cá nhân, chuyến đi và lịch sử chia tiền của bạn sẽ bị xóa hoặc vô danh hóa vĩnh viễn và không thể khôi phục lại.",
-          style: TextStyle(fontSize: 14, height: 1.4),
+      );
+    });
+  }
+
+  Widget _buildPillOption({required String label, required bool selected, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text("HỦY BỎ", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: selected ? Colors.white : Colors.grey.shade600,
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              elevation: 0,
-            ),
-            onPressed: () {
-              Get.back();
-              controller.deleteAccount();
-            },
-            child: const Text("XÓA TÀI KHOẢN", style: TextStyle(fontWeight: FontWeight.bold)),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -98,7 +169,7 @@ class ProfileScreen extends GetView<ProfileController> {
       child: Scaffold(
         backgroundColor: Colors.grey[50],
         appBar: AppBar(
-          title: const Text("Hồ sơ cá nhân", style: TextStyle(fontWeight: FontWeight.bold)),
+          title: Text("profile_title".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
           backgroundColor: Colors.white,
           foregroundColor: AppColors.primaryDark,
           elevation: 0,
@@ -174,7 +245,7 @@ class ProfileScreen extends GetView<ProfileController> {
                   TextField(
                     controller: controller.nameController,
                     decoration: InputDecoration(
-                      labelText: "Tên hiển thị",
+                      labelText: "display_name_label".tr,
                       prefixIcon: Icon(Icons.badge, color: AppColors.primary),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       filled: true, fillColor: Colors.white,
@@ -187,7 +258,7 @@ class ProfileScreen extends GetView<ProfileController> {
                     controller: controller.phoneController,
                     keyboardType: TextInputType.phone,
                     decoration: InputDecoration(
-                      labelText: "Số điện thoại",
+                      labelText: "phone_label".tr,
                       errorText: controller.phoneError.value,
                       prefixIcon: Icon(Icons.phone, color: AppColors.primary),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -198,15 +269,15 @@ class ProfileScreen extends GetView<ProfileController> {
                   
                   // Ô hiển thị Email (Read-only vì liên kết Google)
                   TextField(
-                    controller: TextEditingController(text: user?.email ?? "Chưa liên kết Email"),
+                    controller: TextEditingController(text: "not_linked_email".tr),
                     readOnly: true,
                     style: TextStyle(color: Colors.grey),
                     decoration: InputDecoration(
-                      labelText: "Email (Tài khoản liên kết)",
+                      labelText: "email_linked_label".tr,
                       prefixIcon: Icon(Icons.email, color: Colors.grey),
-                      suffixIcon: const Tooltip(
-                        message: "Email này được dùng để đăng nhập nên không thể đổi",
-                        child: Icon(Icons.lock, color: Colors.grey, size: 20),
+                      suffixIcon: Tooltip(
+                        message: "email_lock_tooltip".tr,
+                        child: const Icon(Icons.lock, color: Colors.grey, size: 20),
                       ),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       filled: true, fillColor: Colors.grey.shade100,
@@ -221,8 +292,8 @@ class ProfileScreen extends GetView<ProfileController> {
                     color: Colors.white,
                     child: ListTile(
                       leading: Icon(Icons.color_lens, color: AppColors.primary),
-                      title: const Text("Màu sắc & Cỡ chữ", style: TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: const Text("Tùy chỉnh chủ đề màu sắc yêu thích", style: TextStyle(fontSize: 12)),
+                      title: Text("theme_and_font".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text("theme_and_font_sub".tr, style: const TextStyle(fontSize: 12)),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => Get.to(() => const ThemeSettingsScreen()),
                     ),
@@ -236,8 +307,8 @@ class ProfileScreen extends GetView<ProfileController> {
                     color: Colors.white,
                     child: ListTile(
                       leading: Icon(Icons.storage, color: AppColors.primary),
-                      title: const Text("Bộ nhớ & Dữ liệu", style: TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: const Text("Dọn dẹp cache, tự động xóa tệp lưu tạm", style: TextStyle(fontSize: 12)),
+                      title: Text("storage_and_data".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text("storage_and_data_sub".tr, style: const TextStyle(fontSize: 12)),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => Get.to(() => const StorageSettingsScreen()),
                     ),
@@ -251,8 +322,8 @@ class ProfileScreen extends GetView<ProfileController> {
                     color: Colors.white,
                     child: ListTile(
                       leading: Icon(Icons.help_outline, color: AppColors.primary),
-                      title: const Text("Hướng dẫn sử dụng", style: TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: const Text("Bật/tắt tour hướng dẫn các tính năng cốt lõi", style: TextStyle(fontSize: 12)),
+                      title: Text("user_guide".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text("user_guide_sub".tr, style: const TextStyle(fontSize: 12)),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => Get.to(() => const UserGuideSettingsScreen()),
                     ),
@@ -266,8 +337,8 @@ class ProfileScreen extends GetView<ProfileController> {
                     color: Colors.white,
                     child: ListTile(
                       leading: Icon(Icons.delete_outline, color: AppColors.primary),
-                      title: const Text("Thùng rác", style: TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: const Text("Phục hồi chuyến đi đã xóa", style: TextStyle(fontSize: 12)),
+                      title: Text("trash".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text("trash_sub".tr, style: const TextStyle(fontSize: 12)),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => Get.toNamed('/trash'),
                     ),
@@ -281,8 +352,8 @@ class ProfileScreen extends GetView<ProfileController> {
                     color: Colors.white,
                     child: ListTile(
                       leading: Icon(Icons.info_outline, color: AppColors.primary),
-                      title: const Text("Về ứng dụng", style: TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: const Text("Tính năng nổi bật và chính sách bảo mật", style: TextStyle(fontSize: 12)),
+                      title: Text("about_app".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text("about_app_sub".tr, style: const TextStyle(fontSize: 12)),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => Get.to(() => const AboutScreen()),
                     ),
@@ -296,10 +367,37 @@ class ProfileScreen extends GetView<ProfileController> {
                     color: Colors.white,
                     child: ListTile(
                       leading: Icon(Icons.contact_support_outlined, color: AppColors.primary),
-                      title: const Text("Hỗ trợ & Góp ý", style: TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: const Text("Báo cáo lỗi, đóng góp ý kiến, donate & liên hệ", style: TextStyle(fontSize: 12)),
+                      title: Text("support_and_feedback".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text("support_and_feedback_sub".tr, style: const TextStyle(fontSize: 12)),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () => Get.to(() => const SupportScreen()),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // CARD NGÔN NGỮ
+                  Card(
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.grey.shade300)),
+                    color: Colors.white,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      child: Row(
+                        children: [
+                          Icon(Icons.language, color: AppColors.primary),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("language".tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                                Text("language_sub".tr, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                              ],
+                            ),
+                          ),
+                          _buildLanguageToggle(),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -317,23 +415,23 @@ class ProfileScreen extends GetView<ProfileController> {
                             children: [
                               Icon(Icons.privacy_tip, color: AppColors.primary),
                               const SizedBox(width: 8),
-                              const Text("Quyền riêng tư", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                              Text("privacy".tr, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                             ],
                           ),
                         ),
                         const Divider(height: 1),
                         Obx(() => SwitchListTile(
                           activeThumbColor: AppColors.primary,
-                          title: const Text("Cho phép thêm tự động", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                          subtitle: const Text("Người khác có thể thêm bạn trực tiếp vào nhóm qua SĐT/Email mà không cần gửi link.", style: TextStyle(fontSize: 12, color: Colors.grey)),
+                          title: Text("allow_auto_add".tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                          subtitle: Text("allow_auto_add_sub".tr, style: const TextStyle(fontSize: 12, color: Colors.grey)),
                           value: controller.allowAutoAdd.value,
                           onChanged: (val) => controller.toggleAutoAdd(val),
                         )),
                         const Divider(height: 1),
                         Obx(() => SwitchListTile(
                           activeThumbColor: AppColors.primary,
-                          title: const Text("Tự động duyệt nhận tiền", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                          subtitle: const Text("Tự động đánh dấu '"'Đã nhận '"' khi có người báo cáo chuyển khoản cho bạn, bạn không cần kiểm tra thông tin chuyển tiền đúng hay sai.", style: TextStyle(fontSize: 12, color: Colors.grey)),
+                          title: Text("auto_approve_payment".tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                          subtitle: Text("auto_approve_payment_sub".tr, style: const TextStyle(fontSize: 12, color: Colors.grey)),
                           value: controller.allowAutoApprovePayment.value,
                           onChanged: (val) => controller.toggleAutoApprovePayment(val),
                         )),
@@ -357,7 +455,7 @@ class ProfileScreen extends GetView<ProfileController> {
                             children: [
                               Icon(Icons.account_balance_wallet, color: AppColors.primary),
                               const SizedBox(width: 8),
-                              const Text("Cài đặt nhận tiền", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                              Text("payment_settings".tr, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                             ],
                           ),
                         ),
@@ -368,8 +466,8 @@ class ProfileScreen extends GetView<ProfileController> {
                           data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
                           child: ExpansionTile(
                             initiallyExpanded: controller.isVietQrExpanded.value,
-                            title: const Text("1. Nhập STK Ngân hàng (VietQR)", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                            subtitle: const Text("Tự động điền số tiền khi người khác quét", style: TextStyle(fontSize: 12, color: Colors.grey)),
+                            title: Text("vietqr_tab_title".tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                            subtitle: Text("vietqr_tab_sub".tr, style: const TextStyle(fontSize: 12, color: Colors.grey)),
                             children: [
                               Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -399,16 +497,16 @@ class ProfileScreen extends GetView<ProfileController> {
                                           controller: textEditingController,
                                           focusNode: focusNode,
                                           decoration: InputDecoration(
-                                            labelText: "Mã ngân hàng (Gõ để tìm...)",
+                                            labelText: "bank_id_hint".tr,
                                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                                             isDense: true,
-                                            suffixIcon: Icon(Icons.search, size: 14),
+                                            suffixIcon: const Icon(Icons.search, size: 14),
                                           ),
                                         );
                                       },
                                     ),
                                     const SizedBox(height: 12),
-                                    TextField(controller: controller.accountNoController, keyboardType: TextInputType.number, decoration: InputDecoration(labelText: "Số tài khoản", border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), isDense: true)),
+                                    TextField(controller: controller.accountNoController, keyboardType: TextInputType.number, decoration: InputDecoration(labelText: "account_no_label".tr, border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)), isDense: true)),
                                     const SizedBox(height: 12),
 
                                     Row(
@@ -419,19 +517,19 @@ class ProfileScreen extends GetView<ProfileController> {
                                               controller.bankIdController.clear();
                                               controller.accountNoController.clear();
                                             },
-                                            icon: Icon(Icons.delete_outline, size: 16, color: Colors.red),
-                                            label: const Text("Xóa data", style: TextStyle(color: Colors.red))
+                                            icon: const Icon(Icons.delete_outline, size: 16, color: Colors.red),
+                                            label: Text("clear_data".tr, style: const TextStyle(color: Colors.red))
                                         ),
                                         Obx(() => controller.paymentPriority.value == 1
                                             ? Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                           decoration: BoxDecoration(color: AppColors.primaryBackgroundLight, borderRadius: BorderRadius.circular(8)),
-                                          child: Text("✓ Đang là mặc định", style: TextStyle(color: AppColors.primary, fontSize: 13, fontWeight: FontWeight.bold)),
+                                          child: Text("is_default".tr, style: TextStyle(color: AppColors.primary, fontSize: 13, fontWeight: FontWeight.bold)),
                                         )
                                             : OutlinedButton(
                                           onPressed: () => controller.setAsDefault(1),
                                           style: OutlinedButton.styleFrom(foregroundColor: AppColors.primary, side: BorderSide(color: AppColors.primary)),
-                                          child: const Text("Đặt làm mặc định"),
+                                          child: Text("set_as_default".tr),
                                         )
                                         )
                                       ],
@@ -449,8 +547,8 @@ class ProfileScreen extends GetView<ProfileController> {
                           data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
                           child: ExpansionTile(
                             initiallyExpanded: controller.isStaticQrExpanded.value,
-                            title: const Text("2. Tải ảnh QR tĩnh", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                            subtitle: const Text("Dùng nếu bạn không có Số tài khoản chính chủ", style: TextStyle(fontSize: 12, color: Colors.grey)),
+                            title: Text("static_qr_tab_title".tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                            subtitle: Text("static_qr_tab_sub".tr, style: const TextStyle(fontSize: 12, color: Colors.grey)),
                             children: [
                               Padding(
                                 padding: const EdgeInsets.all(16.0),
@@ -478,7 +576,7 @@ class ProfileScreen extends GetView<ProfileController> {
                                               transform: Matrix4.translationValues(8, -8, 0),
                                               padding: const EdgeInsets.all(6),
                                               decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-                                              child: Icon(Icons.close, color: Colors.white, size: 16),
+                                              child: const Icon(Icons.close, color: Colors.white, size: 16),
                                             ),
                                           ),
                                         ],
@@ -489,8 +587,8 @@ class ProfileScreen extends GetView<ProfileController> {
                                       children: [
                                         OutlinedButton.icon(
                                           onPressed: controller.isUploading.value ? null : () => controller.pickAndUploadImage('bank-qr'),
-                                          icon: Icon(Icons.qr_code_scanner),
-                                          label: Text((qrUrl == null || qrUrl.isEmpty) ? "Tải ảnh từ máy" : "Đổi ảnh"),
+                                          icon: const Icon(Icons.qr_code_scanner),
+                                          label: Text((qrUrl == null || qrUrl.isEmpty) ? "upload_from_device".tr : "change_image".tr),
                                           style: OutlinedButton.styleFrom(foregroundColor: AppColors.primary, side: BorderSide(color: AppColors.primary), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                                         ),
                                         const SizedBox(width: 12),
@@ -498,12 +596,12 @@ class ProfileScreen extends GetView<ProfileController> {
                                             ? Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                           decoration: BoxDecoration(color: AppColors.primaryBackgroundLight, borderRadius: BorderRadius.circular(8)),
-                                          child: Text("✓ Đang mặc định", style: TextStyle(color: AppColors.primary, fontSize: 13, fontWeight: FontWeight.bold)),
+                                          child: Text("is_default_alt".tr, style: TextStyle(color: AppColors.primary, fontSize: 13, fontWeight: FontWeight.bold)),
                                         )
                                             : OutlinedButton(
                                           onPressed: () => controller.setAsDefault(2),
                                           style: OutlinedButton.styleFrom(foregroundColor: AppColors.primary, side: BorderSide(color: AppColors.primary), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
-                                          child: const Text("Đặt mặc định"),
+                                          child: Text("set_default_alt".tr),
                                         )
                                         )
                                       ],
@@ -527,7 +625,7 @@ class ProfileScreen extends GetView<ProfileController> {
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                       onPressed: (controller.isLoading.value || controller.isUploading.value) ? null : () => controller.saveProfile(),
-                      child: controller.isLoading.value ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white)) : const Text("LƯU THAY ĐỔI", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      child: controller.isLoading.value ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white)) : Text("save_changes_caps".tr, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                     ),
                   ),
 
@@ -535,7 +633,7 @@ class ProfileScreen extends GetView<ProfileController> {
                   Obx(() => OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(minimumSize: const Size(double.infinity, 50), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), side: BorderSide(color: Colors.grey.shade400)),
                     icon: authController.isLoading.value ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) : org_cached.CachedNetworkImage(imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/120px-Google_%22G%22_logo.svg.png', width: 20, errorWidget: (context, url, error) => Icon(Icons.g_mobiledata, color: Colors.blue, size: 28)),
-                    label: Text(user?.email != null ? "ĐỔI SANG TÀI KHOẢN KHÁC" : "LIÊN KẾT TÀI KHOẢN GOOGLE", style: const TextStyle(color: Colors.black87)),
+                    label: Text(user?.email != null ? "switch_google_account".tr : "link_google_account".tr, style: const TextStyle(color: Colors.black87)),
                     onPressed: authController.isLoading.value ? null : () => authController.loginWithGoogle(forceSwitch: user?.email != null),
                   )),
 
@@ -548,7 +646,7 @@ class ProfileScreen extends GetView<ProfileController> {
                       foregroundColor: Colors.redAccent,
                     ),
                     icon: const Icon(Icons.logout, color: Colors.redAccent, size: 20),
-                    label: const Text("ĐĂNG XUẤT", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                    label: Text("logout_caps".tr, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                     onPressed: () => authController.logout(),
                   ),
 
@@ -564,7 +662,7 @@ class ProfileScreen extends GetView<ProfileController> {
                       onPressed: () => _showDeleteAccountDialog(context),
                       icon: const Icon(Icons.delete_forever, color: Colors.grey, size: 18),
                       label: Text(
-                        "Xóa tài khoản vĩnh viễn",
+                        "delete_account".tr,
                         style: TextStyle(
                           color: Colors.grey.shade600,
                           fontSize: 13,

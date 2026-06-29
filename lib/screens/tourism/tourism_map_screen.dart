@@ -78,38 +78,38 @@ class _TourismMapScreenState extends State<TourismMapScreen> with AutomaticKeepA
     final targets = [
       GuideTarget(
         key: userGuideController.searchPlaceKey,
-        title: "Tìm kiếm địa điểm",
-        description: "Nhập tên địa danh, thành phố hoặc danh thắng du lịch bạn muốn khám phá.",
+        title: "guide_search_title".tr,
+        description: "guide_search_desc".tr,
         isCircle: false,
       ),
       GuideTarget(
         key: userGuideController.filterCategoryKey,
-        title: "Lọc theo danh mục",
-        description: "Lọc nhanh các địa điểm xung quanh theo thể loại như: bãi biển, núi non, quán cafe, cắm trại,...",
+        title: "guide_filter_title".tr,
+        description: "guide_filter_desc".tr,
         isCircle: true,
       ),
       GuideTarget(
         key: userGuideController.toggleMapKey,
-        title: "Đổi chế độ xem",
-        description: "Chuyển đổi linh hoạt giữa giao diện Bản đồ trực quan và Bộ sưu tập ảnh lưới địa điểm.",
+        title: "guide_toggle_view_title".tr,
+        description: "guide_toggle_view_desc".tr,
         isCircle: false,
       ),
       GuideTarget(
         key: userGuideController.mapProviderToggleKey,
-        title: "Đổi nhà cung cấp Bản đồ",
-        description: "Chuyển đổi nhanh giữa bản đồ vector mặc định (Flutter Map) và bản đồ vệ tinh độ nét cao (Google Maps).",
+        title: "guide_provider_title".tr,
+        description: "guide_provider_desc".tr,
         isCircle: true,
       ),
       GuideTarget(
         key: userGuideController.mapLayersKey,
-        title: "Lớp giao diện Bản đồ",
-        description: "Chọn các kiểu hiển thị bản đồ khác nhau như: Ngoài trời, Địa hình topo, Phong cách vẽ màu nước, Tối giản...",
+        title: "guide_layers_title".tr,
+        description: "guide_layers_desc".tr,
         isCircle: true,
       ),
       GuideTarget(
         key: userGuideController.pinNewPlaceKey,
-        title: "Ghim địa điểm mới",
-        description: "Đóng góp và ghim thêm một địa điểm du lịch, vui chơi mới chưa có trên hệ thống của Chiabill.",
+        title: "guide_pin_title".tr,
+        description: "guide_pin_desc".tr,
         isCircle: true,
       ),
     ];
@@ -157,16 +157,15 @@ class _TourismMapScreenState extends State<TourismMapScreen> with AutomaticKeepA
                 child: const Icon(Icons.info_outline, color: Colors.red, size: 32),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Thông báo về bản đồ',
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+              Text(
+                'map_notice_title'.tr,
+                style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 14),
-              const Text(
-                'Bản đồ Google Maps có các biểu tượng và tên địa điểm hiển thị kém chi tiết và mờ hơn một chút so với bản đồ mặc định hiện tại.\n\n'
-                'Bạn có chắc chắn muốn chuyển sang Google Maps?',
-                style: TextStyle(fontSize: 14, height: 1.6, color: Colors.black87),
+              Text(
+                'google_maps_notice_desc'.tr,
+                style: const TextStyle(fontSize: 14, height: 1.6, color: Colors.black87),
               ),
               const SizedBox(height: 20),
               Row(
@@ -183,7 +182,7 @@ class _TourismMapScreenState extends State<TourismMapScreen> with AutomaticKeepA
                         controller.isUsingGoogleMaps.value = false; // Quay lại Flutter Map
                         Navigator.of(context).pop();
                       },
-                      child: const Text('Quay lại', style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: Text('go_back'.tr, style: const TextStyle(fontWeight: FontWeight.bold)),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -196,7 +195,7 @@ class _TourismMapScreenState extends State<TourismMapScreen> with AutomaticKeepA
                         padding: const EdgeInsets.symmetric(vertical: 13),
                       ),
                       onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Tiếp tục', style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: Text('continue_label'.tr, style: const TextStyle(fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ],
@@ -229,17 +228,15 @@ class _TourismMapScreenState extends State<TourismMapScreen> with AutomaticKeepA
                 child: const Icon(Icons.map_outlined, color: Colors.orange, size: 32),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Thông báo về bản đồ',
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+              Text(
+                'map_notice_title'.tr,
+                style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 14),
-              const Text(
-                'Thư viện bản đồ này được cung cấp bởi bên thứ 3, tuy nhiên họ lại không đưa quần đảo Hoàng Sa, Trường Sa của chúng ta vào, thậm chí Biển Đông còn bị đổi tên thành South China Sea.\n\n'
-                'Tôi đã khắc phục bằng cách "đè tem", trông có hơi xấu một chút, mong các bạn thông cảm. Tôi sẽ cố gắng tìm ra cách để trông các khu vực trên đẹp hơn.\n\n'
-                'Cảm ơn mọi người rất nhiều! 🇻🇳',
-                style: TextStyle(fontSize: 14, height: 1.6, color: Colors.black87),
+              Text(
+                'maptiler_notice_desc'.tr,
+                style: const TextStyle(fontSize: 14, height: 1.6, color: Colors.black87),
               ),
               const SizedBox(height: 20),
               SizedBox(
@@ -252,7 +249,7 @@ class _TourismMapScreenState extends State<TourismMapScreen> with AutomaticKeepA
                     padding: const EdgeInsets.symmetric(vertical: 13),
                   ),
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Đã hiểu, cảm ơn!', style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: Text('understood_thanks'.tr, style: const TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
@@ -305,9 +302,9 @@ class _TourismMapScreenState extends State<TourismMapScreen> with AutomaticKeepA
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  "Lọc Theo Danh Mục",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                Text(
+                  "filter_by_category_title".tr,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
                 ),
                 Obx(() {
                   if (controller.selectedCategory.value != 'Tất cả') {
@@ -316,7 +313,7 @@ class _TourismMapScreenState extends State<TourismMapScreen> with AutomaticKeepA
                         controller.selectedCategory.value = 'Tất cả';
                         Get.back();
                       },
-                      child: const Text("Xóa lọc", style: TextStyle(color: Colors.red)),
+                      child: Text("clear_filter".tr, style: const TextStyle(color: Colors.red)),
                     );
                   }
                   return const SizedBox.shrink();
@@ -349,7 +346,7 @@ class _TourismMapScreenState extends State<TourismMapScreen> with AutomaticKeepA
                           child: Icon(item['icon'], color: item['color']),
                         ),
                         title: Text(
-                          item['name'],
+                          item['name'].toString().tr,
                           style: TextStyle(
                             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                             color: isSelected ? item['color'] : Colors.black87,
@@ -419,7 +416,7 @@ class _TourismMapScreenState extends State<TourismMapScreen> with AutomaticKeepA
                               onChanged: _onSearchChanged,
                               textAlignVertical: TextAlignVertical.center,
                               decoration: InputDecoration(
-                                hintText: "Tìm kiếm địa điểm du lịch...",
+                                hintText: "search_places_hint".tr,
                                 hintStyle: TextStyle(color: Colors.grey[500], fontSize: 14),
                                 prefixIcon: const Padding(
                                   padding: EdgeInsets.only(left: 12, right: 8),
@@ -547,7 +544,7 @@ class _TourismMapScreenState extends State<TourismMapScreen> with AutomaticKeepA
                           children: [
                             const Icon(Icons.sentiment_dissatisfied, size: 40, color: Colors.grey),
                             const SizedBox(height: 8),
-                            const Text("Không tìm thấy địa điểm này"),
+                            Text("place_not_found".tr),
                             const SizedBox(height: 12),
                             ElevatedButton.icon(
                               style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
@@ -555,7 +552,7 @@ class _TourismMapScreenState extends State<TourismMapScreen> with AutomaticKeepA
                                 Get.to(() => const CreatePlaceScreen());
                               },
                               icon: const Icon(Icons.add_location_alt),
-                              label: const Text("Ghim địa điểm mới"),
+                              label: Text("pin_new_place".tr),
                             )
                           ],
                         ),
@@ -593,7 +590,7 @@ class _TourismMapScreenState extends State<TourismMapScreen> with AutomaticKeepA
                               child: Icon(Icons.place, color: AppColors.primary),
                             ),
                             title: Text(place.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                            subtitle: Text("${place.category} • ${place.city}"),
+                            subtitle: Text("${place.category.tr} • ${place.city}"),
                             onTap: () {
                               controller.moveToPlace(place);
                               controller.isMapView.value = true; // Chuyển sang Map để định vị

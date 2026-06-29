@@ -91,11 +91,11 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> with SingleTicker
                   indicatorColor: AppColors.primary,
                   indicatorWeight: 3,
                   labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-                  tabs: const [
-                    Tab(text: "Tổng quan"),
-                    Tab(text: "Thông tin"),
-                    Tab(text: "Hình ảnh"),
-                    Tab(text: "Thảo luận"),
+                  tabs: [
+                    Tab(text: "tab_overview".tr),
+                    Tab(text: "tab_info".tr),
+                    Tab(text: "tab_gallery".tr),
+                    Tab(text: "tab_comments".tr),
                   ],
                 ),
               ),
@@ -127,7 +127,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> with SingleTicker
               Icon(Icons.category, color: AppColors.primary, size: 20),
               const SizedBox(width: 8),
               Text(
-                place.category,
+                place.category.tr,
                 style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryDark),
               ),
               const Spacer(),
@@ -137,7 +137,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> with SingleTicker
             ],
           ),
           const SizedBox(height: 16),
-          const Text("Giới thiệu", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Text("intro_label".tr, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Text(
             place.summary,
@@ -154,11 +154,11 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> with SingleTicker
                 if (await canLaunchUrl(googleMapsUrl)) {
                   await launchUrl(googleMapsUrl, mode: LaunchMode.externalApplication);
                 } else {
-                  Get.snackbar("Lỗi", "Không thể mở Google Maps");
+                  Get.snackbar("error".tr, "cannot_open_google_maps".tr);
                 }
               },
               icon: const Icon(Icons.directions),
-              label: const Text("Chỉ đường"),
+              label: Text("directions".tr),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
@@ -195,9 +195,9 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> with SingleTicker
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text("Giờ hoạt động", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      Text("opening_hours_label".tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                       const SizedBox(height: 8),
-                      Text(place.openingHours.isNotEmpty ? place.openingHours : "Chưa cập nhật", style: const TextStyle(height: 1.5, fontSize: 16, color: Colors.black87)),
+                      Text(place.openingHours.isNotEmpty ? place.openingHours : "not_updated".tr, style: const TextStyle(height: 1.5, fontSize: 16, color: Colors.black87)),
                     ],
                   ),
                 )
@@ -222,10 +222,10 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> with SingleTicker
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text("Thông tin vé", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      Text("ticket_info_label".tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                       const SizedBox(height: 8),
                       Text(
-                        place.ticketPrices.isNotEmpty ? place.ticketPrices : "Đang cập nhật",
+                        place.ticketPrices.isNotEmpty ? place.ticketPrices : "updating".tr,
                         style: const TextStyle(height: 1.5, fontSize: 16, color: Colors.black87),
                       ),
                     ],
@@ -304,9 +304,9 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> with SingleTicker
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(albumName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      Text(albumName.tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                       const SizedBox(height: 4),
-                      Text("${images.length} ảnh", style: const TextStyle(color: Colors.grey, fontSize: 13)),
+                      Text("images_count".trParams({'count': images.length.toString()}), style: const TextStyle(color: Colors.grey, fontSize: 13)),
                     ],
                   ),
                 )
@@ -329,7 +329,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> with SingleTicker
               return const Center(child: CircularProgressIndicator());
             }
             if (_controller.comments.isEmpty) {
-              return const Center(child: Text("Chưa có bình luận nào. Hãy là người đầu tiên!"));
+              return Center(child: Text("no_comments_yet".tr));
             }
 
             return RefreshIndicator(
@@ -370,7 +370,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> with SingleTicker
                 children: [
                   const Icon(Icons.reply, size: 16, color: Colors.grey),
                   const SizedBox(width: 8),
-                  Expanded(child: Text("Đang trả lời: ${_controller.replyingTo.value!.user.name}", style: const TextStyle(fontSize: 12, color: Colors.black54))),
+                  Expanded(child: Text("replying_to_user".trParams({'user': _controller.replyingTo.value!.user.name ?? ''}), style: const TextStyle(fontSize: 12, color: Colors.black54))),
                   IconButton(
                     icon: const Icon(Icons.close, size: 16),
                     onPressed: () => _controller.setReplyingTo(null),
@@ -393,7 +393,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> with SingleTicker
                 child: TextField(
                   controller: _controller.commentController,
                   decoration: InputDecoration(
-                    hintText: "Viết bình luận...",
+                    hintText: "write_comment_hint".tr,
                     filled: true,
                     fillColor: Colors.grey[200],
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -443,16 +443,16 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> with SingleTicker
                       icon: const Icon(Icons.more_horiz, size: 16, color: Colors.grey),
                       padding: EdgeInsets.zero,
                       itemBuilder: (context) => [
-                        const PopupMenuItem(value: 'edit', child: Text('Chỉnh sửa')),
-                        const PopupMenuItem(value: 'delete', child: Text('Xóa', style: TextStyle(color: Colors.red))),
+                        PopupMenuItem(value: 'edit', child: Text('edit'.tr)),
+                        PopupMenuItem(value: 'delete', child: Text('delete'.tr, style: const TextStyle(color: Colors.red))),
                       ],
                       onSelected: (value) {
                         if (value == 'delete') {
                           Get.defaultDialog(
-                            title: "Xác nhận",
-                            middleText: "Bạn có chắc chắn muốn xóa bình luận này?",
-                            textConfirm: "Xóa",
-                            textCancel: "Hủy",
+                            title: "confirm".tr,
+                            middleText: "delete_comment_confirm_msg".tr,
+                            textConfirm: "delete".tr,
+                            textCancel: "cancel".tr,
                             confirmTextColor: Colors.white,
                             buttonColor: Colors.red,
                             onConfirm: () {
@@ -463,7 +463,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> with SingleTicker
                         } else if (value == 'edit') {
                           final editController = TextEditingController(text: comment.content);
                           Get.defaultDialog(
-                            title: "Chỉnh sửa bình luận",
+                            title: "edit_comment_title".tr,
                             content: TextField(
                               controller: editController,
                               maxLines: 3,
@@ -471,8 +471,8 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> with SingleTicker
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                               ),
                             ),
-                            textConfirm: "Lưu",
-                            textCancel: "Hủy",
+                            textConfirm: "save".tr,
+                            textCancel: "cancel".tr,
                             buttonColor: AppColors.primary,
                             confirmTextColor: Colors.white,
                             onConfirm: () {
@@ -509,7 +509,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen> with SingleTicker
                   if (!isReply)
                     GestureDetector(
                       onTap: () => _controller.setReplyingTo(comment),
-                      child: const Text("Trả lời", style: TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.bold)),
+                      child: Text("reply".tr, style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.bold)),
                     ),
                 ],
               )

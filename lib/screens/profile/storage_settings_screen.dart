@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../theme/app_colors.dart';
 import '../../utils/storage_util.dart';
 import '../../utils/toast_util.dart';
@@ -54,13 +55,13 @@ class _StorageSettingsScreenState extends State<StorageSettingsScreen> {
       
       if (success) {
         ToastUtil.showSuccess(
-          "Đã dọn dẹp",
-          "Bộ nhớ tạm đã được dọn sạch hoàn toàn!",
+          "cache_cleaned_title".tr,
+          "cache_cleaned_msg".tr,
         );
       } else {
         ToastUtil.showError(
-          "Thất bại",
-          "Không thể dọn dẹp toàn bộ tệp tin tạm thời.",
+          "clear_failed_title".tr,
+          "clear_failed_msg".tr,
         );
       }
     }
@@ -71,7 +72,7 @@ class _StorageSettingsScreenState extends State<StorageSettingsScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text("Bộ nhớ & Dữ liệu", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text("storage_title".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.primaryDark,
         elevation: 0,
@@ -105,9 +106,9 @@ class _StorageSettingsScreenState extends State<StorageSettingsScreen> {
               ),
               child: Column(
                 children: [
-                  const Text(
-                    "DUNG LƯỢNG BỘ NHỚ ĐỆM",
-                    style: TextStyle(
+                  Text(
+                    "cache_size_label".tr,
+                    style: const TextStyle(
                       color: Colors.white70,
                       fontWeight: FontWeight.bold,
                       fontSize: 12,
@@ -131,8 +132,8 @@ class _StorageSettingsScreenState extends State<StorageSettingsScreen> {
                         ),
                   const SizedBox(height: 16),
                   Text(
-                    "Bao gồm ảnh thu nhỏ, file lưu tạm và bản đồ ngoại tuyến.",
-                    style: TextStyle(color: Colors.white70, fontSize: 12),
+                    "cache_size_desc".tr,
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
@@ -146,7 +147,7 @@ class _StorageSettingsScreenState extends State<StorageSettingsScreen> {
                           )
                         : const Icon(Icons.cleaning_services, size: 18),
                     label: Text(
-                      _isClearing ? "ĐANG DỌN DẸP..." : "DỌN DẸP NGAY",
+                      _isClearing ? "clearing_status".tr : "clear_now_caps".tr,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     style: ElevatedButton.styleFrom(
@@ -165,9 +166,9 @@ class _StorageSettingsScreenState extends State<StorageSettingsScreen> {
             // ==========================================
             // CARD 2: THIẾT LẬP TỰ ĐỘNG DỌN DẸP
             // ==========================================
-            const Text(
-              "CẤU HÌNH TỰ ĐỘNG DỌN DẸP",
-              style: TextStyle(
+            Text(
+              "auto_clean_config".tr,
+              style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
                 color: Colors.grey,
@@ -196,17 +197,17 @@ class _StorageSettingsScreenState extends State<StorageSettingsScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Text(
-                                "Tự động dọn dẹp định kỳ",
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              Text(
+                                "auto_clean_period".tr,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 _currentSchedule == 'daily'
-                                    ? "Hàng ngày (Khuyên dùng)"
+                                    ? "clean_daily_rec".tr
                                     : _currentSchedule == 'weekly'
-                                        ? "Hàng tuần (Mặc định)"
-                                        : "Đang tắt tự động dọn dẹp",
+                                        ? "clean_weekly_def".tr
+                                        : "clean_off".tr,
                                 style: const TextStyle(fontSize: 12, color: Colors.grey),
                               ),
                             ],
@@ -219,10 +220,10 @@ class _StorageSettingsScreenState extends State<StorageSettingsScreen> {
                           icon: const Icon(Icons.arrow_drop_down),
                           isDense: true,
                           alignment: Alignment.centerRight,
-                          items: const [
-                            DropdownMenuItem(value: 'daily', child: Text("Hàng ngày")),
-                            DropdownMenuItem(value: 'weekly', child: Text("Hàng tuần")),
-                            DropdownMenuItem(value: 'off', child: Text("Tắt")),
+                          items: [
+                            DropdownMenuItem(value: 'daily', child: Text("clean_daily".tr)),
+                            DropdownMenuItem(value: 'weekly', child: Text("clean_weekly".tr)),
+                            DropdownMenuItem(value: 'off', child: Text("clean_turn_off".tr)),
                           ],
                           onChanged: (val) {
                             if (val != null) {
@@ -247,15 +248,15 @@ class _StorageSettingsScreenState extends State<StorageSettingsScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Text(
-                                "Giới hạn dung lượng tối đa",
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              Text(
+                                "max_limit_label".tr,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 _currentMaxSize > 0
-                                    ? "Tự dọn dẹp khi vượt quá $_currentMaxSize MB"
-                                    : "Không giới hạn dung lượng",
+                                    ? "max_limit_desc".trParams({'size': _currentMaxSize.toString()})
+                                    : "no_limit".tr,
                                 style: const TextStyle(fontSize: 12, color: Colors.grey),
                               ),
                             ],
@@ -268,11 +269,11 @@ class _StorageSettingsScreenState extends State<StorageSettingsScreen> {
                           icon: const Icon(Icons.arrow_drop_down),
                           isDense: true,
                           alignment: Alignment.centerRight,
-                          items: const [
-                            DropdownMenuItem(value: 20, child: Text("20 MB")),
-                            DropdownMenuItem(value: 50, child: Text("50 MB")),
-                            DropdownMenuItem(value: 100, child: Text("100 MB")),
-                            DropdownMenuItem(value: 0, child: Text("Không giới hạn")),
+                          items: [
+                            const DropdownMenuItem(value: 20, child: Text("20 MB")),
+                            const DropdownMenuItem(value: 50, child: Text("50 MB")),
+                            const DropdownMenuItem(value: 100, child: Text("100 MB")),
+                            DropdownMenuItem(value: 0, child: Text("no_limit_short".tr)),
                           ],
                           onChanged: (val) {
                             if (val != null) {
@@ -305,22 +306,22 @@ class _StorageSettingsScreenState extends State<StorageSettingsScreen> {
                 children: [
                   Icon(Icons.info, color: Colors.blue.shade700, size: 22),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Thông tin quyền riêng tư & Dữ liệu",
-                          style: TextStyle(
+                          "privacy_data_info".tr,
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 13,
                             color: Colors.black87,
                           ),
                         ),
-                        SizedBox(height: 6),
+                        const SizedBox(height: 6),
                         Text(
-                          "Bộ nhớ đệm chỉ lưu trữ các tệp tạm thời như ảnh đại diện thu nhỏ và dữ liệu bản đồ để tăng tốc độ hiển thị và tiết kiệm mạng 3G/4G cho bạn.\n\nViệc dọn dẹp bộ nhớ đệm hoàn toàn KHÔNG làm mất thông tin tài khoản đăng nhập hay các dữ liệu chia hóa đơn/chuyến đi chơi của bạn.",
-                          style: TextStyle(
+                          "privacy_data_desc".tr,
+                          style: const TextStyle(
                             fontSize: 11.5,
                             color: Colors.black54,
                             height: 1.4,

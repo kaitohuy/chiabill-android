@@ -110,9 +110,9 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      "Chọn thời gian hoạt động",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                    Text(
+                      "select_activity_time".tr,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
                     ),
                     IconButton(
                       icon: const Icon(Icons.close),
@@ -129,7 +129,7 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
                           final picked = await showTimePicker(
                             context: context,
                             initialTime: tempStart ?? const TimeOfDay(hour: 8, minute: 0),
-                            helpText: "Chọn giờ bắt đầu",
+                            helpText: "select_start_time".tr,
                             builder: (context, child) => Theme(
                               data: Theme.of(context).copyWith(
                                 colorScheme: ColorScheme.light(
@@ -150,7 +150,7 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
                             final pickedEnd = await showTimePicker(
                               context: context,
                               initialTime: tempEnd ?? TimeOfDay(hour: picked.hour + 1, minute: picked.minute),
-                              helpText: "Chọn giờ kết thúc",
+                              helpText: "select_end_time".tr,
                               builder: (context, child) => Theme(
                                 data: Theme.of(context).copyWith(
                                   colorScheme: ColorScheme.light(
@@ -178,10 +178,10 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text("Giờ bắt đầu", style: TextStyle(fontSize: 11, color: Colors.grey)),
+                              Text("start_time".tr, style: const TextStyle(fontSize: 11, color: Colors.grey)),
                               const SizedBox(height: 4),
                               Text(
-                                tempStart != null ? _formatTimeOfDay(tempStart!) : "Chọn giờ",
+                                tempStart != null ? _formatTimeOfDay(tempStart!) : "select_hour".tr,
                                 style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.bold,
@@ -198,13 +198,13 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
                       child: InkWell(
                         onTap: () async {
                           if (tempStart == null) {
-                            ToastUtil.showWarning("Thông báo", "Vui lòng chọn giờ bắt đầu trước");
+                            ToastUtil.showWarning("notification".tr, "select_start_time_first".tr);
                             return;
                           }
                           final picked = await showTimePicker(
                             context: context,
                             initialTime: tempEnd ?? TimeOfDay(hour: tempStart!.hour + 1, minute: tempStart!.minute),
-                            helpText: "Chọn giờ kết thúc",
+                            helpText: "select_end_time".tr,
                             builder: (context, child) => Theme(
                               data: Theme.of(context).copyWith(
                                 colorScheme: ColorScheme.light(
@@ -234,10 +234,10 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text("Giờ kết thúc", style: TextStyle(fontSize: 11, color: Colors.grey)),
+                                  Text("end_time".tr, style: const TextStyle(fontSize: 11, color: Colors.grey)),
                                   const SizedBox(height: 4),
                                   Text(
-                                    tempEnd != null ? _formatTimeOfDay(tempEnd!) : "Không bắt buộc",
+                                    tempEnd != null ? _formatTimeOfDay(tempEnd!) : "optional".tr,
                                     style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: tempEnd != null ? FontWeight.bold : FontWeight.normal,
@@ -273,7 +273,7 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
-                        child: const Text("HỦY", style: TextStyle(fontWeight: FontWeight.bold)),
+                        child: Text("cancel_caps".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -294,7 +294,7 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
-                        child: const Text("ĐỒNG Ý", style: TextStyle(fontWeight: FontWeight.bold)),
+                        child: Text("agree_caps".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
                       ),
                     ),
                   ],
@@ -317,7 +317,7 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
     if (_isSaving) return;
     final activity = activityCtrl.text.trim();
     if (activity.isEmpty) {
-      ToastUtil.showWarning("Lỗi", "Vui lòng nhập tên hoạt động");
+      ToastUtil.showWarning("error".tr, "enter_activity_name".tr);
       return;
     }
 
@@ -347,7 +347,7 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
 
     if (success) {
       Get.back(result: true);
-      ToastUtil.showSuccess("Thành công", "Đã lưu hoạt động");
+      ToastUtil.showSuccess("success".tr, "activity_saved".tr);
     }
   }
 
@@ -359,8 +359,8 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       title: Text(
         _isCurrentUserDisabled
-            ? "Chi tiết hoạt động"
-            : (widget.item == null ? "Thêm hoạt động mới" : "Chỉnh sửa hoạt động"),
+            ? "activity_details".tr
+            : (widget.item == null ? "add_new_activity".tr : "edit_activity".tr),
         style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
       ),
       content: SizedBox(
@@ -375,7 +375,7 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Text(
-                    "Chọn ngày hoạt động",
+                    "select_activity_day".tr,
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
@@ -396,7 +396,7 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
                       padding: const EdgeInsets.only(right: 8),
                       child: ChoiceChip(
                         showCheckmark: false,
-                        label: Text("Ngày $dayNum"),
+                        label: Text("${'day'.tr} $dayNum"),
                         selected: isSelected,
                         selectedColor: AppColors.primary.withValues(alpha: 0.15),
                         backgroundColor: Colors.grey.shade50,
@@ -433,8 +433,8 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
                 onTap: _isCurrentUserDisabled ? null : () => _selectTimeRange(context),
                 enabled: !_isCurrentUserDisabled,
                 decoration: InputDecoration(
-                  labelText: "Khung giờ hoạt động",
-                  hintText: "Chạm để chọn giờ",
+                  labelText: "activity_time_range".tr,
+                  hintText: "tap_to_select_hour".tr,
                   prefixIcon: Icon(Icons.access_time, color: AppColors.primary),
                   suffixIcon: _isCurrentUserDisabled
                       ? null
@@ -462,7 +462,7 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
                 maxLength: 100,
                 enabled: !_isCurrentUserDisabled,
                 decoration: InputDecoration(
-                  labelText: "Hoạt động * (VD: Ăn sáng Phở Vũ)",
+                  labelText: "activity_label_hint".tr,
                   prefixIcon: Icon(Icons.explore, color: AppColors.primary),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   counterText: "",
@@ -476,7 +476,7 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
                 maxLength: 150,
                 enabled: !_isCurrentUserDisabled,
                 decoration: InputDecoration(
-                  labelText: "Địa điểm (VD: 15 Trần Hưng Đạo)",
+                  labelText: "location_label_hint".tr,
                   prefixIcon: Icon(Icons.pin_drop, color: AppColors.primary),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   counterText: "",
@@ -494,7 +494,7 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
                   CurrencyInputFormatter(),
                 ],
                 decoration: InputDecoration(
-                  labelText: "Chi phí dự kiến (đ)",
+                  labelText: "estimated_cost_label_input".tr,
                   prefixIcon: Icon(Icons.attach_money, color: AppColors.primary),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
@@ -508,7 +508,7 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
                 maxLines: 2,
                 enabled: !_isCurrentUserDisabled,
                 decoration: InputDecoration(
-                  labelText: "Ghi chú",
+                  labelText: "notes".tr,
                   prefixIcon: Icon(Icons.note, color: AppColors.primary),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   counterText: "",
@@ -521,7 +521,7 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
       actions: [
         TextButton(
           onPressed: _isSaving ? null : () => Get.back(),
-          child: Text(_isCurrentUserDisabled ? "ĐÓNG" : "HỦY", style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+          child: Text(_isCurrentUserDisabled ? "close_caps".tr : "cancel_caps".tr, style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
         ),
         if (!_isCurrentUserDisabled)
           ElevatedButton(
@@ -540,7 +540,7 @@ class _ItineraryDetailDialogState extends State<ItineraryDetailDialog> {
                       strokeWidth: 2,
                     ),
                   )
-                : const Text("LƯU", style: TextStyle(fontWeight: FontWeight.bold)),
+                : Text("save_caps".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
       ],
     );

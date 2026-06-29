@@ -37,7 +37,7 @@ class GhostController extends GetxController {
       Get.back(); // Đóng popup
 
       Future.delayed(const Duration(milliseconds: 300), () {
-        ToastUtil.showSuccess("Thành công", "Đã thêm ${names.length} người. Nhớ cập nhật khoản chi cũ nếu muốn họ gánh chung nhé!");
+        ToastUtil.showSuccess("success".tr, "ghost_added_success".trParams({'count': names.length.toString()}));
       });
 
       // Load lại TOÀN BỘ dữ liệu Trip Detail (Members, Expenses, Settlements)
@@ -45,7 +45,7 @@ class GhostController extends GetxController {
         Get.find<TripDetailController>(tag: tripId.toString()).fetchData(isSilent: true);
       }
     } else {
-      ToastUtil.showError("Lỗi", result.message ?? "Không thể thêm");
+      ToastUtil.showError("error".tr, result.message ?? "cannot_add_member".tr);
     }
     isLoading.value = false;
   }

@@ -67,14 +67,14 @@ class _QRScannerScreenState extends State<QRScannerScreen> with SingleTickerProv
         if (code != null && code.isNotEmpty) {
           Get.back(result: code);
         } else {
-          ToastUtil.showError("Không tìm thấy mã QR", "Vui lòng chọn ảnh chứa mã QR rõ ràng hơn.");
+          ToastUtil.showError("qr_not_found".tr, "qr_not_found_desc".tr);
         }
       } else {
-        ToastUtil.showError("Không tìm thấy mã QR", "Vui lòng chọn ảnh chứa mã QR rõ ràng hơn.");
+        ToastUtil.showError("qr_not_found".tr, "qr_not_found_desc".tr);
       }
     } catch (e) {
       debugPrint('[QRScanner] Error scanning from gallery: $e');
-      ToastUtil.showError("Lỗi quét ảnh", "Đã xảy ra lỗi khi quét mã QR từ ảnh.");
+      ToastUtil.showError("qr_scan_error".tr, "qr_scan_error_desc".tr);
     }
   }
 
@@ -149,10 +149,10 @@ class _QRScannerScreenState extends State<QRScannerScreen> with SingleTickerProv
               top: cutoutRect.bottom + 24,
               left: 32,
               right: 32,
-              child: const Text(
-                "Đặt mã QR vào trong khung để quét",
+              child: Text(
+                "qr_instructions".tr,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 15,
                   fontWeight: FontWeight.w500,
@@ -179,9 +179,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> with SingleTickerProv
                     onPressed: () => Get.back(),
                   ),
                   const SizedBox(width: 8),
-                  const Text(
-                    "Quét mã QR",
-                    style: TextStyle(
+                  Text(
+                    "scan_qr".tr,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,

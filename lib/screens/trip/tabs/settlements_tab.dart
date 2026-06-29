@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../widgets/empty_state.dart';
 import '../../../controllers/create_payment_controller.dart';
@@ -36,7 +36,7 @@ class _SettlementsTabState extends State<SettlementsTab> with AutomaticKeepAlive
             physics: const AlwaysScrollableScrollPhysics(),
             children: [
               SizedBox(height: Get.height * 0.25),
-              const EmptyState(text: "Mọi người đang hòa tiền nhau,\nhoặc chưa có khoản chi nào!"),
+              EmptyState(text: "everyone_balanced".tr),
             ],
           ),
         );
@@ -44,14 +44,14 @@ class _SettlementsTabState extends State<SettlementsTab> with AutomaticKeepAlive
 
       return Column(
         children: [
-          // KHU VỰC TÌM KIẾM
+          // KHU V盻ｰC Tﾃ勲 KI蘯ｾM
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: TextField(
               onChanged: (val) => controller.searchQuery.value = val,
               textAlignVertical: TextAlignVertical.center,
               decoration: InputDecoration(
-                hintText: "Tìm theo tên thành viên...",
+                hintText: "search_member_hint".tr,
                 prefixIcon: const Padding(
                   padding: EdgeInsets.only(left: 12, right: 8),
                   child: Icon(Icons.search, size: 20),
@@ -69,7 +69,7 @@ class _SettlementsTabState extends State<SettlementsTab> with AutomaticKeepAlive
               ),
             ),
           ),
-          // KHU VỰC LỌC VÀ SẮP XẾP
+          // KHU V盻ｰC L盻靴 Vﾃ S蘯ｮP X蘯ｾP
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
@@ -78,7 +78,7 @@ class _SettlementsTabState extends State<SettlementsTab> with AutomaticKeepAlive
                 Row(
                   children: [
                     FilterChip(
-                      label: const Text("Tất cả", style: TextStyle(fontSize: 11)),
+                      label: Text("all".tr, style: const TextStyle(fontSize: 11)),
                       selected: !controller.filterOnlyMe.value,
                       onSelected: (val) => controller.filterOnlyMe.value = false,
                       selectedColor: AppColors.primary.withValues(alpha: 0.15),
@@ -87,7 +87,7 @@ class _SettlementsTabState extends State<SettlementsTab> with AutomaticKeepAlive
                     ),
                     const SizedBox(width: 8),
                     FilterChip(
-                      label: const Text("Chỉ mình tôi", style: TextStyle(fontSize: 11)),
+                      label: Text("only_me".tr, style: const TextStyle(fontSize: 11)),
                       selected: controller.filterOnlyMe.value,
                       onSelected: (val) => controller.filterOnlyMe.value = true,
                       selectedColor: AppColors.primary.withValues(alpha: 0.15),
@@ -104,22 +104,22 @@ class _SettlementsTabState extends State<SettlementsTab> with AutomaticKeepAlive
                       const SizedBox(width: 4),
                       Text(
                         controller.sortOrder.value == "highest"
-                            ? "Nợ nhiều nhất"
+                            ? "N盻｣ nhi盻「 nh蘯･t"
                             : controller.sortOrder.value == "lowest"
-                                ? "Nợ thấp nhất"
+                                ? "N盻｣ th蘯･p nh蘯･t"
                                 : controller.sortOrder.value == "az"
-                                    ? "Người nợ A-Z"
-                                    : "Người nợ Z-A",
+                                    ? "Ngﾆｰ盻拱 n盻｣ A-Z"
+                                    : "Ngﾆｰ盻拱 n盻｣ Z-A",
                         style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 11),
                       ),
                     ],
                   ),
                   onSelected: (val) => controller.sortOrder.value = val,
                   itemBuilder: (context) => [
-                    const PopupMenuItem(value: "highest", child: Text("Nợ nhiều nhất")),
-                    const PopupMenuItem(value: "lowest", child: Text("Nợ thấp nhất")),
-                    const PopupMenuItem(value: "az", child: Text("Người nợ A-Z")),
-                    const PopupMenuItem(value: "za", child: Text("Người nợ Z-A")),
+                    const PopupMenuItem(value: "highest", child: Text("N盻｣ nhi盻「 nh蘯･t")),
+                    const PopupMenuItem(value: "lowest", child: Text("N盻｣ th蘯･p nh蘯･t")),
+                    const PopupMenuItem(value: "az", child: Text("Ngﾆｰ盻拱 n盻｣ A-Z")),
+                    const PopupMenuItem(value: "za", child: Text("Ngﾆｰ盻拱 n盻｣ Z-A")),
                   ],
                 ),
               ],
@@ -134,7 +134,7 @@ class _SettlementsTabState extends State<SettlementsTab> with AutomaticKeepAlive
                   children: [
                     Container(width: 4, height: 16, decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(2))),
                     const SizedBox(width: 8),
-                    const Text("QUYẾT TOÁN", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                    Text("settlement_caps".tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                   ],
                 ),
                 GestureDetector(
@@ -148,7 +148,7 @@ class _SettlementsTabState extends State<SettlementsTab> with AutomaticKeepAlive
                     children: [
                       Icon(Icons.people_outline, size: 16, color: AppColors.primary),
                       const SizedBox(width: 4),
-                      Text("Thanh toán hộ", style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13)),
+                      Text("pay_on_behalf".tr, style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13)),
                     ],
                   ),
                 ),
@@ -161,14 +161,14 @@ class _SettlementsTabState extends State<SettlementsTab> with AutomaticKeepAlive
               onRefresh: () async => widget.mainController.fetchData(),
               child: controller.filteredSettlements.isEmpty
                   ? ListView(
-                      children: const [
-                        SizedBox(height: 80),
+                      children: [
+                        const SizedBox(height: 80),
                         Center(
                           child: Column(
                             children: [
-                              Icon(Icons.search_off, size: 60, color: Colors.grey),
-                              SizedBox(height: 12),
-                              Text("Không tìm thấy kết quả phù hợp", style: TextStyle(color: Colors.grey)),
+                              const Icon(Icons.search_off, size: 60, color: Colors.grey),
+                              const SizedBox(height: 12),
+                              Text("no_matching_results".tr, style: const TextStyle(color: Colors.grey)),
                             ],
                           ),
                         ),
@@ -208,7 +208,7 @@ class _SettlementsTabState extends State<SettlementsTab> with AutomaticKeepAlive
                                           children: [
                                             CircleAvatar(backgroundColor: Colors.red[100], child: Text(fromInitial, style: const TextStyle(color: Colors.red))),
                                             const SizedBox(height: 8),
-                                            Text(settle.fromUserName ?? "Ẩn danh", style: const TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis)
+                                            Text(settle.fromUserName ?? "anonymous".tr, style: const TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis)
                                           ]
                                       )
                                   ),
@@ -216,14 +216,14 @@ class _SettlementsTabState extends State<SettlementsTab> with AutomaticKeepAlive
                                       flex: 2,
                                       child: Column(
                                           children: [
-                                            Text("${CurrencyUtils.formatNumber(settle.amount)} đ", style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Colors.orange)),
+                                             Text("${CurrencyUtils.formatNumber(settle.amount)} đ", style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Colors.orange)),
                                             Image.asset(
                                               'assets/images/payment.png',
                                               width: 32, 
                                               height: 32,
                                               errorBuilder: (context, error, stackTrace) => const Icon(Icons.arrow_forward, color: Colors.grey),
                                             ),
-                                            const Text("Bấm để trả tiền", style: TextStyle(fontSize: 11, color: Colors.blue, decoration: TextDecoration.underline))
+                                             Text("click_to_pay".tr, style: const TextStyle(fontSize: 11, color: Colors.blue, decoration: TextDecoration.underline))
                                           ]
                                       )
                                   ),
@@ -232,7 +232,7 @@ class _SettlementsTabState extends State<SettlementsTab> with AutomaticKeepAlive
                                           children: [
                                             CircleAvatar(backgroundColor: Colors.green[100], child: Text(toInitial, style: const TextStyle(color: Colors.green))),
                                             const SizedBox(height: 8),
-                                            Text(settle.toUserName ?? "Ẩn danh", style: const TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis)
+                                            Text(settle.toUserName ?? "anonymous".tr, style: const TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis)
                                           ]
                                       )
                                   ),
@@ -274,11 +274,11 @@ class _SettlementsTabState extends State<SettlementsTab> with AutomaticKeepAlive
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text("Thanh toán cho ${settle.toUserName}", textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.orange)),
+        title: Text("pay_to_member".trParams({'name': settle.toUserName ?? ''}), textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.orange)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text("Số tiền cần chuyển: ${CurrencyUtils.formatNumber(settle.amount)} đ", style: const TextStyle(fontSize: 16)),
+            Text("amount_to_transfer".trParams({'amount': CurrencyUtils.formatNumber(settle.amount)}), style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 16),
             if (hasData && qrImageUrl != null)
               Container(
@@ -291,7 +291,7 @@ class _SettlementsTabState extends State<SettlementsTab> with AutomaticKeepAlive
                           if (progress == null) return child;
                           return const SizedBox(height: 200, child: Center(child: CircularProgressIndicator()));
                         },
-                        errorBuilder: (context, error, stackTrace) => const Padding(padding: EdgeInsets.all(16), child: Text("Lỗi không thể tải mã QR", textAlign: TextAlign.center))
+                        errorBuilder: (context, error, stackTrace) => Padding(padding: const EdgeInsets.all(16), child: Text("failed_load_qr".tr, textAlign: TextAlign.center))
                     )
                 ),
               )
@@ -303,16 +303,16 @@ class _SettlementsTabState extends State<SettlementsTab> with AutomaticKeepAlive
                       children: [
                         const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 40),
                         const SizedBox(height: 8),
-                        Text("${settle.toUserName} chưa cài đặt thông tin nhận tiền trên ứng dụng.", textAlign: TextAlign.center, style: const TextStyle(color: Colors.red)),
+                        Text("member_no_payment_info".trParams({'name': settle.toUserName ?? ''}), textAlign: TextAlign.center, style: const TextStyle(color: Colors.red)),
                         const SizedBox(height: 4),
-                        const Text("Vui lòng liên hệ trực tiếp để lấy số tài khoản!", textAlign: TextAlign.center, style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold))
+                        Text("contact_directly_for_account".tr, textAlign: TextAlign.center, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold))
                       ]
                   )
               ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text("ĐÓNG", style: TextStyle(color: Colors.grey))),
+          TextButton(onPressed: () => Get.back(), child: Text("close".tr, style: const TextStyle(color: Colors.grey))),
           ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
               onPressed: () {
@@ -322,10 +322,12 @@ class _SettlementsTabState extends State<SettlementsTab> with AutomaticKeepAlive
                     isScrollControlled: true
                 ).then((_) => Get.delete<CreatePaymentController>(tag: 'payment_${settle.toUserId}'));
               },
-              child: const Text("TÔI ĐÃ CHUYỂN TIỀN")
+              child: Text("i_have_transferred".tr)
           )
         ],
       ),
     );
   }
 }
+
+

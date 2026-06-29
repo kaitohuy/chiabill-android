@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../utils/toast_util.dart';
 import '../../../data/repositories/trip_repository.dart';
@@ -19,7 +19,7 @@ class TripActionsHelper {
             const Divider(),
             ListTile(
               leading: const Icon(Icons.edit, color: Colors.blue),
-              title: const Text("Sửa thông tin"),
+              title: const Text("S盻ｭa thﾃｴng tin"),
               onTap: () {
                 Get.back();
                 Get.bottomSheet(EditTripDialog(trip: trip, isFromHome: true), isScrollControlled: true);
@@ -27,7 +27,7 @@ class TripActionsHelper {
             ),
             ListTile(
               leading: const Icon(Icons.delete, color: Colors.red),
-              title: const Text("Xóa chuyến đi", style: TextStyle(color: Colors.red)),
+              title: const Text("Xﾃｳa chuy蘯ｿn ﾄ訴", style: TextStyle(color: Colors.red)),
               onTap: () {
                 Get.back();
                 confirmDeleteTrip(trip);
@@ -44,8 +44,8 @@ class TripActionsHelper {
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text("Xóa chuyến đi?", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20), textAlign: TextAlign.center),
-        content: const Text("Chuyến đi này sẽ bị xóa. Bạn vẫn có thể phục hồi lại trong Thùng rác.", textAlign: TextAlign.center, style: TextStyle(fontSize: 15)),
+        title: const Text("Xﾃｳa chuy蘯ｿn ﾄ訴?", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20), textAlign: TextAlign.center),
+        content: const Text("Chuy蘯ｿn ﾄ訴 nﾃy s蘯ｽ b盻・xﾃｳa. B蘯｡n v蘯ｫn cﾃｳ th盻・ph盻･c h盻妬 l蘯｡i trong Thﾃｹng rﾃ｡c.", textAlign: TextAlign.center, style: TextStyle(fontSize: 15)),
         actionsPadding: const EdgeInsets.only(bottom: 16, right: 16, left: 16),
         actionsAlignment: MainAxisAlignment.spaceEvenly,
         actions: [
@@ -57,7 +57,7 @@ class TripActionsHelper {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24))
             ),
             onPressed: () => Get.back(),
-            child: const Text("HỦY", style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text("cancel_caps_alt".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -70,18 +70,19 @@ class TripActionsHelper {
               Get.back();
               final result = await TripRepository().deleteTrip(trip.id!);
               if (result.success) {
-                ToastUtil.showSuccess("Thành công", "Đã xóa chuyến đi");
+                ToastUtil.showSuccess("Thﾃnh cﾃｴng", "ﾄ静｣ xﾃｳa chuy蘯ｿn ﾄ訴");
                 if (Get.isRegistered<HomeController>()) {
                   Get.find<HomeController>().fetchTrips(isRefresh: true);
                 }
               } else {
-                ToastUtil.showError("Lỗi", result.message ?? "Không thể xóa chuyến đi");
+                ToastUtil.showError("error".tr, result.message ?? "cannot_delete".tr);
               }
             },
-            child: const Text("XÓA", style: TextStyle(fontWeight: FontWeight.bold)),
+            child: const Text("Xﾃ鄭", style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
     );
   }
 }
+

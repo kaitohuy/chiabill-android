@@ -80,15 +80,15 @@ class _MainScreenState extends State<MainScreen> {
                 child: Icon(Icons.rocket_launch, color: AppColors.primary, size: 48),
               ),
               const SizedBox(height: 20),
-              const Text(
-                "Chào mừng tới DuliVie! 🚀",
-                style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+              Text(
+                "guide_welcome_title".tr,
+                style: const TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
-              const Text(
-                "Để giúp bạn làm quen nhanh với ứng dụng chia tiền nhóm và lên lịch trình du lịch, chúng tôi đã chuẩn bị sẵn một tour hướng dẫn nhanh.",
-                style: TextStyle(fontSize: 13.5, color: Colors.black87, height: 1.5),
+              Text(
+                "guide_welcome_desc".tr,
+                style: const TextStyle(fontSize: 13.5, color: Colors.black87, height: 1.5),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
@@ -109,7 +109,7 @@ class _MainScreenState extends State<MainScreen> {
                         userGuideController.setGuideEnabled('tourism', false);
                         Get.back();
                       },
-                      child: const Text("Để sau", style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: Text("guide_later".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -127,7 +127,7 @@ class _MainScreenState extends State<MainScreen> {
                         Get.back();
                         _startHomeGuide(userGuideController);
                       },
-                      child: const Text("Khám phá ngay", style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: Text("guide_explore_now".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ],
@@ -150,26 +150,26 @@ class _MainScreenState extends State<MainScreen> {
         final targets = [
           GuideTarget(
             key: userGuideController.fabTripKey,
-            title: "Thêm chuyến đi mới",
-            description: "Nhấp vào đây để tạo hành trình du lịch mới, thêm thành viên và quản lý các hóa đơn chi tiêu chung.",
+            title: "guide_add_trip_title".tr,
+            description: "guide_add_trip_desc".tr,
             isCircle: true,
           ),
           GuideTarget(
             key: userGuideController.joinTripKey,
-            title: "Tham gia bằng mã/link",
-            description: "Nhập nhóm cực nhanh bằng cách quét mã QR hoặc nhập mã mời tham gia chuyến đi từ bạn bè.",
+            title: "guide_join_trip_title".tr,
+            description: "guide_join_trip_desc".tr,
             isCircle: true,
           ),
           GuideTarget(
             key: userGuideController.calculatorKey,
-            title: "Máy tính nhanh",
-            description: "Mở máy tính mini để tính toán nhẩm các khoản tiền nhanh chóng mà không cần thoát ứng dụng.",
+            title: "guide_calc_title".tr,
+            description: "guide_calc_desc".tr,
             isCircle: true,
           ),
           GuideTarget(
             key: userGuideController.bellKey,
-            title: "Hộp thư thông báo",
-            description: "Nơi cập nhật lịch sử hoạt động, các yêu cầu thanh toán hoặc tin nhắc nhở từ các thành viên trong nhóm.",
+            title: "guide_notify_title".tr,
+            description: "guide_notify_desc".tr,
             isCircle: true,
           ),
         ];
@@ -252,11 +252,11 @@ class _MainScreenState extends State<MainScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _buildNavItem(0, Icons.home_outlined, Icons.home, "Chuyến đi"),
-                    _buildNavItem(1, Icons.pie_chart_outline, Icons.pie_chart, "Thống kê"),
+                    _buildNavItem(0, Icons.home_outlined, Icons.home, "nav_trips".tr),
+                    _buildNavItem(1, Icons.pie_chart_outline, Icons.pie_chart, "nav_stats".tr),
                     const SizedBox(width: 48), // Khoảng trống cho FAB
-                    _buildNavItem(2, Icons.map_outlined, Icons.map, "Du lịch"),
-                    _buildNavItem(3, Icons.person_outline, Icons.person, "Cá nhân"),
+                    _buildNavItem(2, Icons.map_outlined, Icons.map, "nav_tourism".tr),
+                    _buildNavItem(3, Icons.person_outline, Icons.person, "nav_profile".tr),
                   ],
                 ),
               ),

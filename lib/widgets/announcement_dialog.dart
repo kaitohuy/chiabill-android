@@ -269,7 +269,7 @@ class _AnnouncementDialogContent extends StatelessWidget {
                 Icon(Icons.qr_code_scanner_rounded, size: 14, color: config.primaryColor),
                 const SizedBox(width: 4),
                 Text(
-                  'Quét mã để chuyển khoản nhanh',
+                  'scan_qr_transfer'.tr,
                   style: TextStyle(
                     fontSize: 12,
                     color: config.primaryColor.withValues(alpha: 0.9),
@@ -288,7 +288,7 @@ class _AnnouncementDialogContent extends StatelessWidget {
                 if (announcement.suggestedAmount != null)
                   _buildInfoRow(
                     icon: Icons.savings_rounded,
-                    label: 'Số tiền gợi ý',
+                    label: 'suggested_amount'.tr,
                     value: announcement.formattedAmount,
                     highlight: true,
                     config: config,
@@ -314,7 +314,7 @@ class _AnnouncementDialogContent extends StatelessWidget {
           if (info['bank'] != null)
             _buildInfoRow(
               icon: Icons.account_balance_rounded,
-              label: 'Ngân hàng',
+              label: 'bank_label'.tr,
               value: info['bank'].toString(),
               config: config,
               context: context,
@@ -323,7 +323,7 @@ class _AnnouncementDialogContent extends StatelessWidget {
             const SizedBox(height: 10),
             _buildInfoRow(
               icon: Icons.credit_card_rounded,
-              label: 'Số tài khoản',
+              label: 'account_number_label'.tr,
               value: info['account'].toString(),
               copyable: true,
               config: config,
@@ -334,7 +334,7 @@ class _AnnouncementDialogContent extends StatelessWidget {
             const SizedBox(height: 10),
             _buildInfoRow(
               icon: Icons.person_rounded,
-              label: 'Chủ tài khoản',
+              label: 'account_owner_label'.tr,
               value: info['name'].toString().toUpperCase(),
               config: config,
               context: context,
@@ -414,8 +414,8 @@ class _AnnouncementDialogContent extends StatelessWidget {
                   Clipboard.setData(ClipboardData(text: value));
                   Get.closeAllSnackbars();
                   Get.snackbar(
-                    'Thành công',
-                    'Đã sao chép số tài khoản',
+                    'success'.tr,
+                    'copied_account_success'.tr,
                     snackPosition: SnackPosition.BOTTOM,
                     backgroundColor: config.primaryColor,
                     colorText: Colors.white,
@@ -436,7 +436,7 @@ class _AnnouncementDialogContent extends StatelessWidget {
                       Icon(Icons.copy_rounded, size: 13, color: config.primaryColor),
                       const SizedBox(width: 4),
                       Text(
-                        'Sao chép',
+                        'btn_copy'.tr,
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
@@ -477,8 +477,8 @@ class _AnnouncementDialogContent extends StatelessWidget {
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
-                child: const Text(
-                  'Bỏ qua',
+                child: Text(
+                  'btn_skip'.tr,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
@@ -518,11 +518,11 @@ class _AnnouncementDialogContent extends StatelessWidget {
   }
 
   String _defaultActionLabel() {
-    if (announcement.isUpdate) return 'Cập nhật ngay';
-    if (announcement.isDonate) return 'Đã ủng hộ 🙏';
-    if (announcement.isPayment) return 'Đã thanh toán ✓';
-    if (announcement.isMaintenance) return 'Đã hiểu';
-    return 'Đóng';
+    if (announcement.isUpdate) return 'btn_update_now'.tr;
+    if (announcement.isDonate) return 'btn_supported'.tr;
+    if (announcement.isPayment) return 'btn_paid'.tr;
+    if (announcement.isMaintenance) return 'btn_understood'.tr;
+    return 'btn_close'.tr;
   }
 }
 
@@ -558,7 +558,7 @@ class _AnnouncementTypeConfig {
           secondaryColor: AppColors.primaryLight,
           backgroundColor: AppColors.primary.withValues(alpha: 0.06),
           icon: Icons.system_update_rounded,
-          label: 'CẬP NHẬT',
+          label: 'type_update'.tr,
         );
       case 'PAYMENT':
         return _AnnouncementTypeConfig(
@@ -566,7 +566,7 @@ class _AnnouncementTypeConfig {
           secondaryColor: const Color(0xFFF2C94C), // Light Gold
           backgroundColor: const Color(0xFFF2994A).withValues(alpha: 0.06),
           icon: Icons.payment_rounded,
-          label: 'THANH TOÁN',
+          label: 'type_payment'.tr,
         );
       case 'DONATE':
         return _AnnouncementTypeConfig(
@@ -574,7 +574,7 @@ class _AnnouncementTypeConfig {
           secondaryColor: const Color(0xFFF06292), // Light Pink
           backgroundColor: const Color(0xFFEC407A).withValues(alpha: 0.06),
           icon: Icons.favorite_rounded,
-          label: 'ỦNG HỘ',
+          label: 'type_donate'.tr,
         );
       case 'PROMOTION':
         return _AnnouncementTypeConfig(
@@ -582,7 +582,7 @@ class _AnnouncementTypeConfig {
           secondaryColor: const Color(0xFFBB8FCE), // Light Purple
           backgroundColor: const Color(0xFF9B59B6).withValues(alpha: 0.06),
           icon: Icons.celebration_rounded,
-          label: 'TÍNH NĂNG MỚI',
+          label: 'type_promotion'.tr,
         );
       case 'MAINTENANCE':
         return _AnnouncementTypeConfig(
@@ -590,7 +590,7 @@ class _AnnouncementTypeConfig {
           secondaryColor: const Color(0xFFB0BEC5), // Light Slate
           backgroundColor: const Color(0xFF78909C).withValues(alpha: 0.06),
           icon: Icons.build_rounded,
-          label: 'BẢO TRÌ',
+          label: 'type_maintenance'.tr,
         );
       case 'ANNOUNCEMENT':
       default:
@@ -599,7 +599,7 @@ class _AnnouncementTypeConfig {
           secondaryColor: const Color(0xFF56CCF2), // Light Blue
           backgroundColor: const Color(0xFF2F80ED).withValues(alpha: 0.06),
           icon: Icons.campaign_rounded,
-          label: 'THÔNG BÁO',
+          label: 'type_announcement'.tr,
         );
     }
   }

@@ -26,7 +26,7 @@ class CalculatorHistorySheet extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text("Lịch sử", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text("calc_history_title".tr, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 TextButton.icon(
                   onPressed: () {
                     if (controller.history.isNotEmpty) {
@@ -34,7 +34,7 @@ class CalculatorHistorySheet extends StatelessWidget {
                     }
                   },
                   icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
-                  label: const Text("Xóa", style: TextStyle(color: Colors.red)),
+                  label: Text("delete".tr, style: const TextStyle(color: Colors.red)),
                 )
               ],
             ),
@@ -42,8 +42,8 @@ class CalculatorHistorySheet extends StatelessWidget {
           Expanded(
             child: Obx(() {
               if (controller.history.isEmpty) {
-                return const Center(
-                  child: Text("Chưa có lịch sử tính toán", style: TextStyle(color: Colors.grey, fontSize: 16)),
+                return Center(
+                  child: Text("no_calc_history".tr, style: const TextStyle(color: Colors.grey, fontSize: 16)),
                 );
               }
               
@@ -86,16 +86,16 @@ class CalculatorHistorySheet extends StatelessWidget {
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text("Xóa lịch sử?", style: TextStyle(fontWeight: FontWeight.bold)),
-        content: const Text("Bạn có chắc chắn muốn xóa toàn bộ lịch sử tính toán?"),
+        title: Text("clear_history_title".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
+        content: Text("clear_history_confirm".tr),
         actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text("Hủy", style: TextStyle(color: Colors.grey))),
+          TextButton(onPressed: () => Get.back(), child: Text("cancel".tr, style: const TextStyle(color: Colors.grey))),
           TextButton(
             onPressed: () {
               Get.back();
               controller.clearHistory();
             },
-            child: const Text("Xóa", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+            child: Text("delete".tr, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
           ),
         ],
       ),

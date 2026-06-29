@@ -14,7 +14,7 @@ class ThemeSettingsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text("Tùy chỉnh giao diện", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text("theme_settings_title".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.primaryDark,
         elevation: 0,
@@ -25,9 +25,9 @@ class ThemeSettingsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "Chọn một chủ đề màu sắc yêu thích. Giao diện sẽ tự động được làm mới ngay lập tức.",
-              style: TextStyle(fontSize: 14, color: Colors.grey, height: 1.5),
+            Text(
+              "theme_settings_desc".tr,
+              style: const TextStyle(fontSize: 14, color: Colors.grey, height: 1.5),
             ),
             const SizedBox(height: 30),
             Obx(() {
@@ -76,7 +76,7 @@ class ThemeSettingsScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            preset.name,
+                            "theme_${preset.id}".tr,
                             style: TextStyle(
                               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                               color: isSelected ? preset.primary : Colors.black87,
@@ -93,14 +93,14 @@ class ThemeSettingsScreen extends StatelessWidget {
             const SizedBox(height: 35),
             const Divider(),
             const SizedBox(height: 20),
-            const Text(
-              "Kích thước chữ hiển thị",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            Text(
+              "font_size_label".tr,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            const Text(
-              "Kéo thanh trượt bên dưới để thu nhỏ hoặc phóng to cỡ chữ của ứng dụng.",
-              style: TextStyle(fontSize: 13, color: Colors.grey, height: 1.4),
+            Text(
+              "font_size_desc".tr,
+              style: const TextStyle(fontSize: 13, color: Colors.grey, height: 1.4),
             ),
             const SizedBox(height: 20),
             Container(
@@ -121,7 +121,7 @@ class ThemeSettingsScreen extends StatelessWidget {
                     ),
                     child: Center(
                       child: Text(
-                        "Aa - Xem trước cỡ chữ",
+                        "font_preview_label".tr,
                         style: TextStyle(
                           fontSize: 16, 
                           fontWeight: FontWeight.bold,
@@ -133,17 +133,17 @@ class ThemeSettingsScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Obx(() {
                     final scale = themeController.textScale.value;
-                    String label = "Mặc định";
+                    String label = "font_size_default".tr;
                     if (scale < 0.85) {
-                      label = "Rất nhỏ (80%)";
+                      label = "font_size_very_small".tr;
                     } else if (scale < 0.95) {
-                      label = "Nhỏ (90%)";
+                      label = "font_size_small".tr;
                     } else if (scale < 1.05) {
-                      label = "Mặc định (100%)";
+                      label = "font_size_default_percent".tr;
                     } else if (scale < 1.15) {
-                      label = "Lớn (110%)";
+                      label = "font_size_large".tr;
                     } else {
-                      label = "Rất lớn (120%)";
+                      label = "font_size_very_large".tr;
                     }
 
                     return Column(

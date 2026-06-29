@@ -39,7 +39,7 @@ class _CreateInviteDialogState extends State<CreateInviteDialog> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text("Mã mời tham gia", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text("join_invite_code".tr, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 20),
                 QrImageView(
                   data: inviteCode,
@@ -65,7 +65,7 @@ class _CreateInviteDialogState extends State<CreateInviteDialog> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                     icon: const Icon(Icons.share),
-                    label: const Text("CHIA SẺ LINK", style: TextStyle(fontWeight: FontWeight.bold)),
+                    label: Text("share_link_caps".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
                     onPressed: () => widget.controller.shareInviteLink(),
                   ),
                 ),
@@ -78,14 +78,14 @@ class _CreateInviteDialogState extends State<CreateInviteDialog> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text("Tạo mã mời", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text("create_invite_code".tr, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 16),
-                const Text("Để trống để hệ thống tự sinh mã bảo mật.", textAlign: TextAlign.center, style: TextStyle(color: Colors.grey, fontSize: 13)),
+                Text("invite_code_auto_hint".tr, textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey, fontSize: 13)),
                 const SizedBox(height: 24),
                 TextField(
                   controller: customCodeController,
                   decoration: InputDecoration(
-                    hintText: "Mã tùy chỉnh...",
+                    hintText: "custom_code_hint".tr,
                     filled: true,
                     fillColor: Colors.grey[50],
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
@@ -104,7 +104,7 @@ class _CreateInviteDialogState extends State<CreateInviteDialog> {
                     onPressed: widget.controller.isLoading.value
                         ? null
                         : () => widget.controller.generateInviteCode(customCodeController.text),
-                    child: const Text("TẠO MÃ", style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: Text("generate_code_caps".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
               ],

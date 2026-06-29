@@ -62,7 +62,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
       appBar: AppBar(
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
-        title: const Text("Lịch sử chuyến đi", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text("trip_history".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.white,
@@ -70,10 +70,10 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
           labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-          tabs: const [
-            Tab(text: "GIAO DỊCH"),
-            Tab(text: "ĐÓNG QUỸ"),
-            Tab(text: "HOẠT ĐỘNG"),
+          tabs: [
+            Tab(text: "transactions_caps".tr),
+            Tab(text: "fund_contribution_caps".tr),
+            Tab(text: "activities_caps".tr),
           ],
         ),
       ),
@@ -111,7 +111,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
             physics: const AlwaysScrollableScrollPhysics(),
             children: [
               SizedBox(height: Get.height * 0.15),
-              const EmptyState(text: "Chưa có lịch sử đóng quỹ nào"),
+              EmptyState(text: "no_fund_history".tr),
             ],
           ),
         );
@@ -167,7 +167,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                             children: [
                               Expanded(
                                 child: Text(
-                                  item.contributor.name ?? "Thành viên",
+                                  item.contributor.name ?? "unnamed".tr,
                                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -181,7 +181,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
-                                  isDonate ? "DONATE" : "THU QUỸ",
+                                  isDonate ? "donate_caps".tr : "collect_fund_caps".tr,
                                   style: TextStyle(
                                     fontSize: 8,
                                     fontWeight: FontWeight.bold,
@@ -212,7 +212,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          "+${CurrencyUtils.formatNumber(item.amount)} đ",
+                          "+${CurrencyUtils.formatNumber(item.amount)} ${'currency_symbol'.tr}",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
@@ -227,7 +227,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            isConfirmed ? "Đã duyệt" : "Chờ duyệt",
+                            isConfirmed ? "approved".tr : "pending_approval".tr,
                             style: TextStyle(
                               color: isConfirmed ? Colors.green[800] : Colors.orange[800],
                               fontSize: 9,
@@ -276,7 +276,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                         children: [
                           Icon(Icons.filter_list, color: hasFilter ? Colors.white : Colors.grey.shade700, size: 16),
                           const SizedBox(width: 8),
-                          Text("Lọc hoạt động", style: TextStyle(color: hasFilter ? Colors.white : Colors.grey.shade800, fontWeight: FontWeight.bold))
+                          Text("filter_activities".tr, style: TextStyle(color: hasFilter ? Colors.white : Colors.grey.shade800, fontWeight: FontWeight.bold))
                         ]
                     ),
                   ),
@@ -308,7 +308,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                       child: Column(
                         children: [
                           SizedBox(height: Get.height * 0.05),
-                          const EmptyState(text: "Chưa có nhật ký hoạt động nào"),
+                          EmptyState(text: "no_activities_history".tr),
                         ],
                       ),
                     ),
@@ -347,40 +347,40 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                     
                     IconData actionIcon = Icons.info_outline;
                     Color actionColor = Colors.grey;
-                    String actionLabel = "Thông báo";
+                    String actionLabel = "action_notification".tr;
 
                     switch (log.action) {
                       case 'ADD_EXPENSE':
                         actionIcon = Icons.add_circle_outline;
                         actionColor = AppColors.primary;
-                        actionLabel = "Thêm mới";
+                        actionLabel = "add_new".tr;
                         break;
                       case 'EDIT_EXPENSE':
                         actionIcon = Icons.edit_note;
                         actionColor = Colors.blue;
-                        actionLabel = "Chỉnh sửa";
+                        actionLabel = "action_edit".tr;
                         break;
                       case 'DELETE_EXPENSE':
                         actionIcon = Icons.delete_forever;
                         actionColor = Colors.red;
-                        actionLabel = "Đã xóa";
+                        actionLabel = "deleted".tr;
                         break;
                       case 'ADD_MEMBER':
                         actionIcon = Icons.person_add_alt;
                         actionColor = Colors.purple;
-                        actionLabel = "Thêm người";
+                        actionLabel = "add_person".tr;
                         break;
                       case 'REMOVE_MEMBER':
                         actionIcon = Icons.person_remove_alt_1;
                         actionColor = AppColors.primary;
-                        actionLabel = "Xóa người";
+                        actionLabel = "remove_person".tr;
                         break;
                       case 'PAYMENT_REQUEST':
                       case 'PAYMENT_APPROVE':
                       case 'PAYMENT_REJECT':
                         actionIcon = Icons.payment;
                         actionColor = Colors.teal;
-                        actionLabel = "Thanh toán";
+                        actionLabel = "action_payment".tr;
                         break;
                     }
 
@@ -411,7 +411,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        log.actorName ?? "Thành viên",
+                                        log.actorName ?? "unnamed".tr,
                                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                                       ),
                                       Text(
@@ -471,14 +471,14 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
     String? tempEndDate = controller.filterHistoryEndDate.value;
 
     final Map<String, String> availableActions = {
-      'ADD_EXPENSE': 'Thêm chi phí',
-      'EDIT_EXPENSE': 'Sửa chi phí',
-      'DELETE_EXPENSE': 'Xóa chi phí',
-      'ADD_MEMBER': 'Thêm thành viên',
-      'REMOVE_MEMBER': 'Xóa thành viên',
-      'PAYMENT_REQUEST': 'Yêu cầu thanh toán',
-      'PAYMENT_APPROVE': 'Duyệt thanh toán',
-      'PAYMENT_REJECT': 'Từ chối thanh toán',
+      'ADD_EXPENSE': 'action_add_expense'.tr,
+      'EDIT_EXPENSE': 'action_edit_expense'.tr,
+      'DELETE_EXPENSE': 'action_delete_expense'.tr,
+      'ADD_MEMBER': 'action_add_member'.tr,
+      'REMOVE_MEMBER': 'action_remove_member'.tr,
+      'PAYMENT_REQUEST': 'action_payment_request'.tr,
+      'PAYMENT_APPROVE': 'action_payment_approve'.tr,
+      'PAYMENT_REJECT': 'action_payment_reject'.tr,
     };
 
     Get.bottomSheet(
@@ -497,10 +497,10 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text("Lọc hoạt động", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text("filter_activities".tr, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                       TextButton(
                           onPressed: () => setState(() { tempActions.clear(); tempStartDate = null; tempEndDate = null; }),
-                          child: const Text("Xóa lọc", style: TextStyle(color: Colors.red))
+                          child: Text("clear_filter".tr, style: const TextStyle(color: Colors.red))
                       )
                     ],
                   ),
@@ -511,7 +511,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text("Loại hoạt động:", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                          Text("activity_type_label".tr, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
                           const SizedBox(height: 8),
                           Wrap(
                             spacing: 8, runSpacing: 8,
@@ -536,7 +536,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                             }).toList(),
                           ),
                           const SizedBox(height: 24),
-                          const Text("Thời gian:", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                          Text("time_label".tr, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
                           const SizedBox(height: 8),
                           InkWell(
                             onTap: () async {
@@ -551,10 +551,10 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                                         end: DateTime.parse(tempEndDate!),
                                       )
                                     : null,
-                                helpText: "Chọn khoảng thời gian",
-                                cancelText: "Hủy",
-                                confirmText: "Lưu",
-                                saveText: "Lưu",
+                                helpText: "select_time_range".tr,
+                                cancelText: "cancel_caps".tr,
+                                confirmText: "apply_caps".tr,
+                                saveText: "apply_caps".tr,
                                 builder: (context, child) {
                                   return Theme(
                                     data: Theme.of(context).copyWith(
@@ -580,10 +580,10 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                                   Text(
                                     tempStartDate != null && tempEndDate != null
                                         ? "${tempStartDate!.substring(8, 10)}/${tempStartDate!.substring(5, 7)}/${tempStartDate!.substring(0, 4)} - ${tempEndDate!.substring(8, 10)}/${tempEndDate!.substring(5, 7)}/${tempEndDate!.substring(0, 4)}"
-                                        : "Chọn khoảng thời gian",
+                                        : "select_time_range".tr,
                                     style: TextStyle(color: tempStartDate != null ? Colors.black87 : Colors.grey.shade600),
                                   ),
-                                  Icon(Icons.calendar_today, size: 18, color: Colors.blue),
+                                  const Icon(Icons.calendar_today, size: 18, color: Colors.blue),
                                 ],
                               ),
                             ),
@@ -593,7 +593,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                               alignment: Alignment.centerRight,
                               child: TextButton(
                                 onPressed: () => setState(() { tempStartDate = null; tempEndDate = null; }),
-                                child: const Text("Xóa ngày", style: TextStyle(color: Colors.red, fontSize: 12)),
+                                child: Text("clear_date".tr, style: const TextStyle(color: Colors.red, fontSize: 12)),
                               ),
                             ),
                           const SizedBox(height: 16),
@@ -609,7 +609,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                           Get.back();
                           controller.applyHistoryFilter(actions: tempActions, startDate: tempStartDate, endDate: tempEndDate);
                         },
-                        child: const Text("ÁP DỤNG", style: TextStyle(fontWeight: FontWeight.bold))
+                        child: Text("apply_caps".tr, style: const TextStyle(fontWeight: FontWeight.bold))
                     ),
                   )
                 ],

@@ -34,7 +34,7 @@ class CreatePaymentBottomSheet extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Thanh toán cho ${settlement.toUserName}", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green)),
+              Text("pay_to_member".trParams({'name': settlement.toUserName ?? ''}), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green)),
               IconButton(icon: const Icon(Icons.close), onPressed: () => Get.back()),
             ],
           ),
@@ -47,16 +47,16 @@ class CreatePaymentBottomSheet extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildStat("Nợ gốc", settlement.originalAmount, Colors.grey[700]!),
-                _buildStat("Đã trả", settlement.paidAmount, Colors.green),
-                _buildStat("Còn lại", settlement.amount, Colors.redAccent),
+                _buildStat("original_debt".tr, settlement.originalAmount, Colors.grey[700]!),
+                _buildStat("paid".tr, settlement.paidAmount, Colors.green),
+                _buildStat("remaining".tr, settlement.amount, Colors.redAccent),
               ],
             ),
           ),
           const SizedBox(height: 24),
 
           // NHẬP SỐ TIỀN
-          const Text("Số tiền thanh toán đợt này", style: TextStyle(fontWeight: FontWeight.bold)),
+          Text("payment_amount_this_time".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           TextField(
             controller: controller.amountController, // Tên controller của bạn
@@ -78,7 +78,7 @@ class CreatePaymentBottomSheet extends StatelessWidget {
           const SizedBox(height: 24),
 
           // UPLOAD ẢNH
-          const Text("Ảnh minh chứng chuyển khoản (*)", style: TextStyle(fontWeight: FontWeight.bold)),
+          Text("transfer_proof_image".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
           Expanded(
             child: Obx(() {
@@ -93,12 +93,12 @@ class CreatePaymentBottomSheet extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: image == null
-                      ? const Column(
+                      ? Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.add_a_photo, size: 50, color: Colors.grey),
-                      SizedBox(height: 8),
-                      Text("Bấm để tải ảnh lên", style: TextStyle(color: Colors.grey)),
+                      const Icon(Icons.add_a_photo, size: 50, color: Colors.grey),
+                      const SizedBox(height: 8),
+                      Text("click_to_upload_image".tr, style: const TextStyle(color: Colors.grey)),
                     ],
                   )
                       : ClipRRect(
@@ -120,7 +120,7 @@ class CreatePaymentBottomSheet extends StatelessWidget {
               onPressed: controller.isLoading.value ? null : () => controller.submitPayment(),
               child: controller.isLoading.value
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text("GỬI YÊU CẦU DUYỆT", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  : Text("send_approval_request_caps".tr, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             ),
           )),
         ],

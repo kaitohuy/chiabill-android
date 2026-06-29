@@ -13,6 +13,7 @@ import 'services/offline_sync_service.dart';
 import 'services/alarm_service.dart';
 import 'utils/storage_util.dart';
 import 'controllers/user_guide_controller.dart';
+import 'utils/app_translations.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -96,13 +97,19 @@ class MyApp extends StatelessWidget {
     final token = GetStorage().read('token');
     final hasToken = token != null && token.toString().isNotEmpty;
 
+    // Đọc ngôn ngữ đã lưu từ bộ nhớ máy. Nếu chưa từng lưu (lần đầu cài app), mặc định tiếng Anh.
+    final String? savedLang = GetStorage().read('language');
+    final Locale initialLocale = (savedLang == 'vi') ? const Locale('vi', 'VN') : const Locale('en', 'US');
+
     return GetMaterialApp(
       title: 'DuliVie',
       debugShowCheckedModeBanner: false,
       theme: themeController.getThemeData(),
       initialRoute: hasToken ? Routes.MAIN : Routes.WELCOME,
       getPages: AppPages.routes,
-      locale: const Locale('vi', 'VN'),
+      locale: initialLocale,
+      fallbackLocale: const Locale('en', 'US'),
+      translations: AppTranslations(),
       supportedLocales: const [
         Locale('vi', 'VN'),
         Locale('en', 'US'),

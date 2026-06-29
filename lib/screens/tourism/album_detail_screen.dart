@@ -63,16 +63,16 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
         });
         
         Get.snackbar(
-          "Thành công", 
-          "Đã tải ảnh lên album ${widget.albumName}",
+          "success".tr, 
+          "upload_image_success".trParams({'album': widget.albumName}),
           backgroundColor: Colors.green,
           colorText: Colors.white,
         );
       }
     } catch (e) {
       Get.snackbar(
-        "Lỗi tải ảnh", 
-        "Không thể tải ảnh: $e",
+        "upload_image_error_title".tr, 
+        "upload_image_error".trParams({'error': e.toString()}),
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -85,12 +85,12 @@ class _AlbumDetailScreenState extends State<AlbumDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.albumName),
+        title: Text(widget.albumName.tr),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
       body: _currentImages.isEmpty
-          ? const Center(child: Text("Album này chưa có hình ảnh nào."))
+          ? Center(child: Text("empty_album".tr))
           : GridView.builder(
               padding: const EdgeInsets.all(8),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

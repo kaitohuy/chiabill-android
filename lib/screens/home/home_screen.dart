@@ -143,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      "Chào $shortName",
+                      "greeting".trParams({'name': shortName}),
                       style: TextStyle(
                         fontSize: 16,
                         color: AppColors.primaryDark,
@@ -289,7 +289,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                 controller: searchController,
                 textAlignVertical: TextAlignVertical.center,
                 decoration: InputDecoration(
-                  hintText: "Tìm chuyến đi...",
+                  hintText: "search_trip_hint".tr,
                   hintStyle: TextStyle(color: Colors.grey[500], fontSize: 14),
                   prefixIcon: const Padding(
                     padding: EdgeInsets.only(left: 12, right: 8),
@@ -328,12 +328,11 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                 dropdownColor: Colors.white,
                 icon: Icon(Icons.keyboard_arrow_down, color: AppColors.primary, size: 20),
                 style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13),
-                items: ['Tất cả', 'Tháng', 'Năm'].map((String mode) {
-                  return DropdownMenuItem<String>(
-                    value: mode,
-                    child: Text(mode),
-                  );
-                }).toList(),
+                items: [
+                  DropdownMenuItem(value: 'Tất cả', child: Text('filter_all'.tr)),
+                  DropdownMenuItem(value: 'Tháng', child: Text('filter_month'.tr)),
+                  DropdownMenuItem(value: 'Năm', child: Text('filter_year'.tr)),
+                ],
                 onChanged: (String? newMode) {
                   if (newMode != null) {
                     controller.onFilterModeChanged(newMode);
@@ -421,7 +420,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                 ),
                 child: Center(
                   child: Text(
-                    "Năm $year",
+                    "year_label".trParams({'year': year.toString()}),
                     style: TextStyle(
                       color: isSelected ? Colors.white : Colors.black87,
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -465,7 +464,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                       children: [
                         Icon(Icons.calendar_month_outlined, color: AppColors.primaryDark, size: 18),
                         const SizedBox(width: 4),
-                        Text("Đổi năm", style: TextStyle(color: AppColors.primaryDark, fontSize: 13, fontWeight: FontWeight.bold)),
+                        Text("change_year".tr, style: TextStyle(color: AppColors.primaryDark, fontSize: 13, fontWeight: FontWeight.bold)),
                       ],
                     ),
                   ),
@@ -489,7 +488,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
                 ),
                 child: Center(
                   child: Text(
-                    "Tháng $month",
+                    "month_number".trParams({'month': month.toString()}),
                     style: TextStyle(
                       color: isSelected ? Colors.white : AppColors.primaryDark,
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -509,7 +508,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
       physics: const AlwaysScrollableScrollPhysics(),
       children: [
         SizedBox(height: Get.height * 0.15),
-        const EmptyState(text: "Chưa có chuyến đi nào trong khoảng thời gian này.\nHãy nhấn (+) để tạo chuyến đi đầu tiên!"),
+        EmptyState(text: "no_trips_in_period".tr),
       ],
     );
   }
@@ -519,7 +518,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Chọn năm"),
+          title: Text("select_year".tr),
           content: SizedBox(
             width: 300,
             height: 300,

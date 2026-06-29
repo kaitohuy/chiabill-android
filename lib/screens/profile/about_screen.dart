@@ -14,7 +14,7 @@ class AboutScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text("Về DuliVie", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text("about_app_title".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.primaryDark,
         elevation: 0,
@@ -52,7 +52,7 @@ class AboutScreen extends StatelessWidget {
                           ? "${snapshot.data!.version} (Build ${snapshot.data!.buildNumber})"
                           : "1.0.0";
                       return Text(
-                        "Phiên bản $version (Production Ready)",
+                        "version_label".trParams({'version': version}),
                         style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
                       );
                     },
@@ -63,10 +63,10 @@ class AboutScreen extends StatelessWidget {
             ),
 
             // BẢO MẬT & QUYỀN RIÊNG TƯ
-            _buildSectionHeader("Bảo mật & Quyền riêng tư"),
+            _buildSectionHeader("security_privacy_section".tr),
             _buildInfoCard([
-              _buildBulletItem(Icons.security, "Mã hóa dữ liệu", "Mọi thông tin tài khoản, ngân hàng được bảo mật chuẩn mã hóa đường truyền SSL."),
-              _buildBulletItem(Icons.visibility_off, "Cam kết riêng tư", "DuliVie không thu thập vị trí hoặc bán dữ liệu người dùng cho bên thứ ba."),
+              _buildBulletItem(Icons.security, "data_encryption_title".tr, "data_encryption_desc".tr),
+              _buildBulletItem(Icons.visibility_off, "privacy_commitment_title".tr, "privacy_commitment_desc".tr),
               const Divider(height: 20, thickness: 1),
               InkWell(
                 onTap: () async {
@@ -75,7 +75,7 @@ class AboutScreen extends StatelessWidget {
                   if (await canLaunchUrl(url)) {
                     await launchUrl(url, mode: LaunchMode.externalApplication);
                   } else {
-                    ToastUtil.showError("Lỗi", "Không thể mở trang web chính sách");
+                    ToastUtil.showError("error_title".tr, "cannot_open_policy".tr);
                   }
                 },
                 borderRadius: BorderRadius.circular(8),
@@ -89,9 +89,9 @@ class AboutScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text("Đọc Chính sách bảo mật", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.blue)),
+                            Text("read_privacy_policy".tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.blue)),
                             const SizedBox(height: 2),
-                            Text("Xem chi tiết quy định bảo vệ dữ liệu người dùng", style: TextStyle(fontSize: 12, color: Colors.black54)),
+                            Text("privacy_policy_desc".tr, style: const TextStyle(fontSize: 12, color: Colors.black54)),
                           ],
                         ),
                       ),
@@ -104,14 +104,14 @@ class AboutScreen extends StatelessWidget {
             const SizedBox(height: 20),
 
             // TÍNH NĂNG NỔI BẬT
-            _buildSectionHeader("Tính năng nổi bật"),
+            _buildSectionHeader("key_features_section".tr),
             _buildInfoCard([
-              _buildBulletItem(Icons.bolt, "Chia tiền thông minh", "Tự động phân bổ, quyết toán chính xác đến từng đồng lẻ."),
-              _buildBulletItem(Icons.cloud_off, "Đồng bộ ngoại tuyến", "Tạo, sửa chi phí, chuyến đi ngay cả khi mất mạng. Tự động sync khi online."),
-              _buildBulletItem(Icons.qr_code, "Mã QR thanh toán nhanh", "Tự động tạo mã QR đi kèm số tiền và nội dung chuyển khoản tiện lợi."),
-              _buildBulletItem(Icons.group, "Quản lý nhóm linh hoạt", "Dễ dàng thêm thành viên, phân chia vai trò và quản lý quỹ nhóm tiện lợi."),
-              _buildBulletItem(Icons.analytics, "Thống kê trực quan", "Biểu đồ phân tích chi tiêu trực quan giúp kiểm soát ngân sách hiệu quả."),
-              _buildBulletItem(Icons.notifications_active, "Thông báo thời gian thực", "Nhận thông báo lập tức khi có hóa đơn mới hoặc thành viên thanh toán."),
+              _buildBulletItem(Icons.bolt, "smart_split_title".tr, "smart_split_desc".tr),
+              _buildBulletItem(Icons.cloud_off, "offline_sync_title".tr, "offline_sync_desc".tr),
+              _buildBulletItem(Icons.qr_code, "quick_qr_title".tr, "quick_qr_desc".tr),
+              _buildBulletItem(Icons.group, "flexible_group_title".tr, "flexible_group_desc".tr),
+              _buildBulletItem(Icons.analytics, "visual_stats_title".tr, "visual_stats_desc".tr),
+              _buildBulletItem(Icons.notifications_active, "realtime_notif_title".tr, "realtime_notif_desc".tr),
             ]),
             const SizedBox(height: 32),
 
@@ -127,7 +127,7 @@ class AboutScreen extends StatelessWidget {
                   elevation: 0,
                 ),
                 onPressed: () => Get.back(),
-                child: const Text("ĐÃ RÕ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                child: Text("got_it_caps".tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               ),
             ),
             const SizedBox(height: 24),

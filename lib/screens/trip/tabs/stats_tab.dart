@@ -22,9 +22,9 @@ class _StatsTabState extends State<StatsTab> {
     final controller = Get.find<TripExpenseController>(tag: widget.mainController.tripId.toString());
     return Obx(() {
       if (controller.categoryStats.isEmpty && controller.expenses.isEmpty) {
-        return const Center(
+        return Center(
             child: Text(
-                "Chưa có dữ liệu chi tiêu để thống kê.\nHãy thêm chi phí trước nhé!",
+                "no_stats_data".tr,
                 textAlign: TextAlign.center
             )
         );
@@ -61,7 +61,7 @@ class _StatsTabState extends State<StatsTab> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("TỔNG CHI TIÊU", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey.shade600, letterSpacing: 1.0)),
+                  Text("total_spending_caps".tr, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey.shade600, letterSpacing: 1.0)),
                   const SizedBox(height: 8),
                   Text(
                       "${CurrencyUtils.formatNumber(totalSpent)} đ",
@@ -73,11 +73,11 @@ class _StatsTabState extends State<StatsTab> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                            "${(percent * 100).toStringAsFixed(1)}% ngân sách",
+                            "percent_budget".trParams({'percent': (percent * 100).toStringAsFixed(1)}),
                             style: TextStyle(color: progressColor, fontWeight: FontWeight.bold, fontSize: 13)
                         ),
                         Text(
-                            "Giới hạn: ${CurrencyUtils.formatNumber(budget)} đ",
+                            "budget_limit".trParams({'limit': CurrencyUtils.formatNumber(budget)}),
                             style: TextStyle(color: Colors.grey.shade500, fontSize: 13, fontWeight: FontWeight.w500)
                         ),
                       ],
@@ -95,7 +95,7 @@ class _StatsTabState extends State<StatsTab> {
                     if (percent > 1.0)
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),
-                        child: Text("⚠️ Bạn đã chi tiêu lố ngân sách ${CurrencyUtils.formatNumber(totalSpent - budget)} đ", style: const TextStyle(color: Colors.red, fontSize: 12, fontStyle: FontStyle.italic)),
+                        child: Text("spent_over_budget".trParams({'over': CurrencyUtils.formatNumber(totalSpent - budget)}), style: const TextStyle(color: Colors.red, fontSize: 12, fontStyle: FontStyle.italic)),
                       )
                   ]
                 ],
@@ -103,7 +103,7 @@ class _StatsTabState extends State<StatsTab> {
             ),
 
             const SizedBox(height: 32),
-            const Text("Phân bổ chi tiêu", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text("expense_allocation".tr, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
 
             if (controller.categoryStats.isNotEmpty) ...[
@@ -149,10 +149,10 @@ class _StatsTabState extends State<StatsTab> {
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text("TỔNG CỘNG", style: TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.bold)),
+                        Text("total_caps".tr, style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 4),
                         Text(CurrencyUtils.formatNumber(totalSpent), style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900)),
-                        const Text("VNĐ", style: TextStyle(fontSize: 11, color: Colors.grey)),
+                        Text("vnd_caps".tr, style: const TextStyle(fontSize: 11, color: Colors.grey)),
                       ],
                     ),
                   ],

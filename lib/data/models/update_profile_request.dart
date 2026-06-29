@@ -8,6 +8,7 @@ class UpdateProfileRequest {
   final bool allowAutoAdd;
   final bool allowAutoApprovePayment;
   final int paymentPriority; // THÊM TRƯỜNG NÀY (1 hoặc 2)
+  final String? language;
 
   UpdateProfileRequest({
     required this.name,
@@ -19,6 +20,7 @@ class UpdateProfileRequest {
     required this.allowAutoAdd,
     required this.allowAutoApprovePayment,
     required this.paymentPriority,
+    this.language,
   });
 
   Map<String, dynamic> toJson() => {
@@ -31,5 +33,6 @@ class UpdateProfileRequest {
     'allowAutoAdd': allowAutoAdd,
     'allowAutoApprovePayment': allowAutoApprovePayment,
     'paymentPriority': paymentPriority,
+    'language': language,
   };
 }

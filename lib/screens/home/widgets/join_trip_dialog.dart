@@ -25,15 +25,15 @@ class JoinTripDialog {
                   errorBuilder: (context, error, stackTrace) => Icon(Icons.group_add, size: 60, color: AppColors.primary),
                 ),
                 const SizedBox(height: 16),
-                const Text("Tham gia nhóm", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                Text("join_group".tr, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
-                const Text("Nhập mã mời hoặc quét mã QR do bạn bè chia sẻ để tham gia.", textAlign: TextAlign.center, style: TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.w700)),
+                Text("join_group_hint".tr, textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 24),
 
                 TextField(
                   controller: joinController.codeController,
                   decoration: InputDecoration(
-                    labelText: "Mã mời (VD: abcd-1234)",
+                    labelText: "invite_code_hint".tr,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     prefixIcon: const Icon(Icons.keyboard),
                   ),
@@ -48,7 +48,7 @@ class JoinTripDialog {
                       foregroundColor: AppColors.primary
                   ),
                   icon: const Icon(Icons.qr_code_scanner),
-                  label: const Text("Quét mã QR"),
+                  label: Text("scan_qr".tr),
                   onPressed: () async {
                     final String? scannedCode = await Get.to(() => const QRScannerScreen());
                     if (scannedCode != null && scannedCode.isNotEmpty) {
@@ -65,12 +65,12 @@ class JoinTripDialog {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Center(child: Text("🎉 Tìm thấy chuyến đi!", style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 16))),
+                Center(child: Text("trip_found".tr, style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold, fontSize: 16))),
                 const Divider(height: 24),
-                Text("Tên chuyến: ${info.tripName}", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                Text("trip_name_label".trParams({'name': info.tripName}), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                 const SizedBox(height: 8),
-                Text("Người tạo: ${info.createdByName}", style: TextStyle(color: Colors.grey[700])),
-                Text("Thành viên hiện tại: ${info.memberCount} người", style: TextStyle(color: Colors.grey[700])),
+                Text("creator_label".trParams({'name': info.createdByName}), style: TextStyle(color: Colors.grey[700])),
+                Text("members_count_label".trParams({'count': info.memberCount.toString()}), style: TextStyle(color: Colors.grey[700])),
               ],
             );
           }
@@ -81,7 +81,7 @@ class JoinTripDialog {
               Get.back();
               Get.delete<JoinTripController>();
             },
-            child: const Text("HỦY", style: TextStyle(color: Colors.grey)),
+            child: Text("cancel_caps_alt".tr, style: const TextStyle(color: Colors.grey)),
           ),
           Obx(() {
             if (joinController.inviteInfo.value == null) {
@@ -90,7 +90,7 @@ class JoinTripDialog {
                 onPressed: joinController.isLoading.value ? null : () => joinController.checkInviteCode(),
                 child: joinController.isLoading.value
                     ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : const Text("KIỂM TRA"),
+                    : Text("check_caps".tr),
               );
             } else {
               return ElevatedButton(
@@ -98,7 +98,7 @@ class JoinTripDialog {
                 onPressed: joinController.isLoading.value ? null : () => joinController.confirmJoin(),
                 child: joinController.isLoading.value
                     ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : const Text("XÁC NHẬN"),
+                    : Text("confirm_join".tr),
               );
             }
           }),

@@ -39,7 +39,7 @@ class _MembersTabState extends State<MembersTab> with AutomaticKeepAliveClientMi
                   builder: (context) {
                     // Xử lý Empty State
                     if (trip == null || trip.members == null || trip.members!.isEmpty) {
-                      return const EmptyState(text: "Chưa có thành viên nào.\nChạm vào bất cứ đâu để thêm!");
+                      return EmptyState(text: "no_members_yet".tr);
                     }
 
                     // Danh sách thành viên
@@ -71,7 +71,7 @@ class _MembersTabState extends State<MembersTab> with AutomaticKeepAliveClientMi
                                         backgroundColor: member.isGhost ? Colors.grey[200] : AppColors.primaryBackground,
                                         backgroundImage: (member.avatarUrl != null && member.avatarUrl!.isNotEmpty) ? org_cached.CachedNetworkImageProvider(member.avatarUrl!, maxWidth: 150, maxHeight: 150) : null,
                                         child: (member.avatarUrl == null || member.avatarUrl!.isEmpty)
-                                            ? (member.isGhost ? Icon(Icons.visibility_off, color: Colors.grey, size: 10) : Text(memberInitial, style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)))
+                                            ? (member.isGhost ? const Icon(Icons.visibility_off, color: Colors.grey, size: 10) : Text(memberInitial, style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)))
                                             : null,
                                       ),
                                       if (isMemberOwner) const Text("👑", style: TextStyle(fontSize: 16)),
@@ -80,14 +80,14 @@ class _MembersTabState extends State<MembersTab> with AutomaticKeepAliveClientMi
                                   title: Row(
                                       children: [
                                         Expanded(
-                                            child: Text(member.name ?? "Ẩn danh", style: TextStyle(fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis)
+                                            child: Text(member.name ?? "anonymous".tr, style: const TextStyle(fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis)
                                         ),
                                         if (isDisabled)
-                                          const Text(" (Tạm ngưng)", style: TextStyle(fontSize: 10, color: Colors.red, fontWeight: FontWeight.bold))
+                                          Text(" (${'suspended'.tr})", style: const TextStyle(fontSize: 10, color: Colors.red, fontWeight: FontWeight.bold))
                                       ]
                                   ),
-                                  subtitle: Text(member.isGhost ? "Người dùng ảo (Ghost)" : "Thành viên app"),
-                                  trailing: Icon(Icons.settings, color: Colors.grey, size: 22),
+                                  subtitle: Text(member.isGhost ? "ghost_user_label".tr : "app_member_label".tr),
+                                  trailing: const Icon(Icons.settings, color: Colors.grey, size: 22),
 
                                   // 🌟 MENU ADMIN QUẢN LÝ THÀNH VIÊN KHI BẤM VÀO
 
@@ -99,28 +99,28 @@ class _MembersTabState extends State<MembersTab> with AutomaticKeepAliveClientMi
                                           child: Column(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              Text(member.name ?? "Thành viên", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                                              Text(member.name ?? "unnamed".tr, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                                               const SizedBox(height: 16),
 
                                               ListTile(
-                                                  leading: Icon(Icons.email, color: Colors.blue),
-                                                  title: const Text("Email / Tài khoản"),
-                                                  subtitle: Text(member.email ?? "Không có thông tin")
+                                                  leading: const Icon(Icons.email, color: Colors.blue),
+                                                  title: Text("email_or_account".tr),
+                                                  subtitle: Text(member.email ?? "no_info".tr)
                                               ),
 
                                               if (widget.controller.isOwner && !isMemberOwner) ...[
                                                 const Divider(),
-                                                const Text("Quản trị thành viên", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
+                                                Text("member_admin_label".tr, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
                                                 const SizedBox(height: 8),
 
                                                 ListTile(
-                                                    leading: Icon(Icons.swap_horiz, color: Colors.blue),
-                                                    title: const Text("Chuyển quyền Chủ phòng"),
+                                                    leading: const Icon(Icons.swap_horiz, color: Colors.blue),
+                                                    title: Text("transfer_owner".tr),
                                                     onTap: () { Get.back(); widget.controller.transferOwner(member.id); }
                                                 ),
                                                 ListTile(
                                                     leading: Icon(isDisabled ? Icons.play_arrow : Icons.pause, color: Colors.orange),
-                                                    title: Text(isDisabled ? "Mở khóa thành viên" : "Tạm ngưng hoạt động"),
+                                                    title: Text(isDisabled ? "unlock_member".tr : "suspend_member".tr),
                                                     onTap: () {
                                                       Get.back();
                                                       if (isDisabled) {
@@ -131,13 +131,13 @@ class _MembersTabState extends State<MembersTab> with AutomaticKeepAliveClientMi
                                                     }
                                                 ),
                                                 ListTile(
-                                                    leading: Icon(Icons.person_remove, color: Colors.red),
-                                                    title: const Text("Đuổi khỏi nhóm", style: TextStyle(color: Colors.red)),
+                                                    leading: const Icon(Icons.person_remove, color: Colors.red),
+                                                    title: Text("kick_from_group".tr, style: const TextStyle(color: Colors.red)),
                                                     onTap: () {
                                                       Get.back(); // Đóng bottom sheet
                                                       Get.dialog(
                                                           KickMemberDialog(
-                                                              userName: member.name ?? "Thành viên",
+                                                              userName: member.name ?? "unnamed".tr,
                                                               onConfirm: (forgive) => widget.controller.kickMember(member.id, forgive)
                                                           )
                                                       );
@@ -169,29 +169,29 @@ class _MembersTabState extends State<MembersTab> with AutomaticKeepAliveClientMi
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.red,
-                      side: BorderSide(color: Colors.red),
+                      side: const BorderSide(color: Colors.red),
                       padding: const EdgeInsets.symmetric(vertical: 14)
                   ),
-                  icon: Icon(Icons.exit_to_app),
-                  label: const Text("Rời nhóm", style: TextStyle(fontWeight: FontWeight.bold)),
+                  icon: const Icon(Icons.exit_to_app),
+                  label: Text("leave_group".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
                   onPressed: () {
                     Get.dialog(
                       AlertDialog(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                        title: const Text("Rời nhóm?", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20), textAlign: TextAlign.center),
-                        content: const Text("Bạn chắc chắn muốn rời khỏi nhóm này? \n(Dữ liệu chi tiêu của bạn trong nhóm vẫn sẽ được giữ lại cho các thành viên khác)", textAlign: TextAlign.center, style: TextStyle(fontSize: 15)),
+                        title: Text("leave_group_question".tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20), textAlign: TextAlign.center),
+                        content: Text("leave_group_confirm_desc".tr, textAlign: TextAlign.center, style: const TextStyle(fontSize: 15)),
                         actionsPadding: const EdgeInsets.only(bottom: 16, right: 16, left: 16),
                         actionsAlignment: MainAxisAlignment.spaceEvenly,
                         actions: [
                           OutlinedButton(
                             style: OutlinedButton.styleFrom(
                               foregroundColor: Colors.orange, 
-                              side: BorderSide(color: Colors.orange),
+                              side: const BorderSide(color: Colors.orange),
                               minimumSize: const Size(100, 44),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24))
                             ),
                             onPressed: () => Get.back(),
-                            child: const Text("HỦY", style: TextStyle(fontWeight: FontWeight.bold)),
+                            child: Text("cancel_caps".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
                           ),
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
@@ -204,7 +204,7 @@ class _MembersTabState extends State<MembersTab> with AutomaticKeepAliveClientMi
                               Get.back();
                               widget.controller.leaveTrip();
                             },
-                            child: const Text("XÁC NHẬN", style: TextStyle(fontWeight: FontWeight.bold)),
+                            child: Text("confirm_caps".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
                           ),
                         ],
                       ),

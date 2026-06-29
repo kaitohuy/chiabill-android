@@ -43,7 +43,7 @@ class BalanceDetailBottomSheet extends StatelessWidget {
               const SizedBox(height: 12),
               Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2))),
               const SizedBox(height: 16),
-              const Text("Chi tiết số dư", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text("balance_detail".tr, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
               
               // Header summary
@@ -63,7 +63,7 @@ class BalanceDetailBottomSheet extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                "${settlement.fromUserName} nợ ${settlement.toUserName}",
+                "member_owes_member".trParams({'from': settlement.fromUserName ?? '', 'to': settlement.toUserName ?? ''}),
                 style: const TextStyle(fontSize: 14, color: Colors.grey),
               ),
               Text(
@@ -81,7 +81,7 @@ class BalanceDetailBottomSheet extends StatelessWidget {
                       return const Center(child: CircularProgressIndicator());
                     }
                     if (snapshot.hasError || !snapshot.hasData || snapshot.data == null) {
-                      return const Center(child: Text("Không thể tải dữ liệu sao kê"));
+                      return Center(child: Text("failed_to_load_statement".tr));
                     }
                     
                     final data = snapshot.data!;
@@ -107,11 +107,11 @@ class BalanceDetailBottomSheet extends StatelessWidget {
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        const Row(
+                                        Row(
                                           children: [
-                                            Text("Tiền bạn đã trả hộ:", style: TextStyle(color: Colors.grey)),
-                                            SizedBox(width: 4),
-                                            Icon(Icons.info_outline, size: 14, color: Colors.grey),
+                                            Text("amount_you_paid_on_behalf".tr, style: const TextStyle(color: Colors.grey)),
+                                            const SizedBox(width: 4),
+                                            const Icon(Icons.info_outline, size: 14, color: Colors.grey),
                                           ],
                                         ),
                                         Text("+ ${CurrencyUtils.formatNumber(data.totalPaid)} đ", style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
@@ -128,11 +128,11 @@ class BalanceDetailBottomSheet extends StatelessWidget {
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        const Row(
+                                        Row(
                                           children: [
-                                            Text("Chi phí thực tế của bạn:", style: TextStyle(color: Colors.grey)),
-                                            SizedBox(width: 4),
-                                            Icon(Icons.info_outline, size: 14, color: Colors.grey),
+                                            Text("your_actual_expense".tr, style: const TextStyle(color: Colors.grey)),
+                                            const SizedBox(width: 4),
+                                            const Icon(Icons.info_outline, size: 14, color: Colors.grey),
                                           ],
                                         ),
                                         Text("- ${CurrencyUtils.formatNumber(data.totalSpent)} đ", style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
@@ -147,11 +147,11 @@ class BalanceDetailBottomSheet extends StatelessWidget {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    const Text("Số dư cuối cùng:", style: TextStyle(fontWeight: FontWeight.bold)),
+                                    Text("final_balance".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
                                     Text(
                                       data.netBalance < 0 
-                                        ? "Âm ${CurrencyUtils.formatNumber(data.netBalance.abs())} đ" 
-                                        : "+ ${CurrencyUtils.formatNumber(data.netBalance)} đ",
+                                        ? "negative_amount".trParams({'amount': CurrencyUtils.formatNumber(data.netBalance.abs())})
+                                        : "positive_amount".trParams({'amount': CurrencyUtils.formatNumber(data.netBalance)}),
                                       style: TextStyle(color: data.netBalance < 0 ? Colors.red : Colors.green, fontWeight: FontWeight.bold, fontSize: 16),
                                     ),
                                   ],
@@ -171,8 +171,8 @@ class BalanceDetailBottomSheet extends StatelessWidget {
                                 Expanded(
                                   child: Text(
                                     data.netBalance.abs() > settlement.amount
-                                      ? "Bạn đang âm tổng cộng ${CurrencyUtils.formatNumber(data.netBalance.abs())} đ. Hệ thống phân bổ bạn trả trước ${CurrencyUtils.formatNumber(settlement.amount)} đ cho ${settlement.toUserName ?? 'người nhận'} để cấn trừ nợ chéo. Hãy thanh toán các khoản còn lại để tất toán nhé!"
-                                      : "Bạn đang âm tổng cộng ${CurrencyUtils.formatNumber(data.netBalance.abs())} đ. Hệ thống phân bổ bạn chuyển khoản cho ${settlement.toUserName ?? 'người nhận'} để cấn trừ nợ chéo. Thanh toán khoản này sẽ giúp tất toán toàn bộ số dư của bạn!",
+                                      ? "negative_balance_explain_partial".trParams({'total': CurrencyUtils.formatNumber(data.netBalance.abs()), 'amount': CurrencyUtils.formatNumber(settlement.amount), 'to': settlement.toUserName ?? ''})
+                                      : "negative_balance_explain_full".trParams({'total': CurrencyUtils.formatNumber(data.netBalance.abs()), 'to': settlement.toUserName ?? ''}),
                                     style: const TextStyle(color: Colors.blue, height: 1.3, fontSize: 12, fontStyle: FontStyle.italic),
                                   ),
                                 ),
@@ -197,7 +197,7 @@ class BalanceDetailBottomSheet extends StatelessWidget {
                       onPayPressed(); // Gọi callback để mở Dialog thanh toán
                     },
                     icon: const Icon(Icons.qr_code),
-                    label: const Text("THANH TOÁN NGAY"),
+                    label: Text("pay_now_caps".tr),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                       foregroundColor: Colors.white,
@@ -224,8 +224,8 @@ class BalanceDetailBottomSheet extends StatelessWidget {
       if (userSplit != null && userSplit.amount > 0) {
         spentItems.add(SpentItem(
           date: expense.expenseDate ?? "",
-          title: expense.description.isNotEmpty ? expense.description : (expense.categoryName ?? "Chi phí"),
-          subtitle: "Chia chi phí",
+          title: expense.description.isNotEmpty ? expense.description : (expense.categoryName ?? "expense".tr),
+          subtitle: "split_expense".tr,
           icon: expense.categoryIcon ?? "📦",
           amount: userSplit.amount,
         ));
@@ -237,8 +237,8 @@ class BalanceDetailBottomSheet extends StatelessWidget {
       if (payment.toUserId == data.userId) {
         spentItems.add(SpentItem(
           date: payment.createdAt,
-          title: "Nhận tiền từ ${payment.fromUserName}",
-          subtitle: "Nhận thanh toán nợ",
+          title: "received_money_from".trParams({'name': payment.fromUserName}),
+          subtitle: "received_debt_payment".tr,
           icon: "💰",
           amount: payment.amount,
         ));
@@ -264,9 +264,9 @@ class BalanceDetailBottomSheet extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      "Chi tiết chi phí thực tế",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    Text(
+                      "actual_expense_detail".tr,
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     IconButton(
                       icon: const Icon(Icons.close),
@@ -276,12 +276,12 @@ class BalanceDetailBottomSheet extends StatelessWidget {
                 ),
                 const Divider(),
                 if (spentItems.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 30),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 30),
                     child: Center(
                       child: Text(
-                        "Không có chi phí nào",
-                        style: TextStyle(color: Colors.grey),
+                        "no_expenses".tr,
+                        style: const TextStyle(color: Colors.grey),
                       ),
                     ),
                   )
@@ -331,7 +331,7 @@ class BalanceDetailBottomSheet extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text("Tổng cộng chi phí thực tế:", style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text("total_actual_expense".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
                     Text(
                       "- ${CurrencyUtils.formatNumber(data.totalSpent)} đ",
                       style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 16),
@@ -354,8 +354,8 @@ class BalanceDetailBottomSheet extends StatelessWidget {
       if (expense.payer?.id == data.userId) {
         paidItems.add(PaidItem(
           date: expense.expenseDate ?? "",
-          title: expense.description.isNotEmpty ? expense.description : (expense.categoryName ?? "Chi phí"),
-          subtitle: "Thanh toán hóa đơn",
+          title: expense.description.isNotEmpty ? expense.description : (expense.categoryName ?? "expense".tr),
+          subtitle: "bill_payment".tr,
           icon: expense.categoryIcon ?? "📦",
           amount: expense.totalAmount,
         ));
@@ -367,8 +367,8 @@ class BalanceDetailBottomSheet extends StatelessWidget {
       if (payment.fromUserId == data.userId) {
         paidItems.add(PaidItem(
           date: payment.createdAt,
-          title: "Chuyển tiền cho ${payment.toUserName}",
-          subtitle: payment.status == "APPROVED" ? "Đã xác nhận" : "Đang chờ duyệt",
+          title: "transfer_to_member".trParams({'name': payment.toUserName}),
+          subtitle: payment.status == "APPROVED" ? "approved_status".tr : "pending_status".tr,
           icon: "💸",
           amount: payment.amount,
         ));
@@ -394,9 +394,9 @@ class BalanceDetailBottomSheet extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      "Chi tiết tiền bạn đã trả hộ",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    Text(
+                      "paid_on_behalf_detail".tr,
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     IconButton(
                       icon: const Icon(Icons.close),
@@ -406,12 +406,12 @@ class BalanceDetailBottomSheet extends StatelessWidget {
                 ),
                 const Divider(),
                 if (paidItems.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 30),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 30),
                     child: Center(
                       child: Text(
-                        "Chưa thanh toán khoản nào",
-                        style: TextStyle(color: Colors.grey),
+                        "no_payments_made".tr,
+                        style: const TextStyle(color: Colors.grey),
                       ),
                     ),
                   )
@@ -461,7 +461,7 @@ class BalanceDetailBottomSheet extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text("Tổng cộng tiền đã trả hộ:", style: TextStyle(fontWeight: FontWeight.bold)),
+                    Text("total_paid_on_behalf".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
                     Text(
                       "+ ${CurrencyUtils.formatNumber(data.totalPaid)} đ",
                       style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 16),

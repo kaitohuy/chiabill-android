@@ -62,14 +62,14 @@ class _FundSettingsSheetState extends State<FundSettingsSheet> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  "Kích hoạt Quỹ chung",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Text(
+                  "activate_group_fund".tr,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 20),
                 
                 // Chọn thủ quỹ
-                const Text("Chọn Thủ quỹ:", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                Text("select_treasurer".tr, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
                 const SizedBox(height: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -97,7 +97,7 @@ class _FundSettingsSheetState extends State<FundSettingsSheet> {
                                     : null,
                               ),
                               const SizedBox(width: 10),
-                              Text(member.user.name ?? "Không tên"),
+                              Text(member.user.name ?? "unnamed".tr),
                             ],
                           ),
                         );
@@ -116,9 +116,9 @@ class _FundSettingsSheetState extends State<FundSettingsSheet> {
                 const SizedBox(height: 16),
   
                 // Ngưỡng cảnh báo
-                const Text(
-                  "Ngưỡng số dư tối thiểu (để cảnh báo):",
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                Text(
+                  "min_balance_threshold_label".tr,
+                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                 ),
                 const SizedBox(height: 8),
                 TextField(
@@ -129,9 +129,9 @@ class _FundSettingsSheetState extends State<FundSettingsSheet> {
                     CurrencyInputFormatter(),
                   ],
                   decoration: InputDecoration(
-                    hintText: "VD: 200,000",
+                    hintText: "min_balance_threshold_hint".tr,
                     hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
-                    suffixText: "đ",
+                    suffixText: "currency_symbol".tr,
                     filled: true,
                     fillColor: Colors.grey[50],
                     border: OutlineInputBorder(
@@ -167,9 +167,9 @@ class _FundSettingsSheetState extends State<FundSettingsSheet> {
                           },
                     child: widget.fundController.isActionLoading.value
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text(
-                            "KÍCH HOẠT NGAY",
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.white),
+                        : Text(
+                            "activate_now_caps".tr,
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.white),
                           ),
                   )),
                 ),

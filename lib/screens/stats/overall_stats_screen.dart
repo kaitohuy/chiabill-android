@@ -68,7 +68,7 @@ class _OverallStatsScreenState extends State<OverallStatsScreen> with AutomaticK
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Obx(() => Text("Thống kê (${controller.selectedYear.value})", style: TextStyle(fontWeight: FontWeight.bold))),
+        title: Obx(() => Text("stats_year".trParams({'year': controller.selectedYear.value.toString()}), style: const TextStyle(fontWeight: FontWeight.bold))),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
@@ -145,7 +145,7 @@ class _OverallStatsScreenState extends State<OverallStatsScreen> with AutomaticK
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Obx(() => Text("Tổng (năm ${controller.selectedYear.value})", style: TextStyle(color: controller.isAllTimeMode.value ? Colors.grey : AppColors.primary, fontSize: 14, fontWeight: FontWeight.bold))),
+                  Obx(() => Text("total_year".trParams({'year': controller.selectedYear.value.toString()}), style: TextStyle(color: controller.isAllTimeMode.value ? Colors.grey : AppColors.primary, fontSize: 14, fontWeight: FontWeight.bold))),
                   const SizedBox(height: 8),
                   Obx(() => Text(
                     "${CurrencyUtils.formatNumber(controller.yearlyTotalExpense.value)} đ",
@@ -169,7 +169,7 @@ class _OverallStatsScreenState extends State<OverallStatsScreen> with AutomaticK
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Tổng tất cả", style: TextStyle(color: controller.isAllTimeMode.value ? AppColors.primary : Colors.grey, fontSize: 14, fontWeight: FontWeight.bold)),
+                    Text("total_all_time".tr, style: TextStyle(color: controller.isAllTimeMode.value ? AppColors.primary : Colors.grey, fontSize: 14, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   Obx(() => Text(
                     "${CurrencyUtils.formatNumber(controller.allTimeTotalExpense.value)} đ",
@@ -216,7 +216,7 @@ class _OverallStatsScreenState extends State<OverallStatsScreen> with AutomaticK
                       children: [
                         Icon(Icons.calendar_month_outlined, color: AppColors.primaryDark, size: 18),
                         const SizedBox(width: 4),
-                        Text("Đổi năm", style: TextStyle(color: AppColors.primaryDark, fontSize: 13, fontWeight: FontWeight.bold)),
+                        Text("change_year".tr, style: TextStyle(color: AppColors.primaryDark, fontSize: 13, fontWeight: FontWeight.bold)),
                       ],
                     ),
                   ),
@@ -240,7 +240,7 @@ class _OverallStatsScreenState extends State<OverallStatsScreen> with AutomaticK
                 ),
                 child: Center(
                   child: Text(
-                    month == 0 ? "Tất cả" : "Tháng $month",
+                    month == 0 ? "all_months".tr : "month_number".trParams({'month': month.toString()}),
                     style: TextStyle(
                       color: isSelected ? Colors.white : Colors.black87,
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -262,7 +262,7 @@ class _OverallStatsScreenState extends State<OverallStatsScreen> with AutomaticK
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Chọn năm"),
+          title: Text("select_year".tr),
           content: SizedBox(
             width: 300,
             height: 300,
@@ -288,7 +288,7 @@ class _OverallStatsScreenState extends State<OverallStatsScreen> with AutomaticK
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            const Text("Gom theo danh mục", style: TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.bold)),
+            Text("group_by_category".tr, style: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.bold)),
             Obx(() => Switch(
               value: controller.isGroupByCategory.value,
               onChanged: (val) {
@@ -325,7 +325,7 @@ class _OverallStatsScreenState extends State<OverallStatsScreen> with AutomaticK
         Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text("TỔNG CHI", style: TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold)),
+            Text("total_spending_caps".tr, style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold)),
             Obx(() => Text(
               CurrencyUtils.formatNumber(controller.monthlyTotalExpense.value),
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
@@ -369,7 +369,7 @@ class _OverallStatsScreenState extends State<OverallStatsScreen> with AutomaticK
       for (int i = 3; i < stats.length; i++) {
         otherAmount += stats[i].totalAmount;
       }
-      sections.add(_createSection(otherAmount, total, Colors.grey, Icons.more_horiz, title: "Khác", isTouched: 3 == touchedIndex));
+      sections.add(_createSection(otherAmount, total, Colors.grey, Icons.more_horiz, title: "others_category".tr, isTouched: 3 == touchedIndex));
     }
     return sections;
   }
@@ -446,7 +446,7 @@ class _OverallStatsScreenState extends State<OverallStatsScreen> with AutomaticK
   }
 
   Widget _buildEmptyState() {
-    return const EmptyState(text: "Chưa có chi tiêu nào trong khoảng thời gian này");
+    return EmptyState(text: "no_spending_this_period".tr);
   }
 }
 

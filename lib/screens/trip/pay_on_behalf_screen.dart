@@ -20,7 +20,7 @@ class PayOnBehalfScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: const Text("Thanh toán hộ", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text("pay_on_behalf".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: AppColors.primaryDark,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -38,7 +38,7 @@ class PayOnBehalfScreen extends StatelessWidget {
                   Row(children: [
                     Icon(Icons.person_pin_circle_outlined, color: AppColors.primaryDark, size: 20),
                     const SizedBox(width: 8),
-                    const Text("Bước 1: Chọn chủ nợ (người nhận tiền)", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                    Text("step_1_select_creditor".tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                   ]),
                   const SizedBox(height: 12),
                   GestureDetector(
@@ -61,7 +61,7 @@ class PayOnBehalfScreen extends StatelessWidget {
                           Expanded(child: Text(
                             controller.selectedCreditorId.value != null
                                 ? controller.selectedCreditorName
-                                : "Chọn người nhận tiền...",
+                                : "select_recipient_hint".tr,
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: controller.selectedCreditorId.value != null ? FontWeight.bold : FontWeight.normal,
@@ -89,7 +89,7 @@ class PayOnBehalfScreen extends StatelessWidget {
                     Row(children: [
                       Icon(Icons.group_outlined, color: AppColors.primaryDark, size: 20),
                       const SizedBox(width: 8),
-                      const Text("Bước 2: Chọn người cần trả hộ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                      Text("step_2_select_debtors".tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                     ]),
                     TextButton(
                       onPressed: () {
@@ -99,7 +99,7 @@ class PayOnBehalfScreen extends StatelessWidget {
                       },
                       child: Text(
                         controller.settlementsForCreditor.every((s) => s.fromUserId != null && controller.selectedFromUserIds.contains(s.fromUserId!))
-                            ? "Bỏ chọn tất cả" : "Chọn tất cả",
+                            ? "deselect_all".tr : "select_all".tr,
                         style: TextStyle(color: AppColors.primaryDark),
                       ),
                     ),
@@ -157,8 +157,8 @@ class PayOnBehalfScreen extends StatelessWidget {
                                       child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Text(s.fromUserName ?? "Ẩn danh", style: TextStyle(fontWeight: FontWeight.bold)),
-                                          Text("Còn nợ: ${CurrencyUtils.formatNumber(s.amount)}đ",
+                                          Text(s.fromUserName ?? "anonymous".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                          Text("still_owes".trParams({'amount': CurrencyUtils.formatNumber(s.amount)}),
                                             style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
                                         ],
                                       ),
@@ -204,7 +204,7 @@ class PayOnBehalfScreen extends StatelessWidget {
                 child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                   Icon(Icons.people_alt_outlined, size: 80, color: Colors.grey.shade300),
                   const SizedBox(height: 16),
-                  Text("Chọn chủ nợ ở trên để xem\ndanh sách người cần trả hộ",
+                  Text("select_creditor_to_view_debtors".tr,
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.grey.shade400, fontSize: 15)),
                 ]),
@@ -228,7 +228,7 @@ class PayOnBehalfScreen extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start, 
                 children: [
-                  Text("Tổng thanh toán", style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                  Text("total_payment".tr, style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
                   Text("${CurrencyUtils.formatNumber(controller.totalAmount)}đ",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.primaryDark)),
                 ]
@@ -242,7 +242,7 @@ class PayOnBehalfScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 onPressed: () => _showUploadProofBottomSheet(context, controller),
-                child: Text("TÔI ĐÃ CHUYỂN TIỀN", style: TextStyle(fontWeight: FontWeight.bold)),
+                child: Text("i_have_transferred".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
               ),
             ],
           ),
@@ -280,9 +280,9 @@ class PayOnBehalfScreen extends StatelessWidget {
           children: [
             Icon(Icons.warning_amber_rounded, color: Colors.red, size: 40),
             const SizedBox(height: 8),
-            Text("${controller.selectedCreditorName} chưa cài đặt thông tin nhận tiền.", textAlign: TextAlign.center, style: TextStyle(color: Colors.red)),
+            Text("creditor_no_payment_info".trParams({'name': controller.selectedCreditorName}), textAlign: TextAlign.center, style: const TextStyle(color: Colors.red)),
             const SizedBox(height: 4),
-            const Text("Vui lòng liên hệ trực tiếp để lấy số tài khoản!", textAlign: TextAlign.center, style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold))
+            Text("contact_directly_for_account".tr, textAlign: TextAlign.center, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold))
           ]
         )
       );
@@ -298,14 +298,14 @@ class PayOnBehalfScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text("QUÉT MÃ ĐỂ THANH TOÁN", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.primary)),
+          Text("scan_qr_to_pay_caps".tr, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.primary)),
           const SizedBox(height: 12),
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: CachedNetworkImage(
               imageUrl: qrImageUrl,
               placeholder: (context, url) => const SizedBox(height: 200, child: Center(child: CircularProgressIndicator())),
-              errorWidget: (context, url, error) => const SizedBox(height: 200, child: Center(child: Text("Lỗi tải QR", textAlign: TextAlign.center))),
+              errorWidget: (context, url, error) => SizedBox(height: 200, child: Center(child: Text("failed_load_qr".tr, textAlign: TextAlign.center))),
             )
           ),
         ],
@@ -326,12 +326,12 @@ class PayOnBehalfScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("Tải ảnh minh chứng", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text("upload_proof_image".tr, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   IconButton(icon: Icon(Icons.close), onPressed: () => Get.back()),
                 ],
               ),
               const SizedBox(height: 12),
-              const Text("Bạn có thể tải lên ảnh chụp màn hình giao dịch (Không bắt buộc).", style: TextStyle(color: Colors.grey)),
+              Text("upload_proof_optional_desc".tr, style: const TextStyle(color: Colors.grey)),
               const SizedBox(height: 16),
               
               // Upload Box
@@ -353,7 +353,7 @@ class PayOnBehalfScreen extends StatelessWidget {
                       : Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                           Icon(Icons.add_a_photo_outlined, size: 40, color: Colors.grey.shade400),
                           const SizedBox(height: 8),
-                          Text("Bấm để tải ảnh lên", style: TextStyle(color: Colors.grey.shade500)),
+                          Text("click_to_upload_image".tr, style: TextStyle(color: Colors.grey.shade500)),
                         ]),
                 ),
               ),
@@ -374,8 +374,8 @@ class PayOnBehalfScreen extends StatelessWidget {
                     controller.submit();
                   },
                   child: controller.isLoading.value
-                      ? CircularProgressIndicator(color: Colors.white)
-                      : Text("XÁC NHẬN THANH TOÁN (${CurrencyUtils.formatNumber(controller.totalAmount)}đ)", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : Text("confirm_payment_amount_caps".trParams({'amount': CurrencyUtils.formatNumber(controller.totalAmount)}), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 ),
               ),
             ],
@@ -399,7 +399,7 @@ class PayOnBehalfScreen extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("Chọn người nhận tiền", style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+                  Text("select_recipient".tr, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
                   InkWell(
                     onTap: () => Get.back(),
                     child: Container(
@@ -437,7 +437,7 @@ class PayOnBehalfScreen extends StatelessWidget {
                         ),
                         const SizedBox(width: 16),
                         Expanded(child: Text(
-                          s.toUserName ?? "Ẩn danh",
+                          s.toUserName ?? "anonymous".tr,
                           style: TextStyle(fontSize: 16, fontWeight: isSelected ? FontWeight.bold : FontWeight.w500),
                         )),
                         if (isSelected) Icon(Icons.check_circle, color: AppColors.primaryDark),

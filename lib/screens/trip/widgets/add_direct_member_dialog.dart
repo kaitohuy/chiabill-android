@@ -30,16 +30,16 @@ class _AddDirectMemberDialogState extends State<AddDirectMemberDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      title: const Text("Thêm thành viên", style: TextStyle(fontWeight: FontWeight.bold)),
+      title: Text("add_member".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text("Nhập Email hoặc SĐT người dùng đã đăng ký app.", style: TextStyle(fontSize: 13, color: Colors.grey)),
+          Text("add_direct_member_instruction".tr, style: const TextStyle(fontSize: 13, color: Colors.grey)),
           const SizedBox(height: 20),
           TextField(
             controller: inputController,
             decoration: InputDecoration(
-              hintText: "VD: 0987654321",
+              hintText: "add_direct_member_hint".tr,
               filled: true,
               fillColor: Colors.grey[50],
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
@@ -50,7 +50,7 @@ class _AddDirectMemberDialogState extends State<AddDirectMemberDialog> {
       actions: [
         TextButton(
           onPressed: () => Get.back(),
-          child: const Text("HỦY", style: TextStyle(color: Colors.grey)),
+          child: Text("cancel_caps".tr, style: const TextStyle(color: Colors.grey)),
         ),
         Obx(() => ElevatedButton(
           style: ElevatedButton.styleFrom(
@@ -67,7 +67,7 @@ class _AddDirectMemberDialogState extends State<AddDirectMemberDialog> {
                   height: 16,
                   child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                 )
-              : const Text("THÊM"),
+              : Text("add_caps".tr),
         )),
       ],
     );

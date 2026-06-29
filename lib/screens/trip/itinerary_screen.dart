@@ -75,7 +75,7 @@ class ItineraryScreen extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
               Text(
-                "Lịch trình du lịch$rangeStr",
+                "${'itinerary_title'.tr}$rangeStr",
                 style: const TextStyle(fontSize: 12, color: Colors.white70),
               ),
             ],
@@ -89,7 +89,7 @@ class ItineraryScreen extends StatelessWidget {
                 isAsc ? Icons.arrow_downward : Icons.arrow_upward,
                 color: Colors.white,
               ),
-              tooltip: isAsc ? "Sắp xếp: Giờ tăng dần" : "Sắp xếp: Giờ giảm dần",
+              tooltip: isAsc ? "sort_time_asc".tr : "sort_time_desc".tr,
               onPressed: () {
                 controller.isAscending.value = !controller.isAscending.value;
               },
@@ -97,7 +97,7 @@ class ItineraryScreen extends StatelessWidget {
           }),
           IconButton(
             icon: const Icon(Icons.settings_outlined, color: Colors.white),
-            tooltip: "Cài đặt báo thức",
+            tooltip: "alarm_settings".tr,
             onPressed: () => Get.to(() => ItinerarySettingsScreen(tripId: tripId)),
           ),
           PopupMenuButton<String>(
@@ -109,8 +109,8 @@ class ItineraryScreen extends StatelessWidget {
               }
               if (_isCurrentUserDisabled) {
                 Get.snackbar(
-                  "Thông báo",
-                  "Bạn đã bị tạm ngưng hoạt động trong chuyến đi này, không thể thực hiện thao tác này.",
+                  "notification".tr,
+                  "user_suspended_error".tr,
                   backgroundColor: Colors.redAccent,
                   colorText: Colors.white,
                   snackPosition: SnackPosition.BOTTOM,
@@ -124,33 +124,33 @@ class ItineraryScreen extends StatelessWidget {
               }
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'import',
                 child: Row(
                   children: [
-                    Icon(Icons.file_upload, color: Colors.green, size: 20),
-                    SizedBox(width: 8),
-                    Text("Nhập từ Excel"),
+                    const Icon(Icons.file_upload, color: Colors.green, size: 20),
+                    const SizedBox(width: 8),
+                    Text("import_excel".tr),
                   ],
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'export',
                 child: Row(
                   children: [
-                    Icon(Icons.file_download, color: Colors.blue, size: 20),
-                    SizedBox(width: 8),
-                    Text("Xuất ra Excel"),
+                    const Icon(Icons.file_download, color: Colors.blue, size: 20),
+                    const SizedBox(width: 8),
+                    Text("export_excel".tr),
                   ],
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'clone',
                 child: Row(
                   children: [
-                    Icon(Icons.copy_all, color: Colors.orange, size: 20),
-                    SizedBox(width: 8),
-                    Text("Sao chép từ chuyến khác"),
+                    const Icon(Icons.copy_all, color: Colors.orange, size: 20),
+                    const SizedBox(width: 8),
+                    Text("clone_from_other".tr),
                   ],
                 ),
               ),
@@ -187,8 +187,8 @@ class ItineraryScreen extends StatelessWidget {
         onPressed: () {
           if (_isCurrentUserDisabled) {
             Get.snackbar(
-              "Thông báo",
-              "Bạn đã bị tạm ngưng hoạt động trong chuyến đi này, không thể thực hiện thao tác này.",
+              "notification".tr,
+              "user_suspended_error".tr,
               backgroundColor: Colors.redAccent,
               colorText: Colors.white,
               snackPosition: SnackPosition.BOTTOM,
@@ -229,7 +229,7 @@ class ItineraryScreen extends StatelessWidget {
             Icon(Icons.info_outline, size: 16, color: AppColors.primary),
             const SizedBox(width: 8),
             Text(
-              "Ngày $dayNumber: ${dayItems.length} hoạt động",
+              "day_summary_text".trParams({'day': dayNumber.toString(), 'count': dayItems.length.toString()}),
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -239,7 +239,7 @@ class ItineraryScreen extends StatelessWidget {
             const Spacer(),
             if (totalCost > 0)
               Text(
-                "Dự toán ngày: ${CurrencyUtils.formatNumber(totalCost.toInt())} đ",
+                "${'day_budget'.tr}: ${CurrencyUtils.formatNumber(totalCost.toInt())} đ",
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
@@ -300,7 +300,7 @@ class ItineraryScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Ngày ${index + 1}",
+                        "${'day'.tr} ${index + 1}",
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -338,13 +338,13 @@ class ItineraryScreen extends StatelessWidget {
             children: [
               Icon(Icons.calendar_today_outlined, size: 70, color: Colors.grey.shade300),
               const SizedBox(height: 16),
-              const Text(
-                "Chưa có hoạt động nào cho ngày này",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black54),
+              Text(
+                "no_activities_day".tr,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black54),
               ),
               const SizedBox(height: 8),
               Text(
-                "Ấn '+' bên dưới để thêm hoặc nhập lịch trình từ Excel!",
+                "add_activity_hint".tr,
                 style: TextStyle(fontSize: 13, color: Colors.grey.shade400),
                 textAlign: TextAlign.center,
               ),
@@ -377,8 +377,8 @@ class ItineraryScreen extends StatelessWidget {
       onReorder: (oldIndex, newIndex) async {
         if (_isCurrentUserDisabled) {
           Get.snackbar(
-            "Thông báo",
-            "Bạn đã bị tạm ngưng hoạt động trong chuyến đi này, không thể thực hiện thao tác này.",
+            "notification".tr,
+            "user_suspended_error".tr,
             backgroundColor: Colors.redAccent,
             colorText: Colors.white,
             snackPosition: SnackPosition.BOTTOM,
@@ -403,7 +403,7 @@ class ItineraryScreen extends StatelessWidget {
             );
             final success = await controller.saveItineraryItem(updatedItem, showLoading: false, showToast: false);
             if (success) {
-              ToastUtil.showSuccess("Đã cập nhật", "Đã chuyển hoạt động sang khung giờ ${targetNode.timeRange}");
+              ToastUtil.showSuccess("updated".tr, "activity_moved_to".trParams({'time': targetNode.timeRange}));
             }
           } else if (targetNode is ActivityNode) {
             // Hoán đổi khung giờ giữa 2 hoạt động
@@ -417,11 +417,11 @@ class ItineraryScreen extends StatelessWidget {
             ]);
             
             if (results.every((r) => r)) {
-              ToastUtil.showSuccess("Đã hoán đổi", "Đã hoán đổi khung giờ hoạt động thành công");
+              ToastUtil.showSuccess("swapped".tr, "swap_success".tr);
             }
           }
         } catch (e) {
-          ToastUtil.showError("Thao tác thất bại", e.toString());
+          ToastUtil.showError("error".tr, e.toString());
         }
       },
     );
@@ -491,7 +491,7 @@ class ItineraryScreen extends StatelessWidget {
                   backgroundColor: Colors.amber.shade600,
                   foregroundColor: Colors.white,
                   icon: Icons.edit,
-                  label: 'Sửa',
+                  label: 'edit'.tr,
                   borderRadius: const BorderRadius.horizontal(left: Radius.circular(16)),
                 ),
                 SlidableAction(
@@ -499,7 +499,7 @@ class ItineraryScreen extends StatelessWidget {
                   backgroundColor: Colors.redAccent,
                   foregroundColor: Colors.white,
                   icon: Icons.delete,
-                  label: 'Xóa',
+                  label: 'delete'.tr,
                   borderRadius: const BorderRadius.horizontal(right: Radius.circular(16)),
                 ),
               ],
@@ -549,7 +549,7 @@ class ItineraryScreen extends StatelessWidget {
                                       Icon(Icons.access_time, size: 14, color: AppColors.primary),
                                       const SizedBox(width: 6),
                                       Text(
-                                        item.timeRange ?? "Cả ngày",
+                                        item.timeRange ?? "all_day".tr,
                                         style: TextStyle(
                                           fontSize: 13,
                                           fontWeight: FontWeight.bold,
@@ -600,7 +600,7 @@ class ItineraryScreen extends StatelessWidget {
                                         Icon(Icons.payment_outlined, size: 14, color: Colors.amber.shade700),
                                         const SizedBox(width: 6),
                                         Text(
-                                          "Chi phí dự kiến: ${CurrencyUtils.formatNumber(item.estimatedCost!)} đ",
+                                          "${'estimated_cost_label'.tr}: ${CurrencyUtils.formatNumber(item.estimatedCost!)} đ",
                                           style: TextStyle(
                                             fontSize: 13,
                                             fontWeight: FontWeight.w600,
@@ -723,7 +723,7 @@ class ItineraryScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Thời gian tự do (${node.timeRange})",
+                              "${'free_time'.tr} (${node.timeRange})",
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
@@ -732,7 +732,7 @@ class ItineraryScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              "Chạm để thêm nhanh hoạt động",
+                              "tap_to_add_activity".tr,
                               style: TextStyle(
                                 fontSize: 11,
                                 color: Colors.grey.shade400,
@@ -765,8 +765,8 @@ class ItineraryScreen extends StatelessWidget {
     if (itemId == null) return;
     if (_isCurrentUserDisabled) {
       Get.snackbar(
-        "Thông báo",
-        "Bạn đã bị tạm ngưng hoạt động trong chuyến đi này, không thể thực hiện thao tác này.",
+        "notification".tr,
+        "user_suspended_error".tr,
         backgroundColor: Colors.redAccent,
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
@@ -776,16 +776,16 @@ class ItineraryScreen extends StatelessWidget {
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text("Xác nhận xóa"),
-        content: const Text("Bạn có chắc chắn muốn xóa hoạt động này khỏi lịch trình không?"),
+        title: Text("confirm_delete".tr),
+        content: Text("delete_activity_confirm_desc".tr),
         actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text("HỦY", style: TextStyle(color: Colors.grey))),
+          TextButton(onPressed: () => Get.back(), child: Text("cancel_caps".tr, style: const TextStyle(color: Colors.grey))),
           TextButton(
             onPressed: () async {
               Get.back();
               await controller.deleteItineraryItem(itemId);
             },
-            child: const Text("XÓA", style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+            child: Text("delete_caps".tr, style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -804,14 +804,14 @@ class ItineraryScreen extends StatelessWidget {
         isScrollControlled: true,
       );
     } catch (e) {
-      ToastUtil.showError("Lỗi hệ thống", "Không thể phân tích file Excel này: $e");
+      ToastUtil.showError("system_error".tr, "${'excel_create_failed'.tr}: $e");
     }
   }
 
   /// Xuất lịch trình du lịch ra file Excel
   void _handleExportExcel() async {
     if (controller.itineraryList.isEmpty) {
-      ToastUtil.showWarning("Lỗi", "Lịch trình trống, không có hoạt động nào để xuất.");
+      ToastUtil.showWarning("error".tr, "itinerary_empty_export".tr);
       return;
     }
 
@@ -821,7 +821,7 @@ class ItineraryScreen extends StatelessWidget {
       LoadingUtil.hide();
 
       if (bytes == null) {
-        ToastUtil.showError("Lỗi", "Không thể tạo file Excel.");
+        ToastUtil.showError("error".tr, "excel_create_failed".tr);
         return;
       }
 
@@ -832,11 +832,11 @@ class ItineraryScreen extends StatelessWidget {
         bytes: bytes,
         fileName: fileName,
         mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        shareText: 'Lịch trình chuyến đi: ${controller.tripName}',
+        shareText: '${'itinerary_share_prefix'.tr}: ${controller.tripName}',
       );
     } catch (e) {
       LoadingUtil.hide();
-      ToastUtil.showError("Lỗi hệ thống", "Không thể tạo file xuất: $e");
+      ToastUtil.showError("system_error".tr, "$e");
     }
   }
 
@@ -849,7 +849,7 @@ class ItineraryScreen extends StatelessWidget {
 
       final otherTrips = trips.where((t) => t.id != tripId).toList();
       if (otherTrips.isEmpty) {
-        ToastUtil.showInfo("Thông báo", "Bạn không có chuyến đi nào khác để sao chép.");
+        ToastUtil.showInfo("notification".tr, "no_other_trips_to_clone".tr);
         return;
       }
 
@@ -866,15 +866,15 @@ class ItineraryScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                "Sao chép lịch trình",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+              Text(
+                "clone_itinerary_title".tr,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
-              const Text(
-                "Chọn một chuyến đi có sẵn lịch trình để sao chép. Toàn bộ lịch trình hiện tại của chuyến đi này sẽ bị ghi đè.",
-                style: TextStyle(fontSize: 14, color: Colors.grey),
+              Text(
+                "clone_itinerary_desc".tr,
+                style: const TextStyle(fontSize: 14, color: Colors.grey),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
@@ -903,7 +903,7 @@ class ItineraryScreen extends StatelessWidget {
                         subtitle: Text(
                           (t.startDate != null && t.endDate != null)
                               ? "${t.startDate} - ${t.endDate}"
-                              : "Không có ngày cụ thể",
+                              : "no_specific_date".tr,
                           style: const TextStyle(fontSize: 12),
                         ),
                         trailing: const Icon(Icons.chevron_right),
@@ -924,7 +924,7 @@ class ItineraryScreen extends StatelessWidget {
       );
     } catch (e) {
       LoadingUtil.hide();
-      ToastUtil.showError("Lỗi hệ thống", "Không thể tải danh sách chuyến đi: $e");
+      ToastUtil.showError("system_error".tr, "$e");
     }
   }
 
@@ -932,24 +932,23 @@ class ItineraryScreen extends StatelessWidget {
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text("Xác nhận sao chép"),
+        title: Text("confirm_clone".tr),
         content: Text(
-          "Bạn có chắc chắn muốn sao chép lịch trình từ chuyến đi \"${selectedTrip.name}\" không?\n\n"
-          "Toàn bộ lịch trình hiện tại của chuyến đi này sẽ bị ghi đè và không thể phục hồi.",
+          "clone_confirm_desc".trParams({'name': selectedTrip.name}),
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const Text("HỦY", style: TextStyle(color: Colors.grey)),
+            child: Text("cancel_caps".tr, style: const TextStyle(color: Colors.grey)),
           ),
           TextButton(
             onPressed: () async {
               Get.back(); // Đóng dialog
               await controller.cloneItineraryFromTrip(selectedTrip.id);
             },
-            child: const Text(
-              "SAO CHÉP",
-              style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
+            child: Text(
+              "clone_caps".tr,
+              style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold),
             ),
           ),
         ],

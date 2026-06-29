@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../theme/app_colors.dart';
 
 class TripCategoryUtil {
@@ -33,11 +34,11 @@ class TripCategoryUtil {
   }
 
   static String getName(String? iconName) {
-    if (iconName == null) return "Chuyến đi";
+    if (iconName == null) return "Chuyến đi".tr;
     final category = categories.firstWhere(
       (cat) => cat["iconName"] == iconName, 
       orElse: () => categories.last
     );
-    return category["name"] as String;
+    return (category["name"] as String).tr;
   }
 }

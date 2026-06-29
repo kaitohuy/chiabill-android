@@ -77,7 +77,7 @@ class _DebtBannerState extends State<DebtBanner> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          "Tổng quan số dư nợ",
+                          "debt_overview_banner".tr,
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
@@ -90,7 +90,7 @@ class _DebtBannerState extends State<DebtBanner> {
                       children: [
                         if (!_isExpanded) ...[
                           Text(
-                            "Nợ: -${CurrencyUtils.formatNumber(owe)}đ | Thu: +${CurrencyUtils.formatNumber(receive)}đ",
+                            "debt_summary_collapsed".trParams({'owe': CurrencyUtils.formatNumber(owe), 'receive': CurrencyUtils.formatNumber(receive)}),
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
@@ -144,7 +144,7 @@ class _DebtBannerState extends State<DebtBanner> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "Bạn nợ",
+                                  "you_owe".tr,
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Colors.grey.shade600,
@@ -199,7 +199,7 @@ class _DebtBannerState extends State<DebtBanner> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "Bạn được trả",
+                                  "you_receive".tr,
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Colors.grey.shade600,

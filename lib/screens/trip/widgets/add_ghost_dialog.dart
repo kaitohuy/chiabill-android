@@ -30,16 +30,16 @@ class _AddGhostDialogState extends State<AddGhostDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      title: const Text("Thêm người ảo", style: TextStyle(fontWeight: FontWeight.bold)),
+      title: Text("add_ghost_member".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text("Nhập tên những người không dùng app (cách nhau bằng dấu phẩy).", style: TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w600)),
+          Text("add_ghost_member_instruction".tr, style: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w600)),
           const SizedBox(height: 20),
           TextField(
             controller: ghostController.namesController,
             decoration: InputDecoration(
-              hintText: "VD: Bố, Mẹ, Anh Hai...",
+              hintText: "add_ghost_member_hint".tr,
               filled: true,
               fillColor: Colors.grey[50],
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
@@ -50,7 +50,7 @@ class _AddGhostDialogState extends State<AddGhostDialog> {
       actions: [
         TextButton(
           onPressed: () => Get.back(),
-          child: const Text("HỦY"),
+          child: Text("cancel_caps".tr),
         ),
         Obx(() => ElevatedButton(
           style: ElevatedButton.styleFrom(
@@ -59,7 +59,7 @@ class _AddGhostDialogState extends State<AddGhostDialog> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
           onPressed: ghostController.isLoading.value ? null : () => ghostController.submitGhosts(),
-          child: const Text("XÁC NHẬN"),
+          child: Text("confirm_caps".tr),
         )),
       ],
     );

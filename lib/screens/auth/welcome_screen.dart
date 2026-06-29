@@ -64,10 +64,10 @@ class WelcomeScreen extends StatelessWidget {
                 // ==========================================
                 // 3. SLOGAN (Xuất hiện nối tiếp Tên App)
                 // ==========================================
-                const Text(
-                  "Du lịch trọng nghĩa trọng tình,\n Lưu giữ hành trình, tiền bạc phân minh!",
+                Text(
+                  "welcome_slogan".tr,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18,
                     color: Colors.black54,
                     fontWeight: FontWeight.w500,
@@ -102,10 +102,10 @@ class WelcomeScreen extends StatelessWidget {
                           ),
                           onPressed: isLoading ? null : () => authController.loginAnonymous(),
                           child: isLoading
-                              ? const Text("ĐANG XỬ LÝ...", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white70))
-                              : const Text(
-                              "DÙNG ẨN DANH NGAY",
-                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)
+                              ? Text("welcome_processing".tr, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white70))
+                              : Text(
+                              "welcome_use_anonymous".tr,
+                              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)
                           ),
                         ),
                       ),
@@ -117,7 +117,7 @@ class WelcomeScreen extends StatelessWidget {
                           const Expanded(child: Divider(color: Colors.grey, thickness: 0.5)),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Text("hoặc", style: TextStyle(color: Colors.grey.shade500, fontSize: 14)),
+                            child: Text("welcome_or".tr, style: TextStyle(color: Colors.grey.shade500, fontSize: 14)),
                           ),
                           const Expanded(child: Divider(color: Colors.grey, thickness: 0.5)),
                         ],
@@ -148,9 +148,9 @@ class WelcomeScreen extends StatelessWidget {
                                 errorBuilder: (context, error, stackTrace) => const Icon(Icons.g_mobiledata, color: Colors.blue, size: 32),
                               ),
                               const SizedBox(width: 12),
-                              const Text(
-                                  "Đăng nhập với Google",
-                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
+                              Text(
+                                  "welcome_sign_in_google".tr,
+                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
                               ),
                             ],
                           ),

@@ -43,13 +43,13 @@ class _ExportReportSheetState extends State<ExportReportSheet> {
             ),
           ),
 
-          const Text("Xuất báo cáo", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          Text("export_report".tr, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
-          Text("Chọn định dạng và nội dung muốn xuất", style: TextStyle(fontSize: 13, color: Colors.grey[500])),
+          Text("select_format_content_desc".tr, style: TextStyle(fontSize: 13, color: Colors.grey[500])),
           const SizedBox(height: 20),
 
           // ── Chọn định dạng file ──
-          const Text("Định dạng", style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black54, letterSpacing: 0.5)),
+          Text("format".tr, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black54, letterSpacing: 0.5)),
           const SizedBox(height: 10),
           Row(
             children: [
@@ -78,29 +78,29 @@ class _ExportReportSheetState extends State<ExportReportSheet> {
           const SizedBox(height: 24),
 
           // ── Chọn nội dung muốn export ──
-          const Text("Nội dung xuất", style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black54, letterSpacing: 0.5)),
+          Text("export_content".tr, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black54, letterSpacing: 0.5)),
           const SizedBox(height: 8),
 
           _buildExportOptionTile(
             icon: Icons.list_alt_outlined,
-            title: "Thông tin tổng quan",
-            subtitle: "Thành viên, ngân sách, thống kê danh mục",
+            title: "overview_info".tr,
+            subtitle: "overview_info_desc".tr,
             value: true, // Luôn bật, không thể tắt
             enabled: false,
             onChanged: null,
           ),
           _buildExportOptionTile(
             icon: Icons.receipt_long_outlined,
-            title: "Chi tiết từng khoản chi",
-            subtitle: "Ngày, tên khoản, người trả, số tiền, ghi chú",
+            title: "detailed_expenses".tr,
+            subtitle: "detailed_expenses_desc".tr,
             value: includeDetails,
             enabled: true,
             onChanged: (val) => setState(() => includeDetails = val ?? false),
           ),
           _buildExportOptionTile(
             icon: Icons.account_balance_wallet_outlined,
-            title: "Bảng quyết toán nợ",
-            subtitle: "Ai nợ ai bao nhiêu sau khi tính toán",
+            title: "settlement_sheet".tr,
+            subtitle: "settlement_sheet_desc".tr,
             value: includeSettlement,
             enabled: true,
             onChanged: (val) => setState(() => includeSettlement = val ?? false),
@@ -138,7 +138,7 @@ class _ExportReportSheetState extends State<ExportReportSheet> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    selectedFormat == null ? "Chọn định dạng trước" : "XUẤT ${selectedFormat!.toUpperCase()}",
+                    selectedFormat == null ? "select_format_first".tr : "export_caps".trParams({"format": selectedFormat!.toUpperCase()}),
                     style: TextStyle(
                       color: selectedFormat == null ? Colors.grey : Colors.white,
                       fontWeight: FontWeight.bold,

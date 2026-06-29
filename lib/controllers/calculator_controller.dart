@@ -112,7 +112,7 @@ class CalculatorController extends GetxController {
   }
 
   String _formatResult(double val) {
-    if (val.isInfinite || val.isNaN) return 'Lỗi';
+    if (val.isInfinite || val.isNaN) return "error".tr;
     
     String s;
     if (val == val.toInt()) {
@@ -155,14 +155,14 @@ class CalculatorController extends GetxController {
       input.value = finalRes.replaceAll(',', '');
       result.value = finalRes;
     } catch (e) {
-      ToastUtil.showError("Lỗi", "Phép tính không hợp lệ");
+      ToastUtil.showError("error".tr, "invalid_calculation".tr);
     }
   }
 
   void clearHistory() {
     history.clear();
     saveHistory();
-    ToastUtil.showSuccess("Thành công", "Đã xóa lịch sử");
+    ToastUtil.showSuccess("success".tr, "history_cleared".tr);
   }
 
   void applyHistoryItem(String equation) {

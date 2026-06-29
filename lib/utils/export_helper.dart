@@ -41,10 +41,10 @@ class ExportHelper {
                 ),
               ),
             ),
-            const Text(
-              "Tải báo cáo thành công 🎉",
+            Text(
+              'export_success'.tr,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Colors.black87,
@@ -54,7 +54,7 @@ class ExportHelper {
             Text(
               fileName,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 13,
                 color: Colors.grey,
               ),
@@ -67,7 +67,7 @@ class ExportHelper {
                 Get.back();
                 try {
                   String? outputFile = await FilePicker.platform.saveFile(
-                    dialogTitle: 'Chọn nơi lưu tệp tin:',
+                    dialogTitle: 'choose_save_location'.tr,
                     fileName: fileName,
                     bytes: Uint8List.fromList(bytes),
                   );
@@ -80,9 +80,9 @@ class ExportHelper {
                     }
                   } catch (_) {}
 
-                  ToastUtil.showSuccess("Thành công", "Đã lưu tệp vào thiết bị!");
+                  ToastUtil.showSuccess('success'.tr, 'save_file_success'.tr);
                 } catch (e) {
-                  ToastUtil.showError("Lỗi", "Không thể lưu tệp: $e");
+                  ToastUtil.showError('error'.tr, 'save_file_error'.trParams({'error': e.toString()}));
                 }
               },
               borderRadius: BorderRadius.circular(16),
@@ -104,18 +104,18 @@ class ExportHelper {
                       child: Icon(Icons.file_download_outlined, color: AppColors.primary, size: 24),
                     ),
                     const SizedBox(width: 16),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Lưu vào điện thoại",
-                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black87),
+                            'save_to_device'.tr,
+                            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black87),
                           ),
-                          SizedBox(height: 2),
+                          const SizedBox(height: 2),
                           Text(
-                            "Chọn thư mục lưu để mở bằng Excel/Sheets bất kỳ lúc nào",
-                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                            'save_to_device_desc'.tr,
+                            style: const TextStyle(fontSize: 12, color: Colors.grey),
                           ),
                         ],
                       ),
@@ -149,7 +149,7 @@ class ExportHelper {
                     ),
                   );
                 } catch (e) {
-                  ToastUtil.showError("Lỗi hệ thống", "Không thể chia sẻ tệp: $e");
+                  ToastUtil.showError('system_error'.tr, 'share_error'.trParams({'error': e.toString()}));
                 }
               },
               borderRadius: BorderRadius.circular(16),
@@ -171,18 +171,18 @@ class ExportHelper {
                       child: const Icon(Icons.share_outlined, color: Colors.blue, size: 24),
                     ),
                     const SizedBox(width: 16),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Chia sẻ tệp qua các ứng dụng khác",
-                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black87),
+                            'share_via_apps'.tr,
+                            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black87),
                           ),
-                          SizedBox(height: 2),
+                          const SizedBox(height: 2),
                           Text(
-                            "Gửi trực tiếp tệp tin qua tin nhắn chat",
-                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                            'share_via_apps_desc'.tr,
+                            style: const TextStyle(fontSize: 12, color: Colors.grey),
                           ),
                         ],
                       ),
@@ -193,11 +193,11 @@ class ExportHelper {
               ),
             ),
             const SizedBox(height: 16),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 4),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Text(
-                "* Lưu ý: File .xlsx không thể mở trực tiếp từ khung chat Messenger Android (do chính sách bảo mật/lỗi ứng dụng của Facebook). Bạn hãy chọn \"Lưu vào điện thoại\" hoặc chia sẻ qua các nền tảng khác như zalo để mở tệp một cách ổn định nhất nhé! (nếu vẫn muốn chia sẻ qua mesage, bạn chỉ có thể mở file đó trên laptop)",
-                style: TextStyle(
+                'export_note'.tr,
+                style: const TextStyle(
                   fontSize: 11,
                   color: Colors.redAccent,
                   height: 1.4,
@@ -210,9 +210,9 @@ class ExportHelper {
             // Nút đóng
             TextButton(
               onPressed: () => Get.back(),
-              child: const Text(
-                "ĐÓNG",
-                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+              child: Text(
+                'btn_close'.tr.toUpperCase(),
+                style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
               ),
             ),
           ],

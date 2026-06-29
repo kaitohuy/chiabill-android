@@ -26,7 +26,7 @@ class _VoluntaryContributionSheetState extends State<VoluntaryContributionSheet>
   void initState() {
     super.initState();
     amountController = TextEditingController();
-    notesController = TextEditingController(text: "Donate quỹ chung");
+    notesController = TextEditingController(text: "fund_voluntary_default_notes".tr);
     widget.fundController.isActionLoading.value = false;
   }
 
@@ -58,13 +58,13 @@ class _VoluntaryContributionSheetState extends State<VoluntaryContributionSheet>
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  "Đóng góp tự nguyện vào Quỹ",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Text(
+                  "fund_voluntary_title".tr,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 20),
   
-                const Text("Số tiền bạn muốn đóng góp:", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                Text("fund_voluntary_amount_label".tr, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
                 const SizedBox(height: 8),
                 TextField(
                   controller: amountController,
@@ -74,9 +74,9 @@ class _VoluntaryContributionSheetState extends State<VoluntaryContributionSheet>
                     CurrencyInputFormatter(),
                   ],
                   decoration: InputDecoration(
-                    hintText: "VD: 200,000",
+                    hintText: "fund_voluntary_amount_hint".tr,
                     hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
-                    suffixText: "đ",
+                    suffixText: "currency_symbol".tr,
                     filled: true,
                     fillColor: Colors.grey[50],
                     border: OutlineInputBorder(
@@ -87,12 +87,12 @@ class _VoluntaryContributionSheetState extends State<VoluntaryContributionSheet>
                 ),
                 const SizedBox(height: 16),
   
-                const Text("Lời nhắn / Ghi chú:", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                Text("notes_label".tr, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
                 const SizedBox(height: 8),
                 TextField(
                   controller: notesController,
                   decoration: InputDecoration(
-                    hintText: "VD: Ủng hộ tiền đi chợ ngày 1",
+                    hintText: "fund_voluntary_notes_hint".tr,
                     hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
                     filled: true,
                     fillColor: Colors.grey[50],
@@ -120,7 +120,7 @@ class _VoluntaryContributionSheetState extends State<VoluntaryContributionSheet>
                             FocusScope.of(context).unfocus();
                             final double? amount = double.tryParse(amountController.text.replaceAll(',', ''));
                             if (amount == null || amount <= 0) {
-                              ToastUtil.showError("Lỗi", "Vui lòng nhập số tiền đóng góp hợp lệ!");
+                              ToastUtil.showError("failed".tr, "invalid_contribution_amount".tr);
                               widget.fundController.isActionLoading.value = false;
                               return;
                             }
@@ -135,9 +135,9 @@ class _VoluntaryContributionSheetState extends State<VoluntaryContributionSheet>
                           },
                     child: widget.fundController.isActionLoading.value
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text(
-                            "XÁC NHẬN ĐÓNG GÓP",
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.white),
+                        : Text(
+                            "confirm_contribution_caps".tr,
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.white),
                           ),
                   )),
                 ),

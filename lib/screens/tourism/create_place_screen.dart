@@ -32,15 +32,15 @@ class _CreatePlaceScreenState extends State<CreatePlaceScreen> {
   // Định nghĩa các Danh mục tiếng Việt cao cấp có icon & màu sắc riêng
   String _selectedCategoryKey = 'Biển';
   final Map<String, Map<String, dynamic>> _categories = {
-    'Biển': {'name': 'Biển', 'icon': Icons.beach_access, 'color': Colors.blue},
-    'Núi': {'name': 'Núi', 'icon': Icons.terrain, 'color': Colors.green},
-    'Bể bơi': {'name': 'Bể bơi', 'icon': Icons.pool, 'color': Colors.cyan},
-    'TTTM': {'name': 'TTTM', 'icon': Icons.local_mall, 'color': Colors.purple},
-    'Di tích': {'name': 'Di tích', 'icon': Icons.account_balance, 'color': Colors.brown},
-    'Cafe': {'name': 'Cafe', 'icon': Icons.local_cafe, 'color': Colors.orange},
-    'Nhà hàng': {'name': 'Nhà hàng', 'icon': Icons.restaurant, 'color': Colors.red},
-    'Cắm trại': {'name': 'Cắm trại', 'icon': Icons.park, 'color': Colors.green[700]},
-    'Khác': {'name': 'Khác', 'icon': Icons.category, 'color': Colors.grey},
+    'Biển': {'name': 'cat_beach', 'icon': Icons.beach_access, 'color': Colors.blue},
+    'Núi': {'name': 'cat_mountain', 'icon': Icons.terrain, 'color': Colors.green},
+    'Bể bơi': {'name': 'cat_pool', 'icon': Icons.pool, 'color': Colors.cyan},
+    'TTTM': {'name': 'cat_mall', 'icon': Icons.local_mall, 'color': Colors.purple},
+    'Di tích': {'name': 'cat_relic', 'icon': Icons.account_balance, 'color': Colors.brown},
+    'Cafe': {'name': 'cat_cafe', 'icon': Icons.local_cafe, 'color': Colors.orange},
+    'Nhà hàng': {'name': 'cat_restaurant', 'icon': Icons.restaurant, 'color': Colors.red},
+    'Cắm trại': {'name': 'cat_camping', 'icon': Icons.park, 'color': Colors.green[700]},
+    'Khác': {'name': 'cat_other', 'icon': Icons.category, 'color': Colors.grey},
   };
 
   // Search autocomplete state
@@ -80,7 +80,7 @@ class _CreatePlaceScreenState extends State<CreatePlaceScreen> {
             'q': query,
             'format': 'json',
             'limit': 5,
-            'accept-language': 'vi',
+            'accept-language': Get.locale?.languageCode ?? 'vi',
             'addressdetails': 1,
           },
           options: Options(
@@ -113,7 +113,7 @@ class _CreatePlaceScreenState extends State<CreatePlaceScreen> {
           'lat': lat,
           'lon': lon,
           'format': 'json',
-          'accept-language': 'vi',
+          'accept-language': Get.locale?.languageCode ?? 'vi',
         },
         options: Options(
           headers: {
@@ -186,9 +186,9 @@ class _CreatePlaceScreenState extends State<CreatePlaceScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
-              "Chọn Danh Mục Địa Điểm",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+            Text(
+              "select_place_category_title".tr,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
             ),
             const SizedBox(height: 16),
             Flexible(
@@ -216,7 +216,7 @@ class _CreatePlaceScreenState extends State<CreatePlaceScreen> {
                         child: Icon(item['icon'], color: item['color']),
                       ),
                       title: Text(
-                        item['name'],
+                        item['name'].toString().tr,
                         style: TextStyle(
                           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                           color: isSelected ? item['color'] : Colors.black87,
@@ -291,7 +291,7 @@ class _CreatePlaceScreenState extends State<CreatePlaceScreen> {
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         appBar: AppBar(
-        title: const Text("Thêm địa điểm mới", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text("add_new_place".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
@@ -333,7 +333,7 @@ class _CreatePlaceScreenState extends State<CreatePlaceScreen> {
                           onChanged: _onSearchChanged,
                           textAlignVertical: TextAlignVertical.center,
                           decoration: InputDecoration(
-                            hintText: "Tìm kiếm địa điểm (VD: Hồ Hoàn Kiếm)...",
+                            hintText: "search_place_hint".tr,
                             prefixIcon: const Padding(
                               padding: EdgeInsets.only(left: 12, right: 8),
                               child: Icon(Icons.search, color: Colors.grey),
@@ -407,9 +407,9 @@ class _CreatePlaceScreenState extends State<CreatePlaceScreen> {
                         color: Colors.black.withValues(alpha:0.7),
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: const Text(
-                        "Kéo bản đồ để ghim đúng vị trí tâm",
-                        style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                      child: Text(
+                        "drag_map_hint".tr,
+                        style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -431,7 +431,7 @@ class _CreatePlaceScreenState extends State<CreatePlaceScreen> {
                   TextFormField(
                     controller: _nameController,
                     decoration: InputDecoration(
-                      labelText: "Tên địa điểm (*)",
+                      labelText: "place_name_label".tr,
                       prefixIcon: const Icon(Icons.edit_location_alt_outlined),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                       enabledBorder: OutlineInputBorder(
@@ -444,7 +444,7 @@ class _CreatePlaceScreenState extends State<CreatePlaceScreen> {
                       ),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     ),
-                    validator: (v) => v!.trim().isEmpty ? "Vui lòng nhập tên địa điểm" : null,
+                    validator: (v) => v!.trim().isEmpty ? "place_name_empty_error".tr : null,
                   ),
                   const SizedBox(height: 12),
 
@@ -465,9 +465,9 @@ class _CreatePlaceScreenState extends State<CreatePlaceScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text("Danh mục địa điểm (*)", style: TextStyle(fontSize: 11, color: Colors.grey)),
+                                Text("place_category_label".tr, style: const TextStyle(fontSize: 11, color: Colors.grey)),
                                 const SizedBox(height: 2),
-                                Text(selectedCategory['name'], style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                                Text(selectedCategory['name'].toString().tr, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                               ],
                             ),
                           ),
@@ -519,14 +519,14 @@ class _CreatePlaceScreenState extends State<CreatePlaceScreen> {
                       },
                       child: _isReverseGeocoding
                           ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                          : const Row(
+                          : Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.check_circle_outline, color: Colors.white),
-                                SizedBox(width: 10),
+                                const Icon(Icons.check_circle_outline, color: Colors.white),
+                                const SizedBox(width: 10),
                                 Text(
-                                  "GHIM ĐỊA ĐIỂM NÀY",
-                                  style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
+                                  "pin_this_place_caps".tr,
+                                  style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),

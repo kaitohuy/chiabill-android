@@ -112,15 +112,15 @@ class PayOnBehalfController extends GetxController {
 
   Future<void> submit() async {
     if (selectedCreditorId.value == null) {
-      ToastUtil.showWarning("Lỗi", "Vui lòng chọn chủ nợ");
+      ToastUtil.showWarning("error".tr, "select_creditor_warning".tr);
       return;
     }
     if (selectedFromUserIds.isEmpty) {
-      ToastUtil.showWarning("Lỗi", "Vui lòng chọn ít nhất một người cần thanh toán hộ");
+      ToastUtil.showWarning("error".tr, "select_at_least_one_debtor_warning".tr);
       return;
     }
     if (totalAmount <= 0) {
-      ToastUtil.showWarning("Lỗi", "Tổng tiền không hợp lệ");
+      ToastUtil.showWarning("error".tr, "invalid_total_amount".tr);
       return;
     }
 
@@ -146,7 +146,7 @@ class PayOnBehalfController extends GetxController {
         Get.back(); // Đóng BottomSheet
         Get.back(); // Đóng PayOnBehalfScreen
         Future.delayed(const Duration(milliseconds: 400), () {
-          ToastUtil.showSuccess("Thành công", "Đã gửi yêu cầu thanh toán hộ!");
+          ToastUtil.showSuccess("success".tr, "pay_on_behalf_request_sent".tr);
         });
         Future.delayed(const Duration(milliseconds: 900), () {
           if (Get.isRegistered<TripDetailController>(tag: tripId.toString())) {
@@ -154,10 +154,10 @@ class PayOnBehalfController extends GetxController {
           }
         });
       } else {
-        ToastUtil.showError("Lỗi", result.message ?? "Không thể gửi thanh toán hộ");
+        ToastUtil.showError("error".tr, result.message ?? "failed_send_pay_on_behalf".tr);
       }
     } catch (e) {
-      ToastUtil.showError("Lỗi hệ thống", e.toString());
+      ToastUtil.showError("system_error".tr, e.toString());
     } finally {
       isLoading.value = false;
     }

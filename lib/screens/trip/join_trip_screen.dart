@@ -34,7 +34,7 @@ class _JoinTripScreenState extends State<JoinTripScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Tham gia chuyến đi", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text("join_trip_title".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
       body: Obx(() {
@@ -49,18 +49,18 @@ class _JoinTripScreenState extends State<JoinTripScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline, size: 80, color: Colors.redAccent),
+                  const Icon(Icons.error_outline, size: 80, color: Colors.redAccent),
                   const SizedBox(height: 16),
-                  const Text(
-                    "Mã mời không hợp lệ hoặc đã hết hạn",
+                  Text(
+                    "invite_code_invalid".tr,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: () => Get.offAllNamed(Routes.MAIN),
                     style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
-                    child: const Text("VỀ TRANG CHỦ"),
+                    child: Text("back_to_home".tr),
                   )
                 ],
               ),
@@ -86,7 +86,7 @@ class _JoinTripScreenState extends State<JoinTripScreen> {
               ),
               const SizedBox(height: 24),
               Text(
-                "Bạn được mời tham gia!",
+                "invited_to_join".tr,
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.primary),
               ),
               const SizedBox(height: 32),
@@ -101,11 +101,11 @@ class _JoinTripScreenState extends State<JoinTripScreen> {
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     children: [
-                      _buildInfoRow(Icons.map, "Chuyến đi", info.tripName),
+                      _buildInfoRow(Icons.map, "Chuyến đi".tr, info.tripName),
                       const Divider(height: 32),
-                      _buildInfoRow(Icons.person, "Người mời", info.createdByName),
+                      _buildInfoRow(Icons.person, "invited_by".tr, info.createdByName),
                       const Divider(height: 32),
-                      _buildInfoRow(Icons.group, "Thành viên", "${info.memberCount} người"),
+                      _buildInfoRow(Icons.group, "members_count".tr, "${info.memberCount} ${'people'.tr}"),
                     ],
                   ),
                 ),
@@ -125,8 +125,8 @@ class _JoinTripScreenState extends State<JoinTripScreen> {
                     elevation: 4,
                   ),
                   child: controller.isLoading.value
-                      ? CircularProgressIndicator(color: Colors.white)
-                      : const Text("XÁC NHẬN THAM GIA", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : Text("confirm_join".tr, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
               ),
               
@@ -134,7 +134,7 @@ class _JoinTripScreenState extends State<JoinTripScreen> {
               
               TextButton(
                 onPressed: () => Get.offAllNamed(Routes.MAIN),
-                child: const Text("Để sau", style: TextStyle(color: Colors.grey)),
+                child: Text("guide_later".tr, style: const TextStyle(color: Colors.grey)),
               ),
             ],
           ),

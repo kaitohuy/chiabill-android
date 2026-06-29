@@ -31,6 +31,21 @@ class _ItinerarySettingsScreenState extends State<ItinerarySettingsScreen> {
 
   final List<String> _units = ['Giây', 'Phút', 'Giờ', 'Ngày'];
 
+  String _getLocalizedUnit(String unit) {
+    switch (unit) {
+      case 'Giây':
+        return 'unit_second'.tr;
+      case 'Phút':
+        return 'unit_minute'.tr;
+      case 'Giờ':
+        return 'unit_hour'.tr;
+      case 'Ngày':
+        return 'unit_day'.tr;
+      default:
+        return unit;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -115,16 +130,16 @@ class _ItinerarySettingsScreenState extends State<ItinerarySettingsScreen> {
       if (!isAuto) {
         LoadingUtil.hide();
         if (res.success) {
-          ToastUtil.showSuccess("Thành công", "Đã lưu cài đặt báo thức!");
+          ToastUtil.showSuccess("success".tr, "alarm_settings_saved".tr);
         } else {
-          ToastUtil.showError("Lỗi", res.message ?? "Không thể lưu cài đặt báo thức");
+          ToastUtil.showError("error".tr, res.message ?? "cannot_save_alarm_settings".tr);
         }
       }
     } catch (e) {
       debugPrint('[ItinerarySettingsScreen] Failed to save settings: $e');
       if (!isAuto) {
         LoadingUtil.hide();
-        ToastUtil.showError("Lỗi hệ thống", e.toString());
+        ToastUtil.showError("system_error".tr, e.toString());
       }
     }
   }
@@ -142,9 +157,9 @@ class _ItinerarySettingsScreenState extends State<ItinerarySettingsScreen> {
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
           onPressed: () => Get.back(),
         ),
-        title: const Text(
-          "Cài Đặt Báo Thức",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+        title: Text(
+          "alarm_settings".tr,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),
       body: SafeArea(
@@ -177,22 +192,22 @@ class _ItinerarySettingsScreenState extends State<ItinerarySettingsScreen> {
                                 children: [
                                   Icon(Icons.notifications_active_outlined, color: AppColors.primary, size: 22),
                                   const SizedBox(width: 8),
-                                  const Text(
-                                    "Hình Thức Nhắc Nhở",
-                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                                  Text(
+                                    "reminder_method".tr,
+                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
                                   ),
                                 ],
                               ),
                               const Divider(height: 24, thickness: 0.8),
                               SwitchListTile(
                                 contentPadding: EdgeInsets.zero,
-                                title: const Text(
-                                  "Nhắc nhở lịch trình",
-                                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                                title: Text(
+                                  "itinerary_reminder".tr,
+                                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                                 ),
-                                subtitle: const Text(
-                                  "Nhận thông báo khi sắp đến giờ hoạt động",
-                                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                                subtitle: Text(
+                                  "itinerary_reminder_desc".tr,
+                                  style: const TextStyle(fontSize: 12, color: Colors.grey),
                                 ),
                                 value: _isNotificationEnabled,
                                 onChanged: (val) async {
@@ -207,9 +222,9 @@ class _ItinerarySettingsScreenState extends State<ItinerarySettingsScreen> {
                               ),
                               SwitchListTile(
                                 contentPadding: EdgeInsets.zero,
-                                title: const Text(
-                                  "Rung thiết bị",
-                                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                                title: Text(
+                                  "vibrate_device".tr,
+                                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                                 ),
                                 value: _isVibrationEnabled,
                                 onChanged: _isNotificationEnabled
@@ -223,9 +238,9 @@ class _ItinerarySettingsScreenState extends State<ItinerarySettingsScreen> {
                               ),
                               SwitchListTile(
                                 contentPadding: EdgeInsets.zero,
-                                title: const Text(
-                                  "Phát âm thanh chuông",
-                                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                                title: Text(
+                                  "play_sound".tr,
+                                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                                 ),
                                 value: _isSoundEnabled,
                                 onChanged: _isNotificationEnabled
@@ -260,16 +275,16 @@ class _ItinerarySettingsScreenState extends State<ItinerarySettingsScreen> {
                                 children: [
                                   Icon(Icons.alarm_on_outlined, color: AppColors.primary, size: 22),
                                   const SizedBox(width: 8),
-                                  const Text(
-                                    "Thời Gian Báo Trước",
-                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                                  Text(
+                                    "reminder_time_before".tr,
+                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
                                   ),
                                 ],
                               ),
                               const Divider(height: 24, thickness: 0.8),
-                              const Text(
-                                "Nhắc nhở trước khi lịch trình diễn ra:",
-                                style: TextStyle(fontSize: 14, color: Colors.black54),
+                              Text(
+                                "reminder_time_before_desc".tr,
+                                style: const TextStyle(fontSize: 14, color: Colors.black54),
                               ),
                               const SizedBox(height: 12),
                               Row(
@@ -286,7 +301,7 @@ class _ItinerarySettingsScreenState extends State<ItinerarySettingsScreen> {
                                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                                         filled: true,
                                         fillColor: _isNotificationEnabled ? Colors.grey.shade50 : Colors.grey.shade200,
-                                        hintText: 'Nhập số',
+                                        hintText: 'enter_number'.tr,
                                         hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
                                         border: OutlineInputBorder(
                                           borderRadius: BorderRadius.circular(12),
@@ -304,11 +319,11 @@ class _ItinerarySettingsScreenState extends State<ItinerarySettingsScreen> {
                                       validator: (value) {
                                         if (!_isNotificationEnabled) return null;
                                         if (value == null || value.trim().isEmpty) {
-                                          return 'Bắt buộc';
+                                          return 'required'.tr;
                                         }
                                         final n = int.tryParse(value);
                                         if (n == null || n <= 0) {
-                                          return 'Số hợp lệ';
+                                          return 'valid_number'.tr;
                                         }
                                         return null;
                                       },
@@ -323,7 +338,7 @@ class _ItinerarySettingsScreenState extends State<ItinerarySettingsScreen> {
                                       items: _units.map((unit) {
                                         return DropdownMenuItem<String>(
                                           value: unit,
-                                          child: Text(unit, style: const TextStyle(fontSize: 14)),
+                                          child: Text(_getLocalizedUnit(unit), style: const TextStyle(fontSize: 14)),
                                         );
                                       }).toList(),
                                       onChanged: _isNotificationEnabled
@@ -386,9 +401,9 @@ class _ItinerarySettingsScreenState extends State<ItinerarySettingsScreen> {
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    child: const Text(
-                      "LƯU CẤU HÌNH",
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                    child: Text(
+                      "save_config_caps".tr,
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, letterSpacing: 0.5),
                     ),
                   ),
                 ),

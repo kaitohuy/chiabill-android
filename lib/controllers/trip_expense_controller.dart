@@ -110,7 +110,7 @@ class TripExpenseController extends GetxController {
         return ExpenseResponse(
           id: -1, // ID ảo
           totalAmount: (data['totalAmount'] as num).toDouble(),
-          description: data['description'] ?? 'Khoản chi ngoại tuyến',
+          description: data['description'] ?? "offline_expense".tr,
           expenseDate: data['expenseDate'],
           clientUuid: item['id'], // Dùng ID này làm cờ đánh dấu Offline
           isFromFund: data['isFromFund'] ?? false,
@@ -144,7 +144,7 @@ class TripExpenseController extends GetxController {
     isLoading.value = true;
     final result = await _expenseService.deleteExpense(expenseId);
     if (result.success) {
-      ToastUtil.showSuccess("Thành công", "Đã xóa khoản chi");
+      ToastUtil.showSuccess("success".tr, "expense_deleted".tr);
       fetchExpenses(isRefresh: true, isSilent: true);
       fetchStats();
       
@@ -158,7 +158,7 @@ class TripExpenseController extends GetxController {
         Get.find<TripSettlementController>(tag: tripId.toString()).fetchSettlements();
       }
     } else {
-      ToastUtil.showError("Lỗi", result.message ?? "Không thể xóa");
+      ToastUtil.showError("error".tr, result.message ?? "cannot_delete".tr);
     }
     isLoading.value = false;
   }

@@ -73,7 +73,7 @@ class TripCard extends StatelessWidget {
               backgroundColor: Colors.teal.shade50,
               foregroundColor: Colors.teal.shade700,
               icon: Icons.explore_outlined,
-              label: 'Lịch trình',
+              label: 'itinerary_title'.tr,
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(20),
                 bottomLeft: Radius.circular(20),
@@ -87,7 +87,7 @@ class TripCard extends StatelessWidget {
               backgroundColor: Colors.blue.shade50,
               foregroundColor: Colors.blue.shade700,
               icon: Icons.edit_outlined,
-              label: 'Sửa',
+              label: 'edit'.tr,
             ),
             SlidableAction(
               onPressed: (context) {
@@ -97,7 +97,7 @@ class TripCard extends StatelessWidget {
               backgroundColor: Colors.red.shade50,
               foregroundColor: Colors.red.shade700,
               icon: Icons.delete_outline_rounded,
-              label: 'Xóa',
+              label: 'delete'.tr,
               borderRadius: const BorderRadius.only(
                 topRight: Radius.circular(20),
                 bottomRight: Radius.circular(20),
@@ -116,7 +116,7 @@ class TripCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             onTap: () {
               if (trip.id == -1) {
-                ToastUtil.showWarning("Đang chờ đồng bộ", "Chuyến đi này chưa được đồng bộ lên máy chủ");
+                ToastUtil.showWarning("pending_sync".tr, "trip_not_synced".tr);
                 return;
               }
               Get.toNamed(Routes.TRIP_DETAIL, arguments: trip.id);
@@ -162,7 +162,7 @@ class TripCard extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 4),
-                        Text(trip.description ?? "Không có mô tả", maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.grey.shade600, fontSize: 14)),
+                        Text(trip.description ?? "no_description".tr, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.grey.shade600, fontSize: 14)),
                       ],
                     ),
                   ),

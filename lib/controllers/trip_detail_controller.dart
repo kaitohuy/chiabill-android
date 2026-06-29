@@ -94,9 +94,9 @@ class TripDetailController extends GetxController {
     final res = await _tripService.activateMember(tripId, memberId);
     if (res.success) {
       await fetchTripDetail();
-      ToastUtil.showSuccess("Thành công", "Đã kích hoạt lại thành viên");
+      ToastUtil.showSuccess("success".tr, "member_activated_success".tr);
     } else {
-      ToastUtil.showError("Lỗi", res.message ?? "Không thể kích hoạt lại thành viên");
+      ToastUtil.showError("error".tr, res.message ?? "cannot_activate_member".tr);
     }
     isLoading.value = false;
   }
@@ -106,9 +106,9 @@ class TripDetailController extends GetxController {
     final res = await _tripService.disableMember(tripId, memberId);
     if (res.success) {
       await fetchTripDetail();
-      ToastUtil.showSuccess("Thành công", "Đã tạm ngưng thành viên");
+      ToastUtil.showSuccess("success".tr, "member_disabled_success".tr);
     } else {
-      ToastUtil.showError("Lỗi", res.message ?? "Không thể tạm ngưng thành viên");
+      ToastUtil.showError("error".tr, res.message ?? "cannot_disable_member".tr);
     }
     isLoading.value = false;
   }
@@ -118,9 +118,9 @@ class TripDetailController extends GetxController {
     final res = await _tripService.kickMember(tripId, memberId, forgive);
     if (res.success) {
       await fetchTripDetail();
-      ToastUtil.showSuccess("Thành công", "Đã mời thành viên ra khỏi nhóm");
+      ToastUtil.showSuccess("success".tr, "member_kicked_success".tr);
     } else {
-      ToastUtil.showError("Lỗi", res.message ?? "Không thể xóa thành viên khỏi nhóm");
+      ToastUtil.showError("error".tr, res.message ?? "cannot_kick_member".tr);
     }
     isLoading.value = false;
   }
@@ -146,7 +146,7 @@ class TripDetailController extends GetxController {
     if (!detailResult.success) {
       if (!isSilent) isLoading.value = false;
       Future.delayed(Duration.zero, () {
-        ToastUtil.showError("Không thể truy cập", detailResult.message ?? "Lỗi tải thông tin chuyến đi");
+        ToastUtil.showError("cannot_access".tr, detailResult.message ?? "failed_to_load_trip_info".tr);
         Get.back();
       });
       return;
@@ -180,7 +180,7 @@ class TripDetailController extends GetxController {
     if (result.success && result.data != null) {
       activeInviteCode.value = result.data!.inviteCode;
     } else {
-      ToastUtil.showError("Lỗi", result.message ?? "Không thể tạo mã mời");
+      ToastUtil.showError("error".tr, result.message ?? "cannot_create_invite_code".tr);
     }
     isLoading.value = false;
   }
@@ -190,7 +190,7 @@ class TripDetailController extends GetxController {
       final String baseUrl = dotenv.env['BASE_URL'] ?? "https://chiabill-server.onrender.com";
       final inviteUrl = "$baseUrl/join/${activeInviteCode.value}";
       Clipboard.setData(ClipboardData(text: inviteUrl));
-      ToastUtil.showSuccess("Thành công", "Đã copy link mời tham gia");
+      ToastUtil.showSuccess("success".tr, "invite_link_copied".tr);
     }
   }
 
@@ -200,7 +200,7 @@ class TripDetailController extends GetxController {
     isSharingInvite.value = true;
     final String codeToShare = activeInviteCode.value;
     final String baseUrl = dotenv.env['BASE_URL'] ?? "";
-    final String shareText = 'Mời bạn tham gia nhóm trên DuliVie:\n$baseUrl/join/$codeToShare';
+    final String shareText = "invite_message_prefix".trParams({'url': '$baseUrl/join/$codeToShare'});
 
     try {
       await SharePlus.instance.share(ShareParams(text: shareText));
@@ -218,13 +218,13 @@ class TripDetailController extends GetxController {
       Get.back();
       Get.back();
       Future.delayed(const Duration(milliseconds: 300), () {
-        ToastUtil.showSuccess("Thông báo", "Đã xóa chuyến đi");
+        ToastUtil.showSuccess("notification".tr, "trip_deleted_success".tr);
         if (Get.isRegistered<HomeController>()) {
           Get.find<HomeController>().fetchTrips();
         }
       });
     } else {
-      ToastUtil.showError("Lỗi", result.message ?? "Không thể xóa");
+      ToastUtil.showError("error".tr, result.message ?? "cannot_delete".tr);
       isLoading.value = false;
     }
   }
@@ -242,11 +242,11 @@ class TripDetailController extends GetxController {
       Get.back();
 
       Future.delayed(const Duration(milliseconds: 300), () {
-        ToastUtil.showSuccess("Thành công", "Đã thêm thành viên. Nhớ cập nhật khoản chi cũ nếu muốn họ gánh chung nhé!");
+        ToastUtil.showSuccess("success".tr, "member_added_success_remind".tr);
       });
       fetchData(isSilent: true);
     } else {
-      ToastUtil.showError("Thất bại", result.message ?? "Không thể thêm");
+      ToastUtil.showError("failed".tr, result.message ?? "cannot_add".tr);
     }
   }
 
@@ -274,10 +274,10 @@ class TripDetailController extends GetxController {
     isLoading.value = false;
     if (result.success) {
       Get.back();
-      ToastUtil.showSuccess("Thành công", "Bạn đã rời khỏi nhóm");
+      ToastUtil.showSuccess("success".tr, "left_group_success".tr);
       if (Get.isRegistered<HomeController>()) Get.find<HomeController>().fetchTrips();
     } else {
-      ToastUtil.showError("Không thể rời nhóm", result.message ?? "Lỗi máy chủ.");
+      ToastUtil.showError("cannot_leave_group".tr, result.message ?? "SERVER_ERROR".tr);
     }
   }
 
@@ -306,7 +306,7 @@ class TripDetailController extends GetxController {
         final safeName = (trip.value?.name ?? 'ChuyenDi')
             .replaceAll(RegExp(r'[^\w\s]'), '')
             .replaceAll(' ', '_');
-        final fileName = "BaoCao_${safeName}_$tripId.$ext";
+        final fileName = "${'report_file_prefix'.tr}_${safeName}_$tripId.$ext";
 
         final mimeType = format == 'excel'
             ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -316,14 +316,14 @@ class TripDetailController extends GetxController {
           bytes: bytes,
           fileName: fileName,
           mimeType: mimeType,
-          shareText: 'Báo cáo chi tiêu chuyến đi: ${trip.value?.name}',
+          shareText: 'report_share_text'.trParams({'name': trip.value?.name ?? ''}),
         );
       } else {
-        ToastUtil.showError("Lỗi xuất file", result.message ?? "Không thể tải báo cáo");
+        ToastUtil.showError("export_file_error".tr, result.message ?? "cannot_download_report".tr);
       }
     } catch (e) {
       await LoadingUtil.hide();
-      ToastUtil.showError("Lỗi hệ thống", "Đã xảy ra lỗi khi xử lý tệp: $e");
+      ToastUtil.showError("system_error".tr, "error_processing_file".trParams({'error': e.toString()}));
     }
   }
 }

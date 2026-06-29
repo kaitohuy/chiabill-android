@@ -54,7 +54,7 @@ class _TourismGalleryViewState extends State<TourismGalleryView> {
               Icon(Icons.landscape_outlined, size: 64, color: Colors.grey.shade400),
               const SizedBox(height: 16),
               Text(
-                "Không tìm thấy địa điểm nào",
+                "place_not_found".tr,
                 style: TextStyle(fontSize: 16, color: Colors.grey.shade600, fontWeight: FontWeight.bold),
               ),
             ],

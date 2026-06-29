@@ -41,7 +41,7 @@ class HistoryTab extends StatelessWidget {
                           children: [
                             Icon(Icons.filter_list, color: hasFilter ? Colors.white : Colors.grey.shade700, size: 20),
                             const SizedBox(width: 8),
-                            Text("Lọc giao dịch", style: TextStyle(color: hasFilter ? Colors.white : Colors.grey.shade800, fontWeight: FontWeight.bold))
+                            Text("filter_transactions".tr, style: TextStyle(color: hasFilter ? Colors.white : Colors.grey.shade800, fontWeight: FontWeight.bold))
                           ]
                       ),
                     ),
@@ -67,7 +67,7 @@ class HistoryTab extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 SizedBox(height: Get.height * 0.05),
-                                const EmptyState(text: "Chưa có lịch sử giao dịch nào!"),
+                                EmptyState(text: "no_transaction_history".tr),
                               ]
                           )
                       )
@@ -103,16 +103,16 @@ class HistoryTab extends StatelessWidget {
 
                       Color statusColor = Colors.orange;
                       IconData statusIcon = Icons.pending;
-                      String statusText = "Đang chờ duyệt";
+                      String statusText = "pending_approval".tr;
 
                       if (p.status == 'APPROVED') {
                         statusColor = AppColors.primary;
                         statusIcon = Icons.check_circle;
-                        statusText = "Thành công";
+                        statusText = "approved".tr;
                       } else if (p.status == 'REJECTED') {
                         statusColor = Colors.red;
                         statusIcon = Icons.cancel;
-                        statusText = "Bị từ chối";
+                        statusText = "rejected".tr;
                       }
 
                       return Card(
@@ -131,7 +131,7 @@ class HistoryTab extends StatelessWidget {
                                 Text(statusText, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: statusColor))
                               ]
                           ),
-                          trailing: Text("${CurrencyUtils.formatNumber(p.amount)} đ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: statusColor)),
+                          trailing: Text("${CurrencyUtils.formatNumber(p.amount)} ${'currency_symbol'.tr}", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: statusColor)),
                           onTap: () => _showHistoryProofDialog(context, controller, p),
                         ),
                       );
@@ -166,10 +166,10 @@ class HistoryTab extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text("Lọc lịch sử", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        Text("filter_history".tr, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                         TextButton(
                             onPressed: () => setState(() { tempStatus = null; tempFromId = null; tempToId = null; }),
-                            child: const Text("Xóa lọc", style: TextStyle(color: Colors.red))
+                            child: Text("clear_filter".tr, style: const TextStyle(color: Colors.red))
                         )
                       ],
                     ),
@@ -180,7 +180,7 @@ class HistoryTab extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text("Trạng thái:", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                            Text("status_label".tr, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
                             const SizedBox(height: 8),
                             Wrap(
                               spacing: 8,
@@ -190,9 +190,9 @@ class HistoryTab extends StatelessWidget {
                                 'REJECTED'
                               ].map((status) {
                                 bool isSelected = tempStatus == status;
-                                String label = "Chờ duyệt";
-                                if (status == 'APPROVED') label = "Đã duyệt";
-                                if (status == 'REJECTED') label = "Từ chối";
+                                String label = "pending_approval".tr;
+                                if (status == 'APPROVED') label = "approved".tr;
+                                if (status == 'REJECTED') label = "rejected".tr;
 
                                 return FilterChip(
                                     label: Text(label, style: TextStyle(fontSize: 12, color: isSelected ? Colors.white : Colors.black87)),
@@ -205,14 +205,14 @@ class HistoryTab extends StatelessWidget {
                               }).toList(),
                             ),
                             const SizedBox(height: 16),
-                            const Text("Người gửi:", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                            Text("sender_label".tr, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
                             const SizedBox(height: 8),
                             Wrap(
                               spacing: 8,
                               children: (mainController.trip.value?.members ?? []).map((m) {
                                 bool isSelected = tempFromId == m.user.id;
                                 return FilterChip(
-                                    label: Text(m.user.name ?? "Ẩn", style: TextStyle(fontSize: 12, color: isSelected ? Colors.white : Colors.black87)),
+                                    label: Text(m.user.name ?? "hidden".tr, style: TextStyle(fontSize: 12, color: isSelected ? Colors.white : Colors.black87)),
                                     selected: isSelected,
                                     selectedColor: Colors.blue,
                                     checkmarkColor: Colors.white,
@@ -222,14 +222,14 @@ class HistoryTab extends StatelessWidget {
                               }).toList(),
                             ),
                             const SizedBox(height: 16),
-                            const Text("Người nhận:", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                            Text("receiver_label".tr, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
                             const SizedBox(height: 8),
                             Wrap(
                               spacing: 8,
                               children: (mainController.trip.value?.members ?? []).map((m) {
                                 bool isSelected = tempToId == m.user.id;
                                 return FilterChip(
-                                    label: Text(m.user.name ?? "Ẩn", style: TextStyle(fontSize: 12, color: isSelected ? Colors.white : Colors.black87)),
+                                    label: Text(m.user.name ?? "hidden".tr, style: TextStyle(fontSize: 12, color: isSelected ? Colors.white : Colors.black87)),
                                     selected: isSelected,
                                     selectedColor: Colors.blue,
                                     checkmarkColor: Colors.white,
@@ -251,7 +251,7 @@ class HistoryTab extends StatelessWidget {
                             Get.back();
                             controller.applyPaymentFilter(status: tempStatus, fromId: tempFromId, toId: tempToId);
                           },
-                          child: const Text("ÁP DỤNG", style: TextStyle(fontWeight: FontWeight.bold))
+                          child: Text("apply_caps".tr, style: const TextStyle(fontWeight: FontWeight.bold))
                       ),
                     )
                   ],
@@ -292,15 +292,15 @@ class HistoryTab extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Giao dịch: ${CurrencyUtils.formatNumber(payment.amount)}đ", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              Text("transaction_amount".trParams({"amount": CurrencyUtils.formatNumber(payment.amount)}), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
               const SizedBox(height: 8),
               Text("${payment.fromUserName} ➡️ ${payment.toUserName}", style: const TextStyle(color: Colors.grey)),
               const Divider(height: 24),
 
               if (images.isEmpty)
-                const Padding(
-                    padding: EdgeInsets.all(32.0),
-                    child: Text("Không có ảnh đính kèm", style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey))
+                Padding(
+                    padding: const EdgeInsets.all(32.0),
+                    child: Text("no_attached_images".tr, style: const TextStyle(fontStyle: FontStyle.italic, color: Colors.grey))
                 )
               else
                 SizedBox(
@@ -349,10 +349,10 @@ class HistoryTab extends StatelessWidget {
                         onPressed: () {
                           Get.back();
                           Get.defaultDialog(
-                              title: "Từ chối giao dịch?",
-                              middleText: "Bạn chắc chắn chưa nhận được tiền và muốn từ chối khoản này?",
-                              textConfirm: "TỪ CHỐI",
-                              textCancel: "HỦY",
+                              title: "reject_transaction_question".tr,
+                              middleText: "reject_transaction_confirm_desc".tr,
+                              textConfirm: "reject_caps".tr,
+                              textCancel: "cancel_caps".tr,
                               confirmTextColor: Colors.white,
                               buttonColor: Colors.red,
                               onConfirm: () {
@@ -362,7 +362,7 @@ class HistoryTab extends StatelessWidget {
                               }
                           );
                         },
-                        child: const Text("TỪ CHỐI", style: TextStyle(color: Colors.red))
+                        child: Text("reject_caps".tr, style: const TextStyle(color: Colors.red))
                     ),
                     ElevatedButton(
                         style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
@@ -371,7 +371,7 @@ class HistoryTab extends StatelessWidget {
                           Get.find<TripSettlementController>(tag: mainController.tripId.toString()).approvePayment(payment.id);
                                   controller.fetchData();
                         },
-                        child: const Text("ĐÃ NHẬN TIỀN")
+                        child: Text("received_money_caps".tr)
                     ),
                   ],
                 )
@@ -380,7 +380,7 @@ class HistoryTab extends StatelessWidget {
                     width: double.infinity,
                     child: OutlinedButton(
                         onPressed: () => Get.back(),
-                        child: const Text("ĐÓNG")
+                        child: Text("close_caps".tr)
                     )
                 )
             ],

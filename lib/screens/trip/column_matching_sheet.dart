@@ -17,12 +17,12 @@ class ColumnMatchingSheet extends StatefulWidget {
 class _ColumnMatchingSheetState extends State<ColumnMatchingSheet> {
   // Bản đồ các trường đích
   final Map<String, String> targetFields = {
-    "activity": "Hoạt động * (Bắt buộc)",
-    "dayNumber": "Ngày chi tiết (VD: Ngày 1, Day 2)",
-    "timeRange": "Khung giờ (VD: 8h-9h)",
-    "location": "Địa điểm",
-    "note": "Ghi chú",
-    "estimatedCost": "Chi phí dự kiến",
+    "activity": "activity_required".tr,
+    "dayNumber": "day_details_hint".tr,
+    "timeRange": "time_range_hint".tr,
+    "location": "location".tr,
+    "note": "notes".tr,
+    "estimatedCost": "estimated_cost_label".tr,
   };
 
   // Ánh xạ đã được chọn (Trường đích -> Index của cột trong Excel)
@@ -43,8 +43,8 @@ class _ColumnMatchingSheetState extends State<ColumnMatchingSheet> {
     // Hoạt động là trường bắt buộc phải được map
     if (matching["activity"] == null) {
       Get.snackbar(
-        "Lỗi ánh xạ",
-        "Vui lòng chọn cột chứa 'Hoạt động' trong file Excel",
+        "mapping_error".tr,
+        "select_activity_column_error".tr,
         backgroundColor: Colors.redAccent,
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
@@ -68,8 +68,8 @@ class _ColumnMatchingSheetState extends State<ColumnMatchingSheet> {
 
     if (items.isEmpty) {
       Get.snackbar(
-        "Lỗi đọc file",
-        "Không thể tìm thấy hàng dữ liệu hợp lệ nào dựa trên cấu hình khớp cột hiện tại.",
+        "file_read_error".tr,
+        "no_valid_data_rows_error".tr,
         backgroundColor: Colors.orangeAccent,
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
@@ -135,9 +135,9 @@ class _ColumnMatchingSheetState extends State<ColumnMatchingSheet> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "Khớp cột thông minh",
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    Text(
+                      "smart_column_matching".tr,
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     Text(
                       widget.result.fileName,
@@ -152,7 +152,7 @@ class _ColumnMatchingSheetState extends State<ColumnMatchingSheet> {
           ),
           const SizedBox(height: 16),
           Text(
-            "Hệ thống đã tự động so khớp các cột tương thích. Bạn vui lòng kiểm tra lại bên dưới để khớp dữ liệu chính xác nhất:",
+            "column_matching_desc".tr,
             style: TextStyle(fontSize: 13, color: Colors.grey.shade600, height: 1.4),
           ),
           const SizedBox(height: 16),
@@ -165,7 +165,7 @@ class _ColumnMatchingSheetState extends State<ColumnMatchingSheet> {
                 Expanded(
                   flex: 5,
                   child: Text(
-                    "Thông tin hệ thống",
+                    "system_info".tr,
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -177,7 +177,7 @@ class _ColumnMatchingSheetState extends State<ColumnMatchingSheet> {
                 Expanded(
                   flex: 5,
                   child: Text(
-                    "Cột trong file Excel",
+                    "excel_column".tr,
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -234,17 +234,17 @@ class _ColumnMatchingSheetState extends State<ColumnMatchingSheet> {
                             child: DropdownButtonHideUnderline(
                               child: DropdownButton<int?>(
                                 value: matching[fieldKey],
-                                hint: const Text("Bỏ qua", style: TextStyle(fontSize: 12, color: Colors.grey)),
+                                hint: Text("ignore".tr, style: const TextStyle(fontSize: 12, color: Colors.grey)),
                                 isExpanded: true,
                                 icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
                                 items: [
-                                  const DropdownMenuItem<int?>(
+                                  DropdownMenuItem<int?>(
                                     value: null,
-                                    child: Text("-- Bỏ qua --", style: TextStyle(fontSize: 13, color: Colors.grey)),
+                                    child: Text("-- ${'ignore'.tr} --", style: const TextStyle(fontSize: 13, color: Colors.grey)),
                                   ),
                                   ...List.generate(widget.result.headers.length, (idx) {
                                     final colHeader = widget.result.headers[idx];
-                                    final colLabel = colHeader.isEmpty ? "(Cột trống ${idx + 1})" : colHeader;
+                                    final colLabel = colHeader.isEmpty ? "empty_column_prefix".trParams({'index': (idx + 1).toString()}) : colHeader;
                                     return DropdownMenuItem<int?>(
                                       value: idx,
                                       child: Text(
@@ -286,12 +286,12 @@ class _ColumnMatchingSheetState extends State<ColumnMatchingSheet> {
                 elevation: 0,
               ),
               onPressed: _onContinue,
-              child: const Row(
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("XEM TRƯỚC LỊCH TRÌNH", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-                  SizedBox(width: 8),
-                  Icon(Icons.arrow_forward, size: 18),
+                  Text("preview_itinerary_caps".tr, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.arrow_forward, size: 18),
                 ],
               ),
             ),

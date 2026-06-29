@@ -39,7 +39,7 @@ class _RequiredContributionSheetState extends State<RequiredContributionSheet> {
     selectedUserIds = widget.members.map((m) => m.user.id).toList();
 
     amountController = TextEditingController();
-    notesController = TextEditingController(text: "Nộp quỹ");
+    notesController = TextEditingController(text: "fund_required_default_notes".tr);
   }
 
   @override
@@ -70,13 +70,13 @@ class _RequiredContributionSheetState extends State<RequiredContributionSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                "Yêu cầu nộp quỹ bắt buộc",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Text(
+                "fund_required_title".tr,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 20),
 
-              const Text("Số tiền mỗi người cần đóng:", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+              Text("fund_required_amount_label".tr, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
               const SizedBox(height: 8),
               TextField(
                 controller: amountController,
@@ -86,9 +86,9 @@ class _RequiredContributionSheetState extends State<RequiredContributionSheet> {
                   CurrencyInputFormatter(),
                 ],
                 decoration: InputDecoration(
-                  hintText: "VD: 100,000",
+                  hintText: "fund_required_amount_hint".tr,
                   hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
-                  suffixText: "đ",
+                  suffixText: "currency_symbol".tr,
                   filled: true,
                   fillColor: Colors.grey[50],
                   border: OutlineInputBorder(
@@ -99,12 +99,12 @@ class _RequiredContributionSheetState extends State<RequiredContributionSheet> {
               ),
               const SizedBox(height: 16),
 
-              const Text("Nội dung / Ghi chú:", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+              Text("notes_label".tr, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
               const SizedBox(height: 8),
               TextField(
                 controller: notesController,
                 decoration: InputDecoration(
-                  hintText: "VD: Đợt thu đầu chuyến đi",
+                  hintText: "fund_required_notes_hint".tr,
                   hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 13),
                   filled: true,
                   fillColor: Colors.grey[50],
@@ -119,7 +119,7 @@ class _RequiredContributionSheetState extends State<RequiredContributionSheet> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("Ai phải đóng quỹ:", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                  Text("fund_required_target_label".tr, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
                   TextButton(
                     onPressed: () {
                       FocusScope.of(context).unfocus();
@@ -133,8 +133,8 @@ class _RequiredContributionSheetState extends State<RequiredContributionSheet> {
                       });
                     },
                     child: Text(selectedUserIds.length == widget.members.length
-                        ? "Bỏ chọn tất cả"
-                        : "Chọn tất cả"),
+                        ? "deselect_all".tr
+                        : "select_all".tr),
                   ),
                 ],
               ),
@@ -168,7 +168,7 @@ class _RequiredContributionSheetState extends State<RequiredContributionSheet> {
                                 : null,
                           ),
                           const SizedBox(width: 8),
-                          Expanded(child: Text(member.user.name ?? "Không tên")),
+                          Expanded(child: Text(member.user.name ?? "unnamed".tr)),
                           if (isTreasurer)
                             Container(
                               margin: const EdgeInsets.only(left: 8),
@@ -177,7 +177,7 @@ class _RequiredContributionSheetState extends State<RequiredContributionSheet> {
                                 color: Colors.blue[50],
                                 borderRadius: BorderRadius.circular(4),
                               ),
-                              child: Text("Thủ quỹ", style: TextStyle(fontSize: 8, color: Colors.blue[800], fontWeight: FontWeight.bold)),
+                              child: Text("treasurer".tr, style: TextStyle(fontSize: 8, color: Colors.blue[800], fontWeight: FontWeight.bold)),
                             ),
                         ],
                       ),
@@ -216,12 +216,12 @@ class _RequiredContributionSheetState extends State<RequiredContributionSheet> {
                           FocusScope.of(context).unfocus();
                           final double? amount = double.tryParse(amountController.text.replaceAll(',', ''));
                           if (amount == null || amount <= 0) {
-                            ToastUtil.showError("Lỗi", "Vui lòng nhập số tiền đóng quỹ hợp lệ!");
+                            ToastUtil.showError("failed".tr, "invalid_fund_deposit_amount".tr);
                             widget.fundController.isActionLoading.value = false;
                             return;
                           }
                           if (selectedUserIds.isEmpty) {
-                            ToastUtil.showError("Lỗi", "Vui lòng chọn ít nhất một người đóng quỹ!");
+                            ToastUtil.showError("failed".tr, "select_at_least_one_contributor".tr);
                             widget.fundController.isActionLoading.value = false;
                             return;
                           }
@@ -237,9 +237,9 @@ class _RequiredContributionSheetState extends State<RequiredContributionSheet> {
                         },
                   child: widget.fundController.isActionLoading.value
                       ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          "YÊU CẦU THU TIỀN",
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.white),
+                      : Text(
+                          "request_collection_caps".tr,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.white),
                         ),
                 )),
               ),

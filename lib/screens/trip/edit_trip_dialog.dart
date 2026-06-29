@@ -85,7 +85,7 @@ class _EditTripDialogState extends State<EditTripDialog> {
     FocusScope.of(context).unfocus();
     final name = nameController.text.trim();
     if (name.isEmpty) {
-      ToastUtil.showWarning('Lỗi', 'Tên chuyến đi không được để trống');
+      ToastUtil.showWarning('error'.tr, 'edit_trip_name_empty'.tr);
       return;
     }
 
@@ -103,13 +103,13 @@ class _EditTripDialogState extends State<EditTripDialog> {
       );
 
       if (!result.success) {
-        ToastUtil.showError('Lỗi', result.message ?? 'Không thể cập nhật');
+        ToastUtil.showError('error'.tr, result.message ?? 'edit_trip_update_failed'.tr);
         return;
       }
 
       // Đóng sheet và báo thành công ngay lập tức
       Get.back();
-      ToastUtil.showSuccess('Thành công', 'Đã cập nhật chuyến đi');
+      ToastUtil.showSuccess('success'.tr, 'edit_trip_update_success'.tr);
 
       // Refresh data
       _refreshData();
@@ -118,7 +118,7 @@ class _EditTripDialogState extends State<EditTripDialog> {
       if (selectedCoverFile != null) {
         _repo.updateTripCover(widget.trip.id, selectedCoverFile!).then((uploadRes) {
           if (!uploadRes.success) {
-            ToastUtil.showError('Lỗi ảnh bìa', uploadRes.message ?? 'Không thể tải lên ảnh bìa');
+            ToastUtil.showError('edit_trip_cover_error'.tr, uploadRes.message ?? 'edit_trip_cover_failed'.tr);
           } else {
             // Refresh lại để lấy ảnh bìa mới
             _refreshData();
@@ -126,7 +126,7 @@ class _EditTripDialogState extends State<EditTripDialog> {
         });
       }
     } catch (e) {
-      ToastUtil.showError('Lỗi hệ thống', 'Đã xảy ra lỗi không xác định');
+      ToastUtil.showError('system_error'.tr, 'unknown_error_message'.tr);
     } finally {
       if (mounted) setState(() => isLoading = false);
     }
@@ -168,7 +168,7 @@ class _EditTripDialogState extends State<EditTripDialog> {
                 children: [
                   Expanded(
                     child: Text(
-                      'Sửa chuyến đi',
+                      'edit_trip_title'.tr,
                       style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.primary),
                     ),
                   ),
@@ -187,7 +187,7 @@ class _EditTripDialogState extends State<EditTripDialog> {
                 controller: nameController,
                 maxLength: 100,
                 decoration: InputDecoration(
-                  labelText: 'Tên chuyến đi (VD: Vũng Tàu 2N1Đ)',
+                  labelText: 'create_trip_name_label'.tr,
                   prefixIcon: Icon(Icons.map, color: AppColors.primary),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   counterText: '',
@@ -200,7 +200,7 @@ class _EditTripDialogState extends State<EditTripDialog> {
                 controller: descController,
                 maxLength: 200,
                 decoration: InputDecoration(
-                  labelText: 'Mô tả (Không bắt buộc)',
+                  labelText: 'create_trip_desc_label'.tr,
                   prefixIcon: Icon(Icons.description, color: AppColors.primary),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   counterText: '',
@@ -209,13 +209,13 @@ class _EditTripDialogState extends State<EditTripDialog> {
               const SizedBox(height: 20),
 
               // Thời gian
-              const Text('Thời gian chuyến đi', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text('create_trip_duration'.tr, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               _buildDatePicker(),
               const SizedBox(height: 20),
 
               // Chủ đề chuyến đi
-              const Text('Chủ đề chuyến đi', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text('create_trip_theme'.tr, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
               SizedBox(
                 height: 90,
@@ -253,7 +253,7 @@ class _EditTripDialogState extends State<EditTripDialog> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            cat['name'] as String,
+                            (cat['name'] as String).tr,
                             style: TextStyle(
                               fontSize: 12,
                               color: isSelected ? AppColors.primary : Colors.grey[600],
@@ -269,7 +269,7 @@ class _EditTripDialogState extends State<EditTripDialog> {
               const SizedBox(height: 24),
 
               // Ảnh bìa
-              const Text('Ảnh bìa chuyến đi (Không bắt buộc)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text('create_trip_cover_label'.tr, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
               _buildCoverPicker(),
               const SizedBox(height: 24),
@@ -287,7 +287,7 @@ class _EditTripDialogState extends State<EditTripDialog> {
                   onPressed: isLoading ? null : _submitUpdate,
                   child: isLoading
                       ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                      : const Text('LƯU THAY ĐỔI', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      : Text('edit_trip_save_button'.tr, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
@@ -300,7 +300,7 @@ class _EditTripDialogState extends State<EditTripDialog> {
   Widget _buildDatePicker() {
     String dateRangeStr;
     if (selectedStartDate == null) {
-      dateRangeStr = 'Chưa chọn';
+      dateRangeStr = 'not_selected'.tr;
     } else if (selectedEndDate == null) {
       dateRangeStr =
           '${selectedStartDate!.day.toString().padLeft(2, '0')}/${selectedStartDate!.month.toString().padLeft(2, '0')}/${selectedStartDate!.year}';
@@ -310,7 +310,7 @@ class _EditTripDialogState extends State<EditTripDialog> {
           '${selectedStartDate!.day.toString().padLeft(2, '0')}/${selectedStartDate!.month.toString().padLeft(2, '0')}/${selectedStartDate!.year}'
           ' - '
           '${selectedEndDate!.day.toString().padLeft(2, '0')}/${selectedEndDate!.month.toString().padLeft(2, '0')}/${selectedEndDate!.year}'
-          ' ($duration ngày)';
+          ' ($duration ${'days'.tr})';
     }
 
     return InkWell(
@@ -318,21 +318,21 @@ class _EditTripDialogState extends State<EditTripDialog> {
         FocusScope.of(context).unfocus();
         final picked = await showDateRangePicker(
           context: context,
-          locale: const Locale('vi', 'VN'),
+          locale: Locale(Get.locale?.languageCode ?? 'vi', Get.locale?.countryCode ?? 'VN'),
           firstDate: DateTime.now().subtract(const Duration(days: 365)),
           lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
           initialDateRange: DateTimeRange(
             start: selectedStartDate ?? DateTime.now(),
             end: selectedEndDate ?? (selectedStartDate ?? DateTime.now()),
           ),
-          helpText: "Chọn thời gian chuyến đi",
-          cancelText: "Hủy",
-          confirmText: "Lưu",
-          saveText: "Lưu",
-          fieldStartLabelText: "Ngày bắt đầu",
-          fieldEndLabelText: "Chọn ngày kết thúc",
-          fieldStartHintText: "Ngày bắt đầu",
-          fieldEndHintText: "Chọn ngày kết thúc",
+          helpText: "create_trip_picker_help".tr,
+          cancelText: "cancel".tr,
+          confirmText: "save".tr,
+          saveText: "save".tr,
+          fieldStartLabelText: "start_date".tr,
+          fieldEndLabelText: "end_date_select".tr,
+          fieldStartHintText: "start_date".tr,
+          fieldEndHintText: "end_date_select".tr,
           builder: (context, child) => Theme(
             data: Theme.of(context).copyWith(
               colorScheme: ColorScheme.light(
@@ -415,7 +415,7 @@ class _EditTripDialogState extends State<EditTripDialog> {
                         children: [
                           Icon(Icons.add_photo_alternate_outlined, size: 36, color: AppColors.primary),
                           const SizedBox(height: 8),
-                          Text('Chọn ảnh từ thư viện', style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+                          Text('create_trip_pick_photo'.tr, style: TextStyle(color: Colors.grey[600], fontSize: 13)),
                         ],
                       ),
               ),
@@ -477,10 +477,10 @@ class _EditTripDialogState extends State<EditTripDialog> {
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Icon(Icons.edit, color: Colors.white, size: 12),
-                      SizedBox(width: 4),
-                      Text('Đổi ảnh', style: TextStyle(color: Colors.white, fontSize: 11)),
+                    children: [
+                      const Icon(Icons.edit, color: Colors.white, size: 12),
+                      const SizedBox(width: 4),
+                      Text('change_photo'.tr, style: const TextStyle(color: Colors.white, fontSize: 11)),
                     ],
                   ),
                 ),

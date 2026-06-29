@@ -28,7 +28,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text("Thông báo", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text("notification_title".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
         elevation: 1,
@@ -36,7 +36,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
           Obx(() => controller.notifications.isNotEmpty 
             ? IconButton(
                 icon: Icon(Icons.done_all, color: AppColors.primary),
-                tooltip: "Đánh dấu tất cả đã đọc",
+                tooltip: "mark_all_read_tooltip".tr,
                 onPressed: () => controller.markAllAsRead(),
               )
             : const SizedBox.shrink()
@@ -49,7 +49,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
         }
 
         if (controller.notifications.isEmpty) {
-          return const EmptyState(text: "Hộp thư của bạn đang trống.\nKhông có thông báo mới nào!");
+          return EmptyState(text: "empty_inbox".tr);
         }
 
         return ListView.builder(

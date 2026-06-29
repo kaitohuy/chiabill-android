@@ -424,12 +424,12 @@ class _TourismMapViewState extends State<TourismMapView> {
     final double shadowBlur = 6.0 * scaleFactor;
 
     final locations = [
-      _SovereigntyLocation('Biển Đông', 11.6, 113.8, minZoom: 1.0, fontSize: 16 * scaleFactor, italic: true, color: const Color(0xFF1565C0)),
-      _SovereigntyLocation('Quần đảo\nHoàng Sa', 16.35, 111.75, minZoom: 3.5, fontSize: 13 * scaleFactor),
-      _SovereigntyLocation('Quần đảo\nTrường Sa', 9.00, 114.00, minZoom: 3.5, fontSize: 13 * scaleFactor),
-      _SovereigntyLocation('Đảo Phú Quốc', 10.22, 103.96, minZoom: 8.0, fontSize: 12 * scaleFactor),
-      _SovereigntyLocation('Côn Đảo', 8.70, 106.62, minZoom: 8.0, fontSize: 12 * scaleFactor),
-      _SovereigntyLocation('Đảo Lý Sơn', 15.37, 109.12, minZoom: 9.0, fontSize: 12 * scaleFactor),
+      _SovereigntyLocation('sovereignty_east_sea'.tr, 11.6, 113.8, minZoom: 1.0, fontSize: 16 * scaleFactor, italic: true, color: const Color(0xFF1565C0)),
+      _SovereigntyLocation('sovereignty_paracel_islands'.tr, 16.35, 111.75, minZoom: 3.5, fontSize: 13 * scaleFactor),
+      _SovereigntyLocation('sovereignty_spratly_islands'.tr, 9.00, 114.00, minZoom: 3.5, fontSize: 13 * scaleFactor),
+      _SovereigntyLocation('sovereignty_phu_quoc_island'.tr, 10.22, 103.96, minZoom: 8.0, fontSize: 12 * scaleFactor),
+      _SovereigntyLocation('sovereignty_con_dao'.tr, 8.70, 106.62, minZoom: 8.0, fontSize: 12 * scaleFactor),
+      _SovereigntyLocation('sovereignty_ly_son_island'.tr, 15.37, 109.12, minZoom: 9.0, fontSize: 12 * scaleFactor),
     ];
 
     return locations
@@ -473,43 +473,43 @@ class _TourismMapViewState extends State<TourismMapView> {
   void _showMapStylePicker(BuildContext context, TourismController controller) {
     final styleGroups = [
       {
-        'label': 'Đơn giản',
+        'label': 'style_group_simple'.tr,
         'icon': Icons.crop_square,
         'styles': <String, String>{
-          'backdrop': 'Tối giản',
-          'basic-v2': 'Bản đồ nền',
-          'dataviz': 'Trực quan dữ liệu',
-          'landscape': 'Phong cảnh',
-          'toner-v2': 'Đen trắng',
+          'backdrop': 'style_minimalist'.tr,
+          'basic-v2': 'style_base_map'.tr,
+          'dataviz': 'style_data_viz'.tr,
+          'landscape': 'style_landscape'.tr,
+          'toner-v2': 'style_toner'.tr,
         }
       },
       {
-        'label': 'Điều hướng',
+        'label': 'style_group_navigation'.tr,
         'icon': Icons.navigation,
         'styles': <String, String>{
-          'hybrid': 'Vệ tinh kết hợp',
-          'openstreetmap': 'Bản đồ mở',
-          'satellite': 'Ảnh vệ tinh',
-          'streets-v2': 'Đường phố',
+          'hybrid': 'style_hybrid'.tr,
+          'openstreetmap': 'style_openstreetmap'.tr,
+          'satellite': 'style_satellite'.tr,
+          'streets-v2': 'style_streets'.tr,
         }
       },
       {
-        'label': 'Địa hình',
+        'label': 'style_group_terrain'.tr,
         'icon': Icons.terrain,
         'styles': <String, String>{
-          'ocean': 'Đại dương',
-          'outdoor-v2': 'Ngoài trời',
-          'topo-v2': 'Bản đồ địa hình',
-          'winter-v2': 'Mùa đông',
+          'ocean': 'style_ocean'.tr,
+          'outdoor-v2': 'style_outdoors'.tr,
+          'topo-v2': 'style_topo'.tr,
+          'winter-v2': 'style_winter'.tr,
         }
       },
       {
-        'label': 'Khác',
+        'label': 'style_group_other'.tr,
         'icon': Icons.more_horiz,
         'styles': <String, String>{
-          'aquarelle': 'Tranh màu nước (Aquarelle)',
-          'dataviz-light': 'Trực quan (Sáng)',
-          'dataviz-dark': 'Trực quan (Tối)',
+          'aquarelle': 'style_watercolor'.tr,
+          'dataviz-light': 'style_dataviz_light'.tr,
+          'dataviz-dark': 'style_dataviz_dark'.tr,
         }
       },
     ];
@@ -537,13 +537,13 @@ class _TourismMapViewState extends State<TourismMapView> {
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Row(
                     children: [
-                      Icon(Icons.layers, size: 20),
-                      SizedBox(width: 8),
-                      Text("Lớp Bản Đồ", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      const Icon(Icons.layers, size: 20),
+                      const SizedBox(width: 8),
+                      Text("map_layers_title".tr, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ),
@@ -590,7 +590,7 @@ class _TourismMapViewState extends State<TourismMapView> {
                     Icon(Icons.map_outlined, color: AppColors.primary, size: 64),
                     const SizedBox(height: 16),
                     Text(
-                      "Đang tải bản đồ...",
+                      "loading_map".tr,
                       style: TextStyle(
                         color: Colors.grey[600],
                         fontWeight: FontWeight.bold,
@@ -764,9 +764,9 @@ class _MapStyleGroupState extends State<_MapStyleGroup> {
                                 color: Colors.grey[300],
                                 borderRadius: BorderRadius.circular(4),
                               ),
-                              child: const Text(
-                                'Mặc định',
-                                style: TextStyle(
+                              child: Text(
+                                'default_label'.tr,
+                                style: const TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black54,
@@ -783,7 +783,7 @@ class _MapStyleGroupState extends State<_MapStyleGroup> {
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
-                                'Đang sử dụng',
+                                'currently_using'.tr,
                                 style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,

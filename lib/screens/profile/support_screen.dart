@@ -25,7 +25,7 @@ class _SupportScreenState extends State<SupportScreen> {
   void _sendReport() async {
     String text = _reportController.text.trim();
     if (text.isEmpty) {
-      ToastUtil.showWarning("Lỗi", "Vui lòng nhập nội dung báo cáo!");
+      ToastUtil.showWarning("error_title".tr, "please_enter_report".tr);
       return;
     }
 
@@ -43,15 +43,15 @@ class _SupportScreenState extends State<SupportScreen> {
           AlertDialog(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             title: Row(
-              children: const [
-                Icon(Icons.favorite, color: Colors.red),
-                SizedBox(width: 8),
-                Text("Cảm ơn bạn!", style: TextStyle(fontWeight: FontWeight.bold)),
+              children: [
+                const Icon(Icons.favorite, color: Colors.red),
+                const SizedBox(width: 8),
+                Text("thank_you_title".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
               ],
             ),
-            content: const Text(
-              "Ý kiến đóng góp của bạn đã được gửi tới đội ngũ phát triển. Sự phản hồi của bạn chính là động lực lớn nhất để Chiabill ngày càng hoàn thiện hơn!",
-              style: TextStyle(fontSize: 15),
+            content: Text(
+              "thank_you_desc".tr,
+              style: const TextStyle(fontSize: 15),
             ),
             actions: [
               ElevatedButton(
@@ -61,13 +61,13 @@ class _SupportScreenState extends State<SupportScreen> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 onPressed: () => Get.back(),
-                child: const Text("Đồng ý"),
+                child: Text("agree_btn".tr),
               )
             ],
           ),
         );
       } else {
-        ToastUtil.showError("Lỗi", response.message ?? "Không thể gửi phản hồi lúc này.");
+        ToastUtil.showError("error_title".tr, response.message ?? "cannot_send_feedback".tr);
       }
     }
   }
@@ -76,11 +76,11 @@ class _SupportScreenState extends State<SupportScreen> {
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text("Donate (Ủng hộ)", style: TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
-        content: const Text(
-          "Hiện tại số user chưa nhiều, tôi có thể tự mình chi trả chi phí cho các anh chị em, sau này khi cộng đồng lớn mạnh, tôi sẽ mở lại chức năng này hẹ hẹ.",
+        title: Text("donate_title".tr, style: const TextStyle(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+        content: Text(
+          "donate_desc".tr,
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 15, fontStyle: FontStyle.italic),
+          style: const TextStyle(fontSize: 15, fontStyle: FontStyle.italic),
         ),
         actions: [
           Center(
@@ -92,7 +92,7 @@ class _SupportScreenState extends State<SupportScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
               ),
               onPressed: () => Get.back(),
-              child: const Text("Cảm ơn nhé! 💖", style: TextStyle(fontWeight: FontWeight.bold)),
+              child: Text("donate_thanks".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
             ),
           )
         ],
@@ -105,10 +105,10 @@ class _SupportScreenState extends State<SupportScreen> {
     try {
       final success = await launchUrl(url, mode: LaunchMode.externalApplication);
       if (!success) {
-        ToastUtil.showError("Lỗi", "Không thể mở liên kết (Vui lòng cài đặt ứng dụng phù hợp)");
+        ToastUtil.showError("error_title".tr, "cannot_open_link".tr);
       }
     } catch (e) {
-      ToastUtil.showError("Lỗi", "Không thể mở liên kết: $e");
+      ToastUtil.showError("error_title".tr, "cannot_open_link_err".trParams({'error': e.toString()}));
     }
   }
 
@@ -117,7 +117,7 @@ class _SupportScreenState extends State<SupportScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text("Hỗ trợ & Góp ý", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text("support_title".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.primaryDark,
         elevation: 0,
@@ -129,7 +129,7 @@ class _SupportScreenState extends State<SupportScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // BÁO CÁO LỖI & GÓP Ý CARD
-            _buildSectionHeader("Báo cáo lỗi & Góp ý"),
+            _buildSectionHeader("report_bug_section".tr),
             Card(
               elevation: 0,
               shape: RoundedRectangleBorder(
@@ -142,9 +142,9 @@ class _SupportScreenState extends State<SupportScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Text(
-                      "Nếu gặp lỗi hoặc có ý tưởng muốn đóng góp, bạn hãy gửi phản hồi trực tiếp cho nhà phát triển nhé!",
-                      style: TextStyle(fontSize: 13, color: Colors.grey),
+                    Text(
+                      "report_bug_desc".tr,
+                      style: const TextStyle(fontSize: 13, color: Colors.grey),
                     ),
                     const SizedBox(height: 12),
                     TextField(
@@ -152,7 +152,7 @@ class _SupportScreenState extends State<SupportScreen> {
                       maxLines: 4,
                       maxLength: 500,
                       decoration: InputDecoration(
-                        hintText: "Mô tả lỗi hoặc đóng góp ý kiến của bạn...",
+                        hintText: "report_hint".tr,
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         contentPadding: const EdgeInsets.all(12),
                       ),
@@ -169,7 +169,7 @@ class _SupportScreenState extends State<SupportScreen> {
                       icon: _isSending 
                           ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                           : const Icon(Icons.send, size: 18),
-                      label: Text(_isSending ? "Đang gửi..." : "GỬI REPORT", style: const TextStyle(fontWeight: FontWeight.bold)),
+                      label: Text(_isSending ? "sending_status".tr : "send_report_caps".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
                     )
                   ],
                 ),
@@ -189,7 +189,7 @@ class _SupportScreenState extends State<SupportScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                     onPressed: () => Get.back(),
-                    child: const Text("ĐÃ RÕ", style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: Text("got_it_caps".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -203,7 +203,7 @@ class _SupportScreenState extends State<SupportScreen> {
                       elevation: 0,
                     ),
                     onPressed: _handleDonate,
-                    child: const Text("DONATE 💖", style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: Text("donate_btn_caps".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
               ],
@@ -211,7 +211,7 @@ class _SupportScreenState extends State<SupportScreen> {
             const SizedBox(height: 40),
 
             // LIÊN HỆ NHÀ PHÁT TRIỂN
-            _buildSectionHeader("Liên hệ nhà phát triển"),
+            _buildSectionHeader("contact_dev_section".tr),
             Card(
               elevation: 0,
               shape: RoundedRectangleBorder(
@@ -223,9 +223,9 @@ class _SupportScreenState extends State<SupportScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
                 child: Column(
                   children: [
-                    const Text(
-                      "Mọi đóng góp, hợp tác hoặc hỗ trợ khẩn cấp, vui lòng liên hệ trực tiếp với chúng tôi qua các kênh dưới đây:",
-                      style: TextStyle(fontSize: 13, color: Colors.black87),
+                    Text(
+                      "contact_dev_desc".tr,
+                      style: const TextStyle(fontSize: 13, color: Colors.black87),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 20),

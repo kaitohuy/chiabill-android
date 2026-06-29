@@ -30,7 +30,7 @@ class AddCategoryDialog extends StatelessWidget {
 
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: const Text("Tạo danh mục mới", style: TextStyle(fontWeight: FontWeight.bold)),
+      title: Text("create_new_category".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -39,25 +39,25 @@ class AddCategoryDialog extends StatelessWidget {
             TextField(
               controller: nameCtrl,
               decoration: InputDecoration(
-                labelText: "Tên danh mục (VD: Tiền trạm)",
+                labelText: "category_name_label".tr,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 prefixIcon: Icon(Icons.edit, color: AppColors.primary),
               ),
             ),
             const SizedBox(height: 20),
 
-            const Text(
-              "THÔNG TIN CHI TIẾT", 
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.2, color: Colors.grey)
+            Text(
+              "details_caps".tr, 
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1.2, color: Colors.grey)
             ),
             const SizedBox(height: 16),
             Text(
-              "Chuyến đi: ${trip.name}",
+              "trip_prefix".trParams({"name": trip.name}),
               style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary)
             ),
             const SizedBox(height: 16),
 
-            const Text("Chọn một biểu tượng:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+            Text("select_icon".tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
             const SizedBox(height: 12),
 
             // KHUNG CHỌN EMOJI
@@ -93,7 +93,7 @@ class AddCategoryDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Get.back(),
-          child: const Text("HỦY", style: TextStyle(color: Colors.grey))
+          child: Text("cancel_caps".tr, style: const TextStyle(color: Colors.grey))
         ),
         Obx(() => ElevatedButton(
           style: ElevatedButton.styleFrom(
@@ -102,7 +102,7 @@ class AddCategoryDialog extends StatelessWidget {
           ),
           onPressed: controller.isLoading.value ? null : () {
             if (nameCtrl.text.trim().isEmpty) {
-              ToastUtil.showWarning("Thiếu thông tin", "Vui lòng nhập tên danh mục");
+              ToastUtil.showWarning("missing_info".tr, "enter_category_name".tr);
               return;
             }
             // Gọi API tạo danh mục với tên và emoji đã chọn
@@ -110,7 +110,7 @@ class AddCategoryDialog extends StatelessWidget {
           },
           child: controller.isLoading.value
               ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-              : const Text("TẠO MỚI"),
+              : Text("create_caps".tr),
         )),
       ],
     );

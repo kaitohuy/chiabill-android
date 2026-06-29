@@ -124,15 +124,15 @@ class _SetupPlaceDetailScreenState extends State<SetupPlaceDetailScreen> {
       if (success) {
         Get.back();
         Get.snackbar(
-          "Cảm ơn bạn",
-          "Yêu cầu bổ sung thông tin chi tiết địa điểm đã được gửi tới Ban quản trị!",
+          "thank_you".tr,
+          "place_report_success_msg".tr,
           backgroundColor: Colors.blue,
           colorText: Colors.white,
           duration: const Duration(seconds: 4),
         );
       }
     } catch (e) {
-      Get.snackbar("Lỗi", "Không thể gửi yêu cầu: $e", backgroundColor: Colors.redAccent, colorText: Colors.white);
+      Get.snackbar("error".tr, "cannot_send_report".trParams({'error': e.toString()}), backgroundColor: Colors.redAccent, colorText: Colors.white);
     } finally {
       setState(() {
         _isReporting = false;
@@ -144,7 +144,7 @@ class _SetupPlaceDetailScreenState extends State<SetupPlaceDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Thiết lập chi tiết", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text("setup_details".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
@@ -158,18 +158,18 @@ class _SetupPlaceDetailScreenState extends State<SetupPlaceDetailScreen> {
                 )
               : TextButton(
                   onPressed: _handleSkip,
-                  child: const Text("BỎ QUA", style: TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
+                  child: Text("skip_caps".tr, style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
                 )
         ],
       ),
       body: _isReporting
-          ? const Center(
+          ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text("Đang gửi yêu cầu bổ sung tới Admin...", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  Text("sending_request_to_admin".tr, style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
                 ],
               ),
             )
@@ -203,7 +203,7 @@ class _SetupPlaceDetailScreenState extends State<SetupPlaceDetailScreen> {
                                 Icon(Icons.category, color: AppColors.primary, size: 16),
                                 const SizedBox(width: 6),
                                 Text(
-                                  "Danh mục: ${widget.place.category}",
+                                  "place_category_prefix".trParams({'category': widget.place.category.tr}),
                                   style: const TextStyle(color: Colors.black54, fontSize: 13),
                                 ),
                                 const Spacer(),
@@ -220,9 +220,9 @@ class _SetupPlaceDetailScreenState extends State<SetupPlaceDetailScreen> {
                       ),
                       const SizedBox(height: 24),
 
-                      const Text(
-                        "Thông Tin Chi Tiết",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                      Text(
+                        "detailed_info".tr,
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
                       ),
                       const SizedBox(height: 16),
 
@@ -230,8 +230,8 @@ class _SetupPlaceDetailScreenState extends State<SetupPlaceDetailScreen> {
                         controller: _summaryController,
                         maxLines: 4,
                         decoration: InputDecoration(
-                          labelText: "Mô tả tổng quan (*)",
-                          hintText: "Nhập một vài mô tả nổi bật về địa điểm du lịch này...",
+                          labelText: "overview_description_label".tr,
+                          hintText: "overview_description_hint".tr,
                           alignLabelWithHint: true,
                           prefixIcon: const Padding(
                             padding: EdgeInsets.only(bottom: 50),
@@ -247,7 +247,7 @@ class _SetupPlaceDetailScreenState extends State<SetupPlaceDetailScreen> {
                             borderSide: BorderSide(color: AppColors.primary, width: 1.5),
                           ),
                         ),
-                        validator: (v) => v!.trim().isEmpty ? "Vui lòng nhập mô tả tổng quan" : null,
+                        validator: (v) => v!.trim().isEmpty ? "overview_description_empty_error".tr : null,
                       ),
                       const SizedBox(height: 20),
 
@@ -257,8 +257,8 @@ class _SetupPlaceDetailScreenState extends State<SetupPlaceDetailScreen> {
                             child: TextFormField(
                               controller: _priceController,
                               decoration: InputDecoration(
-                                labelText: "Giá vé",
-                                hintText: "VD: Miễn phí / 100.000đ",
+                                labelText: "ticket_price_label".tr,
+                                hintText: "ticket_price_hint".tr,
                                 prefixIcon: const Icon(Icons.confirmation_number_outlined),
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                                 enabledBorder: OutlineInputBorder(
@@ -277,8 +277,8 @@ class _SetupPlaceDetailScreenState extends State<SetupPlaceDetailScreen> {
                             child: TextFormField(
                               controller: _hoursController,
                               decoration: InputDecoration(
-                                labelText: "Giờ mở cửa",
-                                hintText: "VD: 24/7 hoặc 08:00 - 22:00",
+                                labelText: "opening_hours_label".tr,
+                                hintText: "opening_hours_hint".tr,
                                 prefixIcon: const Icon(Icons.access_time),
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                                 enabledBorder: OutlineInputBorder(
@@ -296,9 +296,9 @@ class _SetupPlaceDetailScreenState extends State<SetupPlaceDetailScreen> {
                       ),
                       const SizedBox(height: 24),
 
-                      const Text(
-                        "Hình Ảnh Thực Tế",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                      Text(
+                        "real_images".tr,
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
                       ),
                       const SizedBox(height: 12),
 
@@ -323,13 +323,13 @@ class _SetupPlaceDetailScreenState extends State<SetupPlaceDetailScreen> {
                               children: [
                                 Icon(Icons.add_photo_alternate_outlined, size: 36, color: AppColors.primary),
                                 const SizedBox(height: 6),
-                                const Text(
-                                  "BẤM ĐỂ CHỌN ẢNH TỪ THƯ VIỆN",
-                                  style: TextStyle(color: Colors.black54, fontSize: 13, fontWeight: FontWeight.bold),
+                                Text(
+                                  "tap_to_select_image_caps".tr,
+                                  style: const TextStyle(color: Colors.black54, fontSize: 13, fontWeight: FontWeight.bold),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  "Hình ảnh sẽ được tải ngầm lên album \"Khác\"",
+                                  "image_upload_album_hint".tr,
                                   style: TextStyle(color: Colors.grey[400], fontSize: 11),
                                 ),
                               ],
@@ -341,9 +341,9 @@ class _SetupPlaceDetailScreenState extends State<SetupPlaceDetailScreen> {
 
                       // Danh sách hàng đợi ảnh đang upload ngầm (Async UI)
                       if (_pendingImages.isNotEmpty) ...[
-                        const Text(
-                          "Hàng đợi tải ảnh lên hệ thống:",
-                          style: TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.bold),
+                        Text(
+                          "image_upload_queue".tr,
+                          style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
                         ListView.builder(
@@ -386,33 +386,33 @@ class _SetupPlaceDetailScreenState extends State<SetupPlaceDetailScreen> {
                                         ),
                                         const SizedBox(height: 4),
                                         if (pending.isUploading)
-                                          const Row(
+                                          Row(
                                             children: [
-                                              SizedBox(
+                                              const SizedBox(
                                                 width: 12,
                                                 height: 12,
                                                 child: CircularProgressIndicator(strokeWidth: 1.5),
                                               ),
-                                              SizedBox(width: 6),
+                                              const SizedBox(width: 6),
                                               Text(
-                                                "Đang tải lên Cloudinary...",
-                                                style: TextStyle(fontSize: 11, color: Colors.blue),
+                                                "uploading_to_cloudinary".tr,
+                                                style: const TextStyle(fontSize: 11, color: Colors.blue),
                                               ),
                                             ],
                                           )
                                         else if (pending.isError)
-                                          const Text(
-                                            "Tải lên thất bại!",
-                                            style: TextStyle(fontSize: 11, color: Colors.redAccent, fontWeight: FontWeight.bold),
+                                          Text(
+                                            "upload_failed".tr,
+                                            style: const TextStyle(fontSize: 11, color: Colors.redAccent, fontWeight: FontWeight.bold),
                                           )
                                         else
-                                          const Row(
+                                          Row(
                                             children: [
-                                              Icon(Icons.check_circle, size: 12, color: Colors.green),
-                                              SizedBox(width: 4),
+                                              const Icon(Icons.check_circle, size: 12, color: Colors.green),
+                                              const SizedBox(width: 4),
                                               Text(
-                                                "Tải lên thành công (Album: Khác)",
-                                                style: TextStyle(fontSize: 11, color: Colors.green),
+                                                "upload_success_album_other".tr,
+                                                style: const TextStyle(fontSize: 11, color: Colors.green),
                                               ),
                                             ],
                                           ),
@@ -451,8 +451,8 @@ class _SetupPlaceDetailScreenState extends State<SetupPlaceDetailScreen> {
                             final hasUploading = _pendingImages.any((img) => img.isUploading);
                             if (hasUploading) {
                               Get.snackbar(
-                                "Vui lòng chờ",
-                                "Có hình ảnh đang được tải lên. Vui lòng đợi trong giây lát!",
+                                "please_wait".tr,
+                                "image_still_uploading_msg".tr,
                                 backgroundColor: Colors.orange,
                                 colorText: Colors.white,
                               );
@@ -475,22 +475,22 @@ class _SetupPlaceDetailScreenState extends State<SetupPlaceDetailScreen> {
                               if (success) {
                                 Get.back();
                                 Get.snackbar(
-                                  "Thành công",
-                                  "Cảm ơn bạn đã hoàn tất thông tin địa điểm du lịch!",
+                                  "success".tr,
+                                  "setup_details_success_msg".tr,
                                   backgroundColor: Colors.green,
                                   colorText: Colors.white,
                                 );
                               }
                             }
                           },
-                          child: const Row(
+                          child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.save_outlined, color: Colors.white),
-                              SizedBox(width: 10),
+                              const Icon(Icons.save_outlined, color: Colors.white),
+                              const SizedBox(width: 10),
                               Text(
-                                "LƯU & HOÀN TẤT",
-                                style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                                "save_and_complete_caps".tr,
+                                style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),

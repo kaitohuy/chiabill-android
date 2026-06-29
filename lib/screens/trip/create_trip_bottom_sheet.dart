@@ -30,14 +30,14 @@ class CreateTripBottomSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Tạo chuyến đi mới", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.primary)),
+            Text("create_trip_title".tr, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.primary)),
             const SizedBox(height: 24),
 
             TextField(
               controller: controller.nameController,
               maxLength: 100,
               decoration: InputDecoration(
-                labelText: "Tên chuyến đi (VD: Vũng Tàu 2N1Đ)",
+                labelText: "create_trip_name_label".tr,
                 prefixIcon: Icon(Icons.map, color: AppColors.primary),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 counterText: "", 
@@ -49,7 +49,7 @@ class CreateTripBottomSheet extends StatelessWidget {
               controller: controller.descController,
               maxLength: 200,
               decoration: InputDecoration(
-                labelText: "Mô tả (Không bắt buộc)",
+                labelText: "create_trip_desc_label".tr,
                 prefixIcon: Icon(Icons.description, color: AppColors.primary),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 counterText: "",
@@ -57,7 +57,7 @@ class CreateTripBottomSheet extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            const Text("Thời gian chuyến đi", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text("create_trip_duration".tr, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Obx(() {
               final start = controller.startDate.value;
@@ -67,7 +67,7 @@ class CreateTripBottomSheet extends StatelessWidget {
                 dateRangeStr = "${start.day.toString().padLeft(2, '0')}/${start.month.toString().padLeft(2, '0')}/${start.year}";
               } else {
                 final duration = end.difference(start).inDays + 1;
-                dateRangeStr = "${start.day.toString().padLeft(2, '0')}/${start.month.toString().padLeft(2, '0')}/${start.year} - ${end.day.toString().padLeft(2, '0')}/${end.month.toString().padLeft(2, '0')}/${end.year} ($duration ngày)";
+                dateRangeStr = "${start.day.toString().padLeft(2, '0')}/${start.month.toString().padLeft(2, '0')}/${start.year} - ${end.day.toString().padLeft(2, '0')}/${end.month.toString().padLeft(2, '0')}/${end.year} ($duration ${'days'.tr})";
               }
 
               return InkWell(
@@ -75,21 +75,21 @@ class CreateTripBottomSheet extends StatelessWidget {
                   FocusScope.of(context).requestFocus(FocusNode());
                   final picked = await showDateRangePicker(
                     context: context,
-                    locale: const Locale('vi', 'VN'),
+                    locale: Locale(Get.locale?.languageCode ?? 'vi', Get.locale?.countryCode ?? 'VN'),
                     firstDate: DateTime.now().subtract(const Duration(days: 365)),
                     lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
                     initialDateRange: DateTimeRange(
                       start: start,
                       end: end ?? start,
                     ),
-                    helpText: "Chọn thời gian chuyến đi",
-                    cancelText: "Hủy",
-                    confirmText: "Lưu",
-                    saveText: "Lưu",
-                    fieldStartLabelText: "Ngày bắt đầu",
-                    fieldEndLabelText: "Chọn ngày kết thúc",
-                    fieldStartHintText: "Ngày bắt đầu",
-                    fieldEndHintText: "Chọn ngày kết thúc",
+                    helpText: "create_trip_picker_help".tr,
+                    cancelText: "cancel".tr,
+                    confirmText: "save".tr,
+                    saveText: "save".tr,
+                    fieldStartLabelText: "start_date".tr,
+                    fieldEndLabelText: "end_date_select".tr,
+                    fieldStartHintText: "start_date".tr,
+                    fieldEndHintText: "end_date_select".tr,
                     builder: (context, child) {
                       return Theme(
                         data: Theme.of(context).copyWith(
@@ -135,7 +135,7 @@ class CreateTripBottomSheet extends StatelessWidget {
             }),
             const SizedBox(height: 24),
 
-            const Text("Chủ đề chuyến đi", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text("create_trip_theme".tr, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             SizedBox(
               height: 90,
@@ -169,7 +169,7 @@ class CreateTripBottomSheet extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            cat["name"] as String,
+                            (cat["name"] as String).tr,
                             style: TextStyle(
                               fontSize: 12,
                               color: isSelected ? AppColors.primary : Colors.grey[600],
@@ -184,7 +184,7 @@ class CreateTripBottomSheet extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            const Text("Ảnh bìa chuyến đi (Không bắt buộc)", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text("create_trip_cover_label".tr, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             Obx(() {
               final file = controller.selectedCoverFile.value;
@@ -220,7 +220,7 @@ class CreateTripBottomSheet extends StatelessWidget {
                               Icon(Icons.add_photo_alternate_outlined, size: 36, color: AppColors.primary),
                               const SizedBox(height: 8),
                               Text(
-                                "Chọn ảnh từ thư viện",
+                                "create_trip_pick_photo".tr,
                                 style: TextStyle(color: Colors.grey[600], fontSize: 13),
                               ),
                             ],
@@ -284,7 +284,7 @@ class CreateTripBottomSheet extends StatelessWidget {
                 onPressed: controller.isLoading.value ? null : () => controller.createTrip(),
                 child: controller.isLoading.value
                     ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : const Text("TẠO CHUYẾN ĐI", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    : Text("create_trip_button".tr, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             )),
             const SizedBox(height: 24),

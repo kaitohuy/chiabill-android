@@ -46,27 +46,27 @@ class _ImageViewerScreenState extends State<ImageViewerScreen> {
     
     // Nếu là file local
     if (!url.startsWith('http')) {
-      SharePlus.instance.share(ShareParams(text: 'Xem bức ảnh tuyệt đẹp này!', files: [XFile(url)]));
+      SharePlus.instance.share(ShareParams(text: 'share_image_text'.tr, files: [XFile(url)]));
       return;
     }
 
     // Nếu là URL web
     try {
-      Get.snackbar('Đang chuẩn bị...', 'Vui lòng chờ trong giây lát');
+      Get.snackbar('preparing'.tr, 'please_wait_moment'.tr);
       final tempDir = await getTemporaryDirectory();
       final savePath = '${tempDir.path}/share_image_${DateTime.now().millisecondsSinceEpoch}.jpg';
       
       await Dio().download(url, savePath);
-      await SharePlus.instance.share(ShareParams(text: 'Xem bức ảnh tuyệt đẹp này!', files: [XFile(savePath)]));
+      await SharePlus.instance.share(ShareParams(text: 'share_image_text'.tr, files: [XFile(savePath)]));
     } catch (e) {
-      Get.snackbar('Lỗi', 'Không thể chia sẻ ảnh');
+      Get.snackbar('error'.tr, 'cannot_share_image'.tr);
     }
   }
 
   Future<void> _downloadImage() async {
     final url = widget.images[currentIndex];
     if (!url.startsWith('http')) {
-      Get.snackbar('Thông báo', 'Ảnh này đã có sẵn trong máy của bạn.');
+      Get.snackbar('notification'.tr, 'image_already_local'.tr);
       return;
     }
 
@@ -87,15 +87,15 @@ class _ImageViewerScreenState extends State<ImageViewerScreen> {
       await Gal.putImage(savePath);
       
       Get.snackbar(
-        'Thành công', 
-        'Đã lưu ảnh vào thư viện của bạn',
+        'success'.tr, 
+        'image_saved_success'.tr,
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
     } catch (e) {
       Get.snackbar(
-        'Lỗi tải xuống', 
-        'Không thể lưu ảnh. Vui lòng cấp quyền lưu trữ.',
+        'download_error_title'.tr, 
+        'download_error_msg'.tr,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );

@@ -78,7 +78,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
         Text(
-        isEditMode ? "Sửa khoản chi" : "Thêm chi phí mới",
+            isEditMode ? "edit_expense_title".tr : "add_expense_title".tr,
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primary)
         ),
         const SizedBox(height: 20),
@@ -138,9 +138,9 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                                   child: Icon(Icons.add_a_photo_outlined, size: 28, color: AppColors.primary),
                                 ),
                                 const SizedBox(height: 8),
-                                const Text(
-                                  "Quét hóa đơn bằng camera hoặc chọn từ album ảnh",
-                                  style: TextStyle(
+                                Text(
+                                  "scan_receipt_hint".tr,
+                                  style: const TextStyle(
                                     fontSize: 11,
                                     color: Colors.grey,
                                   ),
@@ -190,8 +190,8 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
-                                      "Đang lưu trữ ảnh lên đám mây...",
-                                      style: TextStyle(fontSize: 11, color: Colors.white70),
+                                      "uploading_cloud".tr,
+                                      style: const TextStyle(fontSize: 11, color: Colors.white70),
                                     ),
                                   ],
                                 ),
@@ -211,14 +211,14 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                                     valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                                   ),
                                   const SizedBox(height: 12),
-                                  const Text(
-                                    "AI đang đọc hóa đơn...",
-                                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                                  Text(
+                                    "ai_scanning".tr,
+                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
                                   ),
                                   const SizedBox(height: 4),
-                                  const Text(
-                                    "Sẽ hoàn tất trong giây lát",
-                                    style: TextStyle(color: Colors.white70, fontSize: 11),
+                                  Text(
+                                    "ocr_will_complete_soon".tr,
+                                    style: const TextStyle(color: Colors.white70, fontSize: 11),
                                   ),
                                 ],
                               ),
@@ -247,7 +247,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                       CurrencyInputFormatter(),
                     ],
                     decoration: InputDecoration(
-                      labelText: "Số tiền",
+                      labelText: "amount_label".tr,
                       prefixIcon: Icon(Icons.attach_money, color: AppColors.primary),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     ),
@@ -280,8 +280,8 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                               children: [
                                 Icon(Icons.add, color: AppColors.primary, size: 18),
                                 const SizedBox(width: 4),
-                                Text("Thêm", style: TextStyle(color: AppColors.primary)),
-                              ]
+                                Text("add_new".tr, style: TextStyle(color: AppColors.primary)),
+                              ],
                             )
                           )
                         ],
@@ -308,7 +308,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 12),
-                  const Text("Vui lòng nhập tỷ giá nếu hiện tại đã thay đổi *", style: TextStyle(color: Colors.grey, fontSize: 12, fontStyle: FontStyle.italic)),
+                  Text("exchange_rate_hint".tr, style: const TextStyle(color: Colors.grey, fontSize: 12, fontStyle: FontStyle.italic)),
                   const SizedBox(height: 4),
                   TextField(
                     controller: controller.exchangeRateController,
@@ -318,7 +318,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                       CurrencyInputFormatter(),
                     ],
                     decoration: InputDecoration(
-                      labelText: "Tỷ giá (1 ${controller.selectedCurrency.value} = ... VNĐ)",
+                      labelText: "exchange_rate_label".trParams({'currency': controller.selectedCurrency.value}),
                       prefixIcon: const Icon(Icons.currency_exchange, color: Colors.orange),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     ),
@@ -349,7 +349,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
               TextField(
                 controller: controller.descController,
                 decoration: InputDecoration(
-                  labelText: "Nội dung (VD: Tiền ăn trưa)",
+                  labelText: "expense_desc_label".tr,
                   prefixIcon: Icon(Icons.description, color: AppColors.primary),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
@@ -365,7 +365,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text("Ngày chi tiêu", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                      Text("expense_date".tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                       const SizedBox(height: 6),
                       InkWell(
                         onTap: () async {
@@ -419,7 +419,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text("Danh mục", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                      Text("expense_category".tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                       const SizedBox(height: 6),
                       InkWell(
                         onTap: () {
@@ -444,7 +444,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                                 child: Obx(() {
                                   final selectedCat = controller.categories.firstWhereOrNull((c) => c.id == controller.selectedCategoryId.value);
                                   return Text(
-                                    selectedCat?.name ?? "Chọn",
+                                    selectedCat?.name.tr ?? "select_placeholder".tr,
                                     style: TextStyle(fontSize: 14, color: selectedCat == null ? Colors.grey : Colors.black87),
                                     overflow: TextOverflow.ellipsis,
                                   );
@@ -480,8 +480,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                   .replaceAll(',', '')) ?? 1.0);
               double totalVnd = amt * rate;
               bool isFundSufficient = controller.fundBalance.value >= totalVnd;
-              bool showPayer = !controller.isFromFund.value ||
-                  !isFundSufficient;
+              bool showPayer = !controller.isFromFund.value || !isFundSufficient;
 
               return Row(
                 children: [
@@ -492,8 +491,8 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                         children: [
                           Text(
                             controller.isFromFund.value
-                                ? "Ai ứng phần thiếu?"
-                                : "Ai đã trả tiền?",
+                                ? "payer_label_who_shortage".tr
+                                : "payer_label_who".tr,
                             style: const TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 13),
                           ),
@@ -520,8 +519,8 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                                     fontSize: 14),
                                 items: controller.activeMembers.map((m) =>
                                     DropdownMenuItem(value: m.user.id,
-                                        child: Text(m.user.name ?? "Ẩn danh"))
-                                ).toList(),
+                                        child: Text(m.user.name ?? "anonymous".tr))
+                                  ).toList(),
                                 onChanged: (val) =>
                                 controller.selectedPayerId.value = val!,
                               ),
@@ -536,7 +535,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text("Chia cho ai?", style: TextStyle(
+                        Text("split_who".tr, style: const TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 13)),
                         const SizedBox(height: 6),
                         InkWell(
@@ -564,31 +563,31 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                                     String modeText = "";
                                     if (controller.splitType.value == "PERCENTAGE") {
                                       modeText = " (%)";
-                                    } else if (controller.splitType.value == "SHARES") {modeText = " (Tỉ trọng)";}
-                                    else if (controller.splitType.value == "EXACT") {modeText = " (Chính xác)";}
+                                    } else if (controller.splitType.value == "SHARES") {modeText = " (${'split_shares'.tr})";}
+                                    else if (controller.splitType.value == "EXACT") {modeText = " (${'split_exact'.tr})";}
 
                                     if (controller.splitType.value != "EQUAL") {
                                       int selectedKeys = controller.splitValues.keys.where((id) => (controller.splitValues[id] ?? 0) > 0).length;
-                                      return Text("Đã chia $selectedKeys/$totalCount$modeText",
+                                      return Text("split_already_divided".trParams({'count': '$selectedKeys', 'total': '$totalCount', 'mode': modeText}),
                                           style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13),
                                           overflow: TextOverflow.ellipsis);
                                     }
 
                                     if (selectedCount == totalCount) {
-                                      return Text("Tất cả mọi người",
+                                      return Text("split_all".tr,
                                           style: TextStyle(
                                               color: AppColors.primary,
                                               fontWeight: FontWeight.bold,
                                               fontSize: 13),
                                           overflow: TextOverflow.ellipsis);
                                     } else if (selectedCount == 0) {
-                                      return const Text("Chưa chọn",
-                                          style: TextStyle(color: Colors.red,
+                                      return Text("split_not_selected".tr,
+                                          style: const TextStyle(color: Colors.red,
                                               fontWeight: FontWeight.bold,
                                               fontSize: 13),
                                           overflow: TextOverflow.ellipsis);
                                     } else {
-                                      return Text("Đã chọn: $selectedCount",
+                                      return Text("split_selected_count".trParams({'count': '$selectedCount'}),
                                           style: TextStyle(
                                               color: AppColors.primary,
                                               fontWeight: FontWeight.bold,
@@ -665,13 +664,13 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                "Thanh toán bằng Quỹ chung",
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              Text(
+                                "pay_with_fund".tr,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                "Số dư Quỹ: ${CurrencyUtils.formatNumber(controller.fundBalance.value)} đ",
+                                "fund_balance_label".trParams({'balance': CurrencyUtils.formatNumber(controller.fundBalance.value)}),
                                 style: TextStyle(
                                   color: controller.fundBalance.value <= 200000 ? Colors.red : Colors.grey[600],
                                   fontSize: 12,
@@ -707,7 +706,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              "Số dư quỹ chung không đủ. Hệ thống sẽ tự động tách phần thiếu (${CurrencyUtils.formatNumber(totalVnd - availableFund)} đ) làm một hóa đơn riêng do mọi người cùng chia nợ, và chi trả phần còn lại từ quỹ chung.",
+                              "fund_insufficient_alert".trParams({'shortage': CurrencyUtils.formatNumber(totalVnd - availableFund)}),
                               style: TextStyle(color: Colors.amber[900], fontSize: 11, height: 1.3),
                             ),
                           ),
@@ -736,7 +735,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                 child: controller.isLoading.value
                     ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                     : Text(
-                    isEditMode ? "CẬP NHẬT" : "XÁC NHẬN",
+                    isEditMode ? "update_caps".tr : "confirm_caps".tr,
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)
                 ),
               ),
@@ -767,7 +766,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      isEditMode ? "Đang cập nhật..." : "Đang lưu...",
+                      isEditMode ? "updating".tr : "saving".tr,
                       style: TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.bold,
@@ -792,7 +791,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
     Get.dialog(
         AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text("Chọn danh mục", style: TextStyle(fontWeight: FontWeight.bold)),
+          title: Text("select_category_title".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
           content: SizedBox(
             width: double.maxFinite,
             height: 300,
@@ -803,7 +802,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
 
               // Xử lý thêm trường hợp nếu rỗng thật (sau khi đã tải xong)
               if (controller.categories.isEmpty) {
-                return const Center(child: Text("Chưa có danh mục nào.\nHãy tạo mới nhé!", textAlign: TextAlign.center));
+                return Center(child: Text("category_empty_hint".tr, textAlign: TextAlign.center));
               }
 
               if (controller.categories.isEmpty) return const Center(child: CircularProgressIndicator());
@@ -831,7 +830,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                           children: [
                             Icon(Icons.add, color: AppColors.primary, size: 28),
                             SizedBox(height: 4),
-                            Text("Tạo mới", style: TextStyle(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.bold)),
+                            Text("create_new".tr, style: TextStyle(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ),
@@ -866,7 +865,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                           const SizedBox(height: 4),
                           // SỬA: Giới hạn tên danh mục tối đa 2 dòng, quá thì cắt ...
                           Text(
-                            cat.name,
+                            cat.name.tr,
                             textAlign: TextAlign.center,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -896,18 +895,18 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text("Thêm tiền tệ mới", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text("add_new_currency_title".tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         content: TextField(
           controller: ctrl,
           textCapitalization: TextCapitalization.characters,
           maxLength: 3,
           decoration: InputDecoration(
-            labelText: "Mã tiền tệ (VD: CAD)",
+            labelText: "currency_code_label".tr,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text("HỦY", style: TextStyle(color: Colors.grey))),
+          TextButton(onPressed: () => Get.back(), child: Text("cancel_caps".tr, style: const TextStyle(color: Colors.grey))),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
             onPressed: () {
@@ -920,10 +919,10 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                 controller.fetchLatestExchangeRate(newCurrency);
                 Get.back();
               } else {
-                ToastUtil.showWarning("Lỗi", "Mã tiền tệ phải có đúng 3 ký tự");
+                ToastUtil.showWarning("error".tr, "currency_code_invalid".tr);
               }
             },
-            child: const Text("THÊM"),
+            child: Text("add_caps".tr),
           )
         ],
       )
@@ -943,9 +942,9 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: 16),
-              const Text(
-                "Chọn ảnh hóa đơn",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              Text(
+                "select_receipt_image".tr,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               ListTile(
@@ -957,7 +956,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                   ),
                   child: Icon(Icons.camera_alt, color: AppColors.primary),
                 ),
-                title: const Text("Chụp từ Camera"),
+                title: Text("take_photo".tr),
                 onTap: () {
                   Navigator.pop(context);
                   controller.pickReceiptImage(ImageSource.camera);
@@ -972,7 +971,7 @@ class _AddExpenseBottomSheetState extends State<AddExpenseBottomSheet> {
                   ),
                   child: Icon(Icons.photo_library, color: AppColors.primary),
                 ),
-                title: const Text("Chọn từ Thư viện"),
+                title: Text("choose_from_gallery".tr),
                 onTap: () {
                   Navigator.pop(context);
                   controller.pickReceiptImage(ImageSource.gallery);

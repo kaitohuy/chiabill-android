@@ -65,7 +65,7 @@ class TripGalleryCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         onTap: () {
           if (trip.id == -1) {
-            ToastUtil.showWarning("Đang chờ đồng bộ", "Chuyến đi này chưa được đồng bộ lên máy chủ");
+            ToastUtil.showWarning("pending_sync".tr, "trip_not_synced".tr);
             return;
           }
           Get.toNamed(Routes.TRIP_DETAIL, arguments: trip.id);
@@ -154,7 +154,7 @@ class TripGalleryCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      trip.description ?? "Không có mô tả",
+                      trip.description ?? "no_description".tr,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(color: Colors.grey.shade600, fontSize: 14),

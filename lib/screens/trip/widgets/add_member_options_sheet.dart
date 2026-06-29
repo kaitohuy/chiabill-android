@@ -19,12 +19,12 @@ class AddMemberOptionsSheet extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text("Thêm thành viên", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Text("add_member".tr, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 20),
           _buildActionItem(
             Icons.person_outline, 
-            "Người ảo (không dùng app)", 
-            "Tạo tài khoản giả để bạn chia tiền thay họ.", 
+            "ghost_member_title".tr, 
+            "ghost_member_desc".tr, 
             () {
               Get.back();
               Get.dialog(
@@ -34,8 +34,8 @@ class AddMemberOptionsSheet extends StatelessWidget {
           ),
           _buildActionItem(
             Icons.group_add_outlined, 
-            "Nhập từ nhóm khác", 
-            "Thêm nhanh thành viên từ nhóm bạn đã tham gia.", 
+            "import_from_other_group".tr, 
+            "import_from_other_group_desc".tr, 
             () {
               Get.back();
               Get.to(() => ImportMemberScreen(currentTripId: controller.tripId));
@@ -43,8 +43,8 @@ class AddMemberOptionsSheet extends StatelessWidget {
           ),
           _buildActionItem(
             Icons.search, 
-            "Tìm qua SĐT / Email", 
-            "Thêm người dùng đã đăng ký app vào nhóm.", 
+            "search_by_phone_email".tr, 
+            "search_by_phone_email_desc".tr, 
             () {
               Get.back();
               Get.dialog(
@@ -54,8 +54,8 @@ class AddMemberOptionsSheet extends StatelessWidget {
           ),
           _buildActionItem(
             Icons.share_outlined, 
-            "Chia sẻ mã mời", 
-            "Gửi link hoặc mã QR cho bạn bè tự tham gia.", 
+            "share_invite_code".tr, 
+            "share_invite_code_desc".tr, 
             () {
               Get.back();
               Get.dialog(

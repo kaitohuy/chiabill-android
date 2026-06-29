@@ -89,12 +89,12 @@ class AddExpenseController extends GetxController {
           } catch (_) {}
         }
         
-        ToastUtil.showSuccess("Đã quét hóa đơn", "Tự động điền số tiền, nội dung và ngày bằng AI thành công!");
+        ToastUtil.showSuccess("receipt_scanned".tr, "ai_autofill_success".tr);
       } else {
-        ToastUtil.showWarning("AI bận", ocrResult.message ?? "Không thể tự động quét hóa đơn. Vui lòng tự điền thông tin.");
+        ToastUtil.showWarning("ai_busy".tr, ocrResult.message ?? "cannot_scan_receipt".tr);
       }
     } catch (e) {
-      ToastUtil.showWarning("AI bận", "Có lỗi xảy ra khi quét hóa đơn. Vui lòng tự điền thông tin.");
+      ToastUtil.showWarning("ai_busy".tr, "ocr_error".tr);
     } finally {
       isScanningImage.value = false;
       LoadingUtil.hide();
@@ -108,10 +108,10 @@ class AddExpenseController extends GetxController {
       if (result.success && result.data != null) {
         receiptUrl.value = result.data;
       } else {
-        ToastUtil.showError("Lỗi tải ảnh", result.message ?? "Không thể lưu trữ ảnh minh chứng lên đám mây.");
+        ToastUtil.showError("failed_upload_image".tr, result.message ?? "cannot_save_receipt_cloud".tr);
       }
     } catch (e) {
-      ToastUtil.showError("Lỗi hệ thống", "Không thể kết nối máy chủ để lưu ảnh.");
+      ToastUtil.showError("system_error".tr, "cannot_connect_server_image".tr);
     } finally {
       isUploadingImage.value = false;
     }
@@ -276,7 +276,7 @@ class AddExpenseController extends GetxController {
         selectedCategoryId.value = categories.first.id;
       }
     } else {
-      ToastUtil.showError("Lỗi tải danh mục", result.message ?? "Có lỗi xảy ra");
+      ToastUtil.showError("failed_to_load_categories".tr, result.message ?? "an_error_occurred".tr);
     }
   }
 
@@ -288,12 +288,12 @@ class AddExpenseController extends GetxController {
         Get.back(); // Đóng sub-dialog tạo mới
         categories.add(result.data!); // Thêm vào list hiện tại
         selectedCategoryId.value = result.data!.id; // Tự động chọn luôn cái vừa tạo
-        ToastUtil.showSuccess("Thành công", "Đã thêm danh mục mới");
+        ToastUtil.showSuccess("success".tr, "category_added_success".tr);
       } else {
-        ToastUtil.showError("Lỗi", result.message ?? "Không thể tạo danh mục");
+        ToastUtil.showError("error".tr, result.message ?? "cannot_create_category".tr);
       }
     } catch (e) {
-      ToastUtil.showError("Lỗi hệ thống", e.toString());
+      ToastUtil.showError("system_error".tr, e.toString());
     } finally {
       isLoading.value = false;
     }
@@ -338,13 +338,13 @@ class AddExpenseController extends GetxController {
     FocusManager.instance.primaryFocus?.unfocus();
 
     if (isUploadingImage.value) {
-      ToastUtil.showWarning("Đang xử lý", "Vui lòng đợi ảnh hóa đơn tải lên hoàn thành");
+      ToastUtil.showWarning("processing".tr, "wait_receipt_upload".tr);
       return;
     }
 
     double? originalAmount = double.tryParse(amountController.text.replaceAll(',', ''));
     if (originalAmount == null || originalAmount <= 0) {
-      ToastUtil.showWarning("Lỗi", "Số tiền không hợp lệ");
+      ToastUtil.showWarning("error".tr, "invalid_amount".tr);
       return;
     }
 
@@ -355,7 +355,7 @@ class AddExpenseController extends GetxController {
       if (parsedRate != null && parsedRate > 0) {
         userExchangeRate = parsedRate;
       } else {
-        ToastUtil.showWarning("Lỗi", "Vui lòng nhập tỷ giá hợp lệ");
+        ToastUtil.showWarning("error".tr, "enter_valid_exchange_rate".tr);
         return;
       }
     }
@@ -365,19 +365,19 @@ class AddExpenseController extends GetxController {
 
     // THÊM CHẶN GIỚI HẠN (Ví dụ: Tối đa 10 tỷ VNĐ)
     if (total > 10000000000) {
-      ToastUtil.showWarning("Lỗi", "Chi tiêu gì mà tốn kém thế! Vui lòng nhập số tiền nhỏ hơn 10 tỷ.");
+      ToastUtil.showWarning("error".tr, "amount_too_large".tr);
       return;
     }
 
     // Kiểm tra xem user có chọn ai để chia tiền không
     if (selectedSplitMemberIds.isEmpty) {
-      ToastUtil.showWarning("Lỗi", "Vui lòng chọn ít nhất 1 người để chia tiền");
+      ToastUtil.showWarning("error".tr, "select_at_least_one_member".tr);
       return;
     }
 
     // Validate danh mục
     if (selectedCategoryId.value == null) {
-      ToastUtil.showWarning("Lỗi", "Vui lòng chọn danh mục chi phí");
+      ToastUtil.showWarning("error".tr, "select_expense_category".tr);
       return;
     }
 
@@ -386,7 +386,7 @@ class AddExpenseController extends GetxController {
       // Tính toán splits theo cấu hình phân chia của người dùng
       List<SplitRequest> splits = _generateSplits(total, userExchangeRate);
       if (splits.isEmpty) {
-        ToastUtil.showWarning("Lỗi", "Cấu hình chia tiền không hợp lệ hoặc không khớp với tổng tiền.");
+        ToastUtil.showWarning("error".tr, "invalid_split_configuration".tr);
         isLoading.value = false;
         return;
       }
@@ -402,7 +402,7 @@ class AddExpenseController extends GetxController {
         }
 
         if (isFromFund.value && availableFund <= 0) {
-          ToastUtil.showWarning("Lỗi", "Số dư Quỹ chung khả dụng bằng 0, không thể chọn thanh toán bằng quỹ");
+          ToastUtil.showWarning("error".tr, "fund_balance_zero".tr);
           isLoading.value = false;
           return;
         }
@@ -416,7 +416,7 @@ class AddExpenseController extends GetxController {
           List<SplitRequest> splitsRest = _generateSplits(restPart, userExchangeRate);
 
           if (splitsFund.isEmpty || splitsRest.isEmpty) {
-            ToastUtil.showWarning("Lỗi", "Cấu hình chia tiền không hợp lệ cho phần tách hóa đơn.");
+            ToastUtil.showWarning("error".tr, "invalid_split_shortage".tr);
             isLoading.value = false;
             return;
           }
@@ -425,7 +425,7 @@ class AddExpenseController extends GetxController {
           final updateRequest1 = UpdateExpenseRequest(
             payerId: selectedPayerId.value,
             totalAmount: fundPart,
-            description: "${descController.text.trim()} (Trích từ quỹ chung)",
+            description: "${descController.text.trim()} ${'deducted_from_fund'.tr}",
             categoryId: selectedCategoryId.value,
             expenseDate: selectedDate.value.toIso8601String().split('.')[0],
             currency: selectedCurrency.value,
@@ -441,7 +441,7 @@ class AddExpenseController extends GetxController {
             tripId: trip.id,
             payerId: selectedPayerId.value,
             totalAmount: restPart,
-            description: "${descController.text.trim()} (Phần thiếu hụt quỹ)",
+            description: "${descController.text.trim()} ${'fund_shortage_part'.tr}",
             categoryId: selectedCategoryId.value,
             expenseDate: selectedDate.value.toIso8601String().split('.')[0],
             currency: selectedCurrency.value,
@@ -457,10 +457,10 @@ class AddExpenseController extends GetxController {
           if (res1.success) {
             final res2 = await _repository.createExpense(createRequest2);
             isSuccess = res2.success;
-            errorMessage = res2.message ?? "Lỗi tạo khoản thiếu hụt";
+            errorMessage = res2.message ?? "failed_create_shortage".tr;
           } else {
             isSuccess = false;
-            errorMessage = res1.message ?? "Lỗi cập nhật khoản trích quỹ";
+            errorMessage = res1.message ?? "failed_update_fund_deduction".tr;
           }
         } else {
           // Trường hợp update bình thường không cần tách
@@ -479,11 +479,11 @@ class AddExpenseController extends GetxController {
           );
           final result = await _repository.updateExpense(expenseToEdit!.id, updateRequest);
           isSuccess = result.success;
-          errorMessage = result.message ?? "Lỗi";
+          errorMessage = result.message ?? "error".tr;
         }
       } else {
         if (isFromFund.value && fundBalance.value <= 0) {
-          ToastUtil.showWarning("Lỗi", "Số dư Quỹ chung bằng 0, không thể chọn thanh toán bằng quỹ");
+          ToastUtil.showWarning("error".tr, "fund_balance_zero".tr);
           isLoading.value = false;
           return;
         }
@@ -496,7 +496,7 @@ class AddExpenseController extends GetxController {
           List<SplitRequest> splitsRest = _generateSplits(restPart, userExchangeRate);
 
           if (splitsFund.isEmpty || splitsRest.isEmpty) {
-            ToastUtil.showWarning("Lỗi", "Cấu hình chia tiền không hợp lệ cho phần tách hóa đơn.");
+            ToastUtil.showWarning("error".tr, "invalid_split_shortage".tr);
             isLoading.value = false;
             return;
           }
@@ -506,7 +506,7 @@ class AddExpenseController extends GetxController {
             tripId: trip.id,
             payerId: selectedPayerId.value,
             totalAmount: fundPart,
-            description: "${descController.text.trim()} (Trích từ quỹ chung)",
+            description: "${descController.text.trim()} ${'deducted_from_fund'.tr}",
             categoryId: selectedCategoryId.value,
             expenseDate: selectedDate.value.toIso8601String().split('.')[0],
             currency: selectedCurrency.value,
@@ -526,7 +526,7 @@ class AddExpenseController extends GetxController {
               tripId: trip.id,
               payerId: selectedPayerId.value,
               totalAmount: restPart,
-              description: "${descController.text.trim()} (Phần thiếu hụt nợ người trả)",
+              description: "${descController.text.trim()} ${'shortage_debt_payer'.tr}",
               categoryId: selectedCategoryId.value,
               expenseDate: selectedDate.value.toIso8601String().split('.')[0],
               currency: selectedCurrency.value,
@@ -539,10 +539,10 @@ class AddExpenseController extends GetxController {
             );
             final result2 = await _repository.createExpense(createRequest2);
             isSuccess = result2.success;
-            errorMessage = result2.message ?? "Lỗi tạo phần thiếu hụt";
+            errorMessage = result2.message ?? "failed_create_shortage_part".tr;
           } else {
             isSuccess = false;
-            errorMessage = result1.message ?? "Lỗi trích xuất quỹ";
+            errorMessage = result1.message ?? "failed_fund_deduction".tr;
           }
         } else {
         final createRequest = CreateExpenseRequest(
@@ -562,7 +562,7 @@ class AddExpenseController extends GetxController {
         );
         final result = await _repository.createExpense(createRequest);
         isSuccess = result.success;
-        errorMessage = result.message ?? "Lỗi";
+        errorMessage = result.message ?? "error".tr;
         }
       }
 
@@ -578,7 +578,7 @@ class AddExpenseController extends GetxController {
 
         // BƯỚC 4: Chờ BottomSheet đóng HOÀN TOÀN rồi mới show Toast (tránh xung đột animation)
         Future.delayed(const Duration(milliseconds: 500), () {
-          ToastUtil.showSuccess("Thành công", expenseToEdit != null ? "Đã cập nhật chi phí" : "Đã thêm chi phí");
+          ToastUtil.showSuccess("success".tr, expenseToEdit != null ? "expense_updated".tr : "expense_added".tr);
         });
 
         // BƯỚC 5: Sau khi Toast xuất hiện xong, sync dữ liệu ngầm
@@ -587,11 +587,11 @@ class AddExpenseController extends GetxController {
           Get.find<TripDetailController>(tag: trip.id.toString()).fetchData(isSilent: true);
         });
       } else {
-        ToastUtil.showError("Lỗi", errorMessage);
+        ToastUtil.showError("error".tr, errorMessage);
         isLoading.value = false;
       }
     } catch (e) {
-      ToastUtil.showError("Lỗi hệ thống", e.toString());
+      ToastUtil.showError("system_error".tr, e.toString());
       isLoading.value = false;
     }
   }

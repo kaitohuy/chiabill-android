@@ -71,7 +71,7 @@ class _AdvancedSplitBottomSheetState extends State<AdvancedSplitBottomSheet> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("Thành viên tham gia", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                  Text("members_joined".tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                   TextButton(
                     onPressed: () {
                       FocusScope.of(context).unfocus();
@@ -89,7 +89,7 @@ class _AdvancedSplitBottomSheetState extends State<AdvancedSplitBottomSheet> {
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                     child: Text(
-                      _selectedMemberIds.length == widget.controller.activeMembers.length ? "Bỏ chọn tất cả" : "Chọn tất cả",
+                      _selectedMemberIds.length == widget.controller.activeMembers.length ? "deselect_all".tr : "select_all".tr,
                       style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
                     ),
                   )
@@ -110,7 +110,7 @@ class _AdvancedSplitBottomSheetState extends State<AdvancedSplitBottomSheet> {
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: const Text('Xác nhận', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+              child: Text('confirm'.tr, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
             ),
           ),
           const SizedBox(height: 16),
@@ -124,9 +124,9 @@ class _AdvancedSplitBottomSheetState extends State<AdvancedSplitBottomSheet> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
-          "Tùy chọn chia tiền",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        Text(
+          "split_options_title".tr,
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         Row(
           children: [
@@ -149,13 +149,13 @@ class _AdvancedSplitBottomSheetState extends State<AdvancedSplitBottomSheet> {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          _buildTab("EQUAL", "Chia đều", Icons.group),
+          _buildTab("EQUAL", "split_equal".tr, Icons.group),
           const SizedBox(width: 8),
-          _buildTab("EXACT", "Chính xác", Icons.attach_money),
+          _buildTab("EXACT", "split_exact".tr, Icons.attach_money),
           const SizedBox(width: 8),
-          _buildTab("PERCENTAGE", "Phần trăm", Icons.percent),
+          _buildTab("PERCENTAGE", "split_percentage".tr, Icons.percent),
           const SizedBox(width: 8),
-          _buildTab("SHARES", "Tỷ trọng", Icons.pie_chart),
+          _buildTab("SHARES", "split_shares".tr, Icons.pie_chart),
         ],
       ),
     );
@@ -170,29 +170,29 @@ class _AdvancedSplitBottomSheetState extends State<AdvancedSplitBottomSheet> {
 
     switch (_splitType) {
       case 'EQUAL':
-        title = "Chia đều";
-        desc = "Chọn những người tham gia, số tiền sẽ được chia đều cho tất cả.";
+        title = "split_equal".tr;
+        desc = "split_equal_desc".tr;
         bgColor = Colors.blue.shade50;
         iconColor = Colors.blue.shade800;
         icon = Icons.group;
         break;
       case 'EXACT':
-        title = "Chia chính xác";
-        desc = "Nhập chính xác số tiền mỗi người phải trả. Thích hợp khi có người gọi món riêng đắt tiền.";
+        title = "split_exact".tr;
+        desc = "split_exact_desc".tr;
         bgColor = Colors.orange.shade100;
         iconColor = Colors.orange.shade800;
         icon = Icons.attach_money;
         break;
       case 'PERCENTAGE':
-        title = "Chia theo phần trăm";
-        desc = "Nhập phần trăm (%) mỗi người phải trả. Tổng phần trăm phải đúng bằng 100%.";
+        title = "split_percentage".tr;
+        desc = "split_percentage_desc".tr;
         bgColor = Colors.purple.shade50;
         iconColor = Colors.purple.shade800;
         icon = Icons.percent;
         break;
       case 'SHARES':
-        title = "Chia theo tỷ trọng";
-        desc = "Nhập số phần (suất) của mỗi người. Ví dụ: Gia đình đi 3 người thì tính 3 phần.";
+        title = "split_shares".tr;
+        desc = "split_shares_desc".tr;
         bgColor = Colors.green.shade50;
         iconColor = Colors.green.shade800;
         icon = Icons.pie_chart;
@@ -311,7 +311,7 @@ class _AdvancedSplitBottomSheetState extends State<AdvancedSplitBottomSheet> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      user.name ?? "Ẩn danh",
+                      user.name ?? "anonymous".tr,
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                     ),
                     if (_splitType == 'SHARES') ...[
@@ -324,7 +324,7 @@ class _AdvancedSplitBottomSheetState extends State<AdvancedSplitBottomSheet> {
                         String shareStr = myShare.toStringAsFixed(myShare.truncateToDouble() == myShare ? 0 : 2);
                         String totalStr = totalShares.toStringAsFixed(totalShares.truncateToDouble() == totalShares ? 0 : 2);
                         return Text(
-                          "$shareStr/$totalStr phần (${percent.toStringAsFixed(1)}%)",
+                          "shares_summary".trParams({'share': shareStr, 'total': totalStr, 'percent': percent.toStringAsFixed(1)}),
                           style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                         );
                       })
@@ -383,7 +383,7 @@ class _AdvancedSplitBottomSheetState extends State<AdvancedSplitBottomSheet> {
 
   String _getSuffix() {
     if (_splitType == 'PERCENTAGE') return '%';
-    if (_splitType == 'SHARES') return ' phần';
+    if (_splitType == 'SHARES') return 'shares_suffix'.tr;
     return '';
   }
 
@@ -392,7 +392,7 @@ class _AdvancedSplitBottomSheetState extends State<AdvancedSplitBottomSheet> {
       return Padding(
         padding: const EdgeInsets.only(top: 16),
         child: Text(
-          "Đã chọn ${_selectedMemberIds.length} người",
+          "split_selected_people".trParams({'count': '${_selectedMemberIds.length}'}),
           style: TextStyle(color: Colors.grey[600], fontWeight: FontWeight.w500),
         ),
       );
@@ -405,29 +405,29 @@ class _AdvancedSplitBottomSheetState extends State<AdvancedSplitBottomSheet> {
     if (_splitType == 'PERCENTAGE') {
       double diff = 100 - total;
       if (diff.abs() < 0.1) {
-         statusText = "Đã chia đủ 100%";
+         statusText = "split_percent_full".tr;
          statusColor = Colors.green;
       } else if (diff > 0) {
-         statusText = "Còn thiếu: ${diff.toStringAsFixed(diff.truncateToDouble() == diff ? 0 : 2)}%";
+         statusText = "split_percent_missing".trParams({'diff': diff.toStringAsFixed(diff.truncateToDouble() == diff ? 0 : 2)});
          statusColor = Colors.orange.shade800;
       } else {
-         statusText = "Bị vượt mức: ${diff.abs().toStringAsFixed(diff.abs().truncateToDouble() == diff.abs() ? 0 : 2)}%";
+         statusText = "split_percent_exceeded".trParams({'diff': diff.abs().toStringAsFixed(diff.abs().truncateToDouble() == diff.abs() ? 0 : 2)});
          statusColor = Colors.red;
       }
     } else if (_splitType == 'SHARES') {
-      statusText = "Tổng: ${total.toStringAsFixed(total.truncateToDouble() == total ? 0 : 2)} phần";
+      statusText = "split_shares_total".trParams({'total': total.toStringAsFixed(total.truncateToDouble() == total ? 0 : 2)});
       statusColor = AppColors.primary;
     } else if (_splitType == 'EXACT') {
       double expectedTotal = double.tryParse(widget.controller.amountController.text.replaceAll(',', '')) ?? 0.0;
       double diff = expectedTotal - total;
       if (diff.abs() < 0.1) {
-         statusText = "Đã chia đủ tiền";
+         statusText = "split_exact_full".tr;
          statusColor = Colors.green;
       } else if (diff > 0) {
-         statusText = "Còn thiếu: ${CurrencyUtils.formatNumber(diff)} ${widget.controller.selectedCurrency.value}";
+         statusText = "split_exact_missing".trParams({'diff': CurrencyUtils.formatNumber(diff), 'currency': widget.controller.selectedCurrency.value});
          statusColor = Colors.orange.shade800;
       } else {
-         statusText = "Bị vượt mức: ${CurrencyUtils.formatNumber(diff.abs())} ${widget.controller.selectedCurrency.value}";
+         statusText = "split_exact_exceeded".trParams({'diff': CurrencyUtils.formatNumber(diff.abs()), 'currency': widget.controller.selectedCurrency.value});
          statusColor = Colors.red;
       }
     }

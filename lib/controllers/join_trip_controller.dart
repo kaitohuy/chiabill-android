@@ -25,7 +25,7 @@ class JoinTripController extends GetxController {
     if (result.success && result.data != null) {
       inviteInfo.value = result.data;
     } else {
-      ToastUtil.showError("Lỗi", result.message ?? "Mã không hợp lệ");
+      ToastUtil.showError("error".tr, result.message ?? "invalid_code_error".tr);
       inviteInfo.value = null;
     }
     isLoading.value = false;
@@ -60,7 +60,7 @@ class JoinTripController extends GetxController {
         }
 
         Future.delayed(const Duration(milliseconds: 350), () {
-          ToastUtil.showSuccess("Chào mừng!", "Bạn đã tham gia chuyến đi thành công");
+          ToastUtil.showSuccess("join_success_welcome".tr, "join_success_message".tr);
         });
 
         // Làm mới danh sách hiển thị ở trang chủ ngầm phòng trường hợp quay lại
@@ -68,10 +68,10 @@ class JoinTripController extends GetxController {
            Get.find<HomeController>().fetchTrips(isRefresh: true);
         }
       } else {
-        ToastUtil.showError("Thất bại", result.message ?? "Không thể tham gia");
+        ToastUtil.showError("join_fail_title".tr, result.message ?? "join_failed".tr);
       }
     } catch (e) {
-      ToastUtil.showError("Lỗi hệ thống", e.toString());
+      ToastUtil.showError("system_error".tr, e.toString());
     } finally {
       isLoading.value = false;
       LoadingUtil.hide();

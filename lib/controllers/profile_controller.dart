@@ -166,6 +166,7 @@ class ProfileController extends GetxController {
         allowAutoAdd: allowAutoAdd.value,
         allowAutoApprovePayment: allowAutoApprovePayment.value,
         paymentPriority: paymentPriority.value,
+        language: Get.locale?.languageCode ?? 'vi',
       );
 
       final result = await _repository.updateProfile(request);

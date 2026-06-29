@@ -37,7 +37,7 @@ class _ExcelPreviewDialogState extends State<ExcelPreviewDialog> {
 
     if (success) {
       Get.back(); // Đóng Dialog Preview trước
-      ToastUtil.showSuccess("Thành công", "Đã nhập ${items.length} hoạt động lịch trình"); // Hiển thị Toast sau khi đóng overlay
+      ToastUtil.showSuccess("success".tr, "activities_imported_success".trParams({'count': items.length.toString()})); // Hiển thị Toast sau khi đóng overlay
     }
   }
 
@@ -65,9 +65,9 @@ class _ExcelPreviewDialogState extends State<ExcelPreviewDialog> {
           children: [
             Icon(Icons.edit, color: AppColors.primary),
             const SizedBox(width: 8),
-            const Text(
-              "Sửa hoạt động",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            Text(
+              "edit_activity".tr,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
           ],
         ),
@@ -77,9 +77,9 @@ class _ExcelPreviewDialogState extends State<ExcelPreviewDialog> {
             children: [
               TextField(
                 controller: activityController,
-                decoration: const InputDecoration(
-                  labelText: "Hoạt động * (Bắt buộc)",
-                  hintText: "Nhập tên hoạt động",
+                decoration: InputDecoration(
+                  labelText: "activity_required".tr,
+                  hintText: "enter_activity_name_hint".tr,
                 ),
               ),
               const SizedBox(height: 12),
@@ -89,9 +89,9 @@ class _ExcelPreviewDialogState extends State<ExcelPreviewDialog> {
                     child: TextField(
                       controller: dayController,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: "Ngày số",
-                        hintText: "VD: 1",
+                      decoration: InputDecoration(
+                        labelText: "day_number".tr,
+                        hintText: "day_number_hint".tr,
                       ),
                     ),
                   ),
@@ -99,9 +99,9 @@ class _ExcelPreviewDialogState extends State<ExcelPreviewDialog> {
                   Expanded(
                     child: TextField(
                       controller: timeController,
-                      decoration: const InputDecoration(
-                        labelText: "Khung giờ",
-                        hintText: "VD: 08:00 - 09:00",
+                      decoration: InputDecoration(
+                        labelText: "time_range".tr,
+                        hintText: "time_range_hint_input".tr,
                       ),
                     ),
                   ),
@@ -110,27 +110,27 @@ class _ExcelPreviewDialogState extends State<ExcelPreviewDialog> {
               const SizedBox(height: 12),
               TextField(
                 controller: locationController,
-                decoration: const InputDecoration(
-                  labelText: "Địa điểm",
-                  hintText: "Nhập địa điểm",
+                decoration: InputDecoration(
+                  labelText: "location".tr,
+                  hintText: "enter_location_hint".tr,
                 ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: costController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: "Chi phí dự toán",
-                  hintText: "Nhập số tiền",
+                decoration: InputDecoration(
+                  labelText: "estimated_cost_label".tr,
+                  hintText: "enter_amount_hint".tr,
                 ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: noteController,
                 maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: "Ghi chú",
-                  hintText: "Nhập ghi chú thêm",
+                decoration: InputDecoration(
+                  labelText: "notes".tr,
+                  hintText: "enter_notes_hint".tr,
                 ),
               ),
             ],
@@ -139,7 +139,7 @@ class _ExcelPreviewDialogState extends State<ExcelPreviewDialog> {
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const Text("HỦY", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+            child: Text("cancel_caps".tr, style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -151,8 +151,8 @@ class _ExcelPreviewDialogState extends State<ExcelPreviewDialog> {
               final act = activityController.text.trim();
               if (act.isEmpty) {
                 Get.snackbar(
-                  "Lỗi",
-                  "Tên hoạt động không được để trống",
+                  "error".tr,
+                  "activity_name_cannot_be_empty".tr,
                   backgroundColor: Colors.redAccent,
                   colorText: Colors.white,
                 );
@@ -174,7 +174,7 @@ class _ExcelPreviewDialogState extends State<ExcelPreviewDialog> {
               });
               Get.back();
             },
-            child: const Text("LƯU", style: TextStyle(fontWeight: FontWeight.bold)),
+            child: Text("save_caps".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -200,17 +200,17 @@ class _ExcelPreviewDialogState extends State<ExcelPreviewDialog> {
                     onPressed: () => Get.back(),
                   ),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Xem trước lịch trình",
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                          "preview_itinerary".tr,
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
                         ),
                         Text(
-                          "Chạm vào hoạt động để chỉnh sửa hoặc nhấn xóa nếu cần",
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                          "preview_itinerary_desc".tr,
+                          style: const TextStyle(fontSize: 12, color: Colors.grey),
                         ),
                       ],
                     ),
@@ -231,10 +231,10 @@ class _ExcelPreviewDialogState extends State<ExcelPreviewDialog> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildStatItem("Tổng hoạt động", "${items.length}", Icons.explore),
+                  _buildStatItem("total_activities".tr, "${items.length}", Icons.explore),
                   Container(width: 1, height: 40, color: Colors.grey.shade200),
                   _buildStatItem(
-                    "Ước tính chi phí",
+                    "estimated_cost_summary".tr,
                     "${CurrencyUtils.formatNumber(
                       items.map((e) => e.estimatedCost ?? 0.0).fold(0.0, (a, b) => a + b),
                     )} đ",
@@ -254,7 +254,7 @@ class _ExcelPreviewDialogState extends State<ExcelPreviewDialog> {
                         children: [
                           Icon(Icons.inbox, size: 64, color: Colors.grey.shade400),
                           const SizedBox(height: 12),
-                          const Text("Không còn hoạt động nào để nhập", style: TextStyle(color: Colors.grey)),
+                          Text("no_activities_to_import".tr, style: const TextStyle(color: Colors.grey)),
                         ],
                       ),
                     )
@@ -282,7 +282,7 @@ class _ExcelPreviewDialogState extends State<ExcelPreviewDialog> {
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Text(
-                                    "Ngày ${item.dayNumber}",
+                                    "${'day'.tr} ${item.dayNumber}",
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
@@ -329,7 +329,7 @@ class _ExcelPreviewDialogState extends State<ExcelPreviewDialog> {
                                 if (item.estimatedCost != null && item.estimatedCost! > 0) ...[
                                   const SizedBox(height: 4),
                                   Text(
-                                    "Dự toán: ${CurrencyUtils.formatNumber(item.estimatedCost!)} đ",
+                                    "${'estimation'.tr}: ${CurrencyUtils.formatNumber(item.estimatedCost!)} đ",
                                     style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primary),
                                   ),
                                 ],
@@ -378,7 +378,7 @@ class _ExcelPreviewDialogState extends State<ExcelPreviewDialog> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       onPressed: () => Get.back(),
-                      child: const Text("HỦY", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                      child: Text("cancel_caps".tr, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -395,7 +395,7 @@ class _ExcelPreviewDialogState extends State<ExcelPreviewDialog> {
                       onPressed: isUploading || items.isEmpty ? null : _onConfirmImport,
                       child: isUploading
                           ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                          : const Text("XÁC NHẬN NHẬP", style: TextStyle(fontWeight: FontWeight.bold)),
+                          : Text("confirm_import_caps".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ],

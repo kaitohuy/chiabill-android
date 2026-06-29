@@ -47,12 +47,12 @@ class CreateTripController extends GetxController {
     try {
       final uploadResult = await _repository.updateTripCover(tripId, file);
       if (uploadResult.success) {
-        ToastUtil.showSuccess("Thành công", "Đã tải lên ảnh bìa cho chuyến đi!");
+        ToastUtil.showSuccess("success".tr, "cover_uploaded_success".tr);
         if (Get.isRegistered<HomeController>()) {
           Get.find<HomeController>().fetchTrips();
         }
       } else {
-        ToastUtil.showError("Lỗi", "Không thể tải lên ảnh bìa: ${uploadResult.message}");
+        ToastUtil.showError("error".tr, "${'cover_upload_failed'.tr}: ${uploadResult.message}");
       }
     } catch (e) {
       // Bỏ qua lỗi ngầm
@@ -61,7 +61,7 @@ class CreateTripController extends GetxController {
 
   Future<void> createTrip() async {
     if (nameController.text.trim().isEmpty) {
-      ToastUtil.showWarning("Lỗi", "Vui lòng nhập tên chuyến đi");
+      ToastUtil.showWarning("error".tr, "create_trip_name_empty".tr);
       return;
     }
 
@@ -114,7 +114,7 @@ class CreateTripController extends GetxController {
 
         if (result.data != null) {
           Future.delayed(const Duration(milliseconds: 350), () {
-            ToastUtil.showSuccess("Thành công", "Đã tạo chuyến đi ${result.data!.name}");
+            ToastUtil.showSuccess("success".tr, "${'trip_created_success'.tr} ${result.data!.name}");
           });
           // Bắt đầu upload ảnh bìa bất đồng bộ (async) không chặn UI
           if (coverFile != null) {
@@ -122,7 +122,7 @@ class CreateTripController extends GetxController {
           }
         } else {
           Future.delayed(const Duration(milliseconds: 350), () {
-            ToastUtil.showSuccess("Đã lưu ngoại tuyến", result.message ?? "Sẽ đồng bộ khi có mạng");
+            ToastUtil.showSuccess("offline_saved".tr, result.message ?? "offline_sync_hint".tr);
           });
         }
 
@@ -133,10 +133,10 @@ class CreateTripController extends GetxController {
           }
         });
       } else {
-        ToastUtil.showError("Lỗi", result.message ?? "Không thể tạo chuyến đi");
+        ToastUtil.showError("error".tr, result.message ?? "trip_create_failed".tr);
       }
     } catch (e) {
-      ToastUtil.showError("Lỗi hệ thống", e.toString());
+      ToastUtil.showError("system_error".tr, e.toString());
     } finally {
       isLoading.value = false;
       LoadingUtil.hide();

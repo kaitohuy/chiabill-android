@@ -46,13 +46,13 @@ class KickMemberDialog extends StatelessWidget {
             
             // Tiêu đề & Nội dung
             Text(
-              "Xóa $userName?",
+              "kick_member_title".trParams({"name": userName}),
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: -0.5),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
-              "Bạn muốn xử lý các khoản nợ liên quan đến thành viên này như thế nào?",
+              "kick_member_subtitle".tr,
               style: TextStyle(color: Colors.grey.shade600, fontSize: 14, height: 1.4),
               textAlign: TextAlign.center,
             ),
@@ -60,8 +60,8 @@ class KickMemberDialog extends StatelessWidget {
 
             // LỰA CHỌN 1: GIỮ NỢ
             _buildOptionTile(
-              title: "Trục xuất & Giữ nợ",
-              subtitle: "Lịch sử nợ vẫn được lưu lại trong danh sách quyết toán.",
+              title: "kick_keep_debt".tr,
+              subtitle: "kick_keep_debt_desc".tr,
               icon: Icons.shield_outlined,
               color: Colors.amber,
               onTap: () {
@@ -73,8 +73,8 @@ class KickMemberDialog extends StatelessWidget {
 
             // LỰA CHỌN 2: XÓA NỢ
             _buildOptionTile(
-              title: "Trục xuất & Xóa sạch nợ",
-              subtitle: "Tất cả nợ của người này sẽ được xóa trắng (về 0).",
+              title: "kick_clear_debt".tr,
+              subtitle: "kick_clear_debt_desc".tr,
               icon: Icons.auto_fix_high_outlined,
               color: Colors.red,
               onTap: () {
@@ -92,7 +92,7 @@ class KickMemberDialog extends StatelessWidget {
                 minimumSize: const Size(double.infinity, 48),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: Text("QUAY LẠI", style: TextStyle(color: Colors.grey.shade500, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+              child: Text("back_caps".tr, style: TextStyle(color: Colors.grey.shade500, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
             ),
           ],
         ),

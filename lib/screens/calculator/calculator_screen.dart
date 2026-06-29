@@ -30,7 +30,7 @@ class CalculatorScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("Máy tính", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text("calculator_title".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
         backgroundColor: Colors.white,
         foregroundColor: AppColors.primaryDark,
